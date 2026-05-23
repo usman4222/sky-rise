@@ -1,0 +1,104 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+  LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
+  Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
+  User, LifeBuoy, LogOut, Bell, Search, Menu, X
+} from "lucide-react";
+import { useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { user } from "@/lib/mock-data";
+
+const nav = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/dashboard/packages", label: "Investment Packages", icon: Package },
+  { to: "/dashboard/investments", label: "My Investments", icon: Wallet },
+  { to: "/dashboard/roi", label: "Daily ROI", icon: TrendingUp },
+  { to: "/dashboard/team", label: "Referral Team", icon: Users },
+  { to: "/dashboard/levels", label: "Level Income", icon: Layers },
+  { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
+  { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
+  { to: "/dashboard/vip", label: "VIP Salary", icon: Crown },
+  { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
+  { to: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownToLine },
+  { to: "/dashboard/transactions", label: "Transactions", icon: Receipt },
+  { to: "/dashboard/profile", label: "Profile", icon: User },
+  { to: "/dashboard/support", label: "Support", icon: LifeBuoy },
+];
+
+function Sidebar({ onClose }: { onClose?: () => void }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return (
+    <aside className="flex h-full w-64 flex-col glass-sidebar glass-blur-md">
+      <div className="flex items-center justify-between px-6 py-5 border-b border-glass-border">
+        <Link to="/" className="flex items-center gap-2" onClick={onClose}>
+          <div className="h-8 w-8 rounded-full bg-primary-gradient shadow-soft" />
+          <span className="font-bold text-foreground">Sky<span className="text-primary">Rise</span></span>
+        </Link>
+        {onClose && <button onClick={onClose} className="lg:hidden hover:opacity-70 transition"><X size={18} /></button>}
+      </div>
+      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+        {nav.map((n) => {
+          const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
+          const Icon = n.icon;
+          return (
+            <Link
+              key={n.to}
+              to={n.to}
+              onClick={onClose}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                active
+                  ? "bg-primary-gradient text-white shadow-soft"
+                  : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
+              }`}
+            >
+              <Icon size={18} />
+              <span className="truncate">{n.label}</span>
+            </Link>
+          );
+        })}
+        <Link to="/login" onClick={onClose} className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10">
+          <LogOut size={18} />Logout
+        </Link>
+      </nav>
+    </aside>
+  );
+}
+
+export function DashboardLayout({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex min-h-screen bg-background">
+      <div className="hidden lg:flex"><Sidebar /></div>
+      {open && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
+          <div className="absolute inset-y-0 left-0"><Sidebar onClose={() => setOpen(false)} /></div>
+        </div>
+      )}
+      <div className="flex flex-1 flex-col min-w-0">
+        <header className="sticky top-0 z-30 flex items-center gap-4 glass-navbar glass-blur-md px-4 py-3 md:px-6">
+          <button className="lg:hidden hover:opacity-70 transition" onClick={() => setOpen(true)}><Menu /></button>
+          <h1 className="text-base font-semibold md:text-lg flex-1 truncate text-foreground">{title}</h1>
+          <div className="relative hidden md:block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search…" className="w-64 pl-10" />
+          </div>
+          <Button variant="ghost" size="icon" className="relative rounded-full">
+            <Bell size={18} />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-gold animate-pulse" />
+          </Button>
+          <div className="hidden sm:flex flex-col text-right">
+            <span className="text-xs text-muted-foreground font-medium">Wallet</span>
+            <span className="text-sm font-bold text-primary">${user.walletBalance.toFixed(2)}</span>
+          </div>
+          <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30">
+            <AvatarFallback className="bg-primary-gradient text-white font-semibold">AM</AvatarFallback>
+          </Avatar>
+        </header>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-liquid-bg">{children}</main>
+      </div>
+    </div>
+  );
+}
