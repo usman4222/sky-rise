@@ -3,28 +3,32 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { cloudflare } from "@cloudflare/vite-plugin";
-import path from "node:path";
+import { nitro } from "nitro/vite";
+import { fileURLToPath } from "node:url";
+
+const srcPath = fileURLToPath(new URL("./src", import.meta.url));
 
 export default defineConfig({
+  base: "/",
+
   plugins: [
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
-    tsconfigPaths(),
     tanstackStart(),
+    nitro(),
     viteReact(),
     tailwindcss(),
+    tsconfigPaths(),
   ],
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": srcPath,
     },
     dedupe: ["react", "react-dom", "@tanstack/react-router"],
   },
 
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 3000,
     strictPort: false,
   },
-})
+});
