@@ -1,27 +1,28 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
   User, LifeBuoy, LogOut, Bell, Search, Menu, X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { user } from "@/lib/mock-data";
+
+import { useAuthStore } from "@/store/authStore";
 
 const nav = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard/packages", label: "Investment Packages", icon: Package },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true, hasAdmin: true },
+  { to: "/dashboard/packages", label: "Investment Packages", icon: Package, hasAdmin: true },
   { to: "/dashboard/investments", label: "My Investments", icon: Wallet },
   { to: "/dashboard/roi", label: "Daily ROI", icon: TrendingUp },
   { to: "/dashboard/team", label: "Referral Team", icon: Users },
   { to: "/dashboard/levels", label: "Level Income", icon: Layers },
-  { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
+  { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift, hasAdmin: true },
   { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
   { to: "/dashboard/vip", label: "VIP Salary", icon: Crown },
   { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
-  { to: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownToLine },
+  { to: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownToLine, hasAdmin: true },
   { to: "/dashboard/transactions", label: "Transactions", icon: Receipt },
   { to: "/dashboard/profile", label: "Profile", icon: User },
   { to: "/dashboard/support", label: "Support", icon: LifeBuoy },
@@ -29,6 +30,16 @@ const nav = [
 
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user, logout } = useAuthStore();
+  const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    onClose?.();
+    navigate({ to: "/login", replace: true });
+  };
+
   return (
     <aside className="flex h-full w-64 flex-col glass-sidebar glass-blur-md">
       <div className="flex items-center justify-between px-6 py-5 border-b border-glass-border">
@@ -47,20 +58,28 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
               key={n.to}
               to={n.to}
               onClick={onClose}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${
                 active
                   ? "bg-primary-gradient text-white shadow-soft"
                   : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
               }`}
             >
-              <Icon size={18} />
-              <span className="truncate">{n.label}</span>
+              <div className="flex items-center gap-3">
+                <Icon size={18} />
+                <span className="truncate">{n.label}</span>
+              </div>
+              {isAdmin && n.hasAdmin && (
+                <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" title="Admin controls inside" />
+              )}
             </Link>
           );
         })}
-        <Link to="/login" onClick={onClose} className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10">
+        <button 
+          onClick={handleLogout} 
+          className="mt-4 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+        >
           <LogOut size={18} />Logout
-        </Link>
+        </button>
       </nav>
     </aside>
   );
@@ -68,6 +87,24 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
 export function DashboardLayout({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { user, fetchProfile } = useAuthStore();
+
+  useEffect(() => {
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  // Calculate total balance from specific Firebase synced wallets
+  const w = user?.wallets;
+  const walletBalance = w 
+    ? (w.deposit || 0) + (w.roi || 0) + (w.referral || 0) + (w.bonusReceived || 0) + (w.salary || 0) + (w.achievement || 0) - (w.withdrawal || 0)
+    : 0;
+
   return (
     <div className="flex min-h-screen bg-background">
       <div className="hidden lg:flex"><Sidebar /></div>
@@ -91,10 +128,12 @@ export function DashboardLayout({ title, children }: { title: string; children: 
           </Button>
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs text-muted-foreground font-medium">Wallet</span>
-            <span className="text-sm font-bold text-primary">${user.walletBalance.toFixed(2)}</span>
+            <span className="text-sm font-bold text-primary">${walletBalance.toFixed(2)}</span>
           </div>
           <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30">
-            <AvatarFallback className="bg-primary-gradient text-white font-semibold">AM</AvatarFallback>
+            <AvatarFallback className="bg-primary-gradient text-white font-semibold">
+              {getInitials(user?.name)}
+            </AvatarFallback>
           </Avatar>
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-liquid-bg">{children}</main>

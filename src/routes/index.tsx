@@ -5,15 +5,54 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
 import {
   Wallet, TrendingUp, Users, Layers, Crown, Trophy,
   ArrowRight, CheckCircle2, Sparkles, BarChart3, Gift, Coins
 } from "lucide-react";
 import { packages, incomeModules, vipRanks, achievements, faqs } from "@/lib/mock-data";
+import { packagesApi } from "@/lib/api-packages";
+import { useAuthStore } from "@/store/authStore";
 
 export const Route = createFileRoute("/")({ component: HomePage });
 
 function HomePage() {
+  const { isAuthenticated } = useAuthStore();
+
+  const { data: apiPackages = [] } = useQuery({
+    queryKey: ["packages", "public"],
+    queryFn: async () => {
+      try {
+        const res = await packagesApi.getPublicPackages();
+        return res.packages || [];
+      } catch (err) {
+        console.error("Failed to fetch public packages:", err);
+        return [];
+      }
+    }
+  });
+
+  const displayPackages = (apiPackages.length > 0 ? apiPackages : packages).map((p: any) => {
+    if (p._id) {
+      const minStr = p.minAmount;
+      const maxStr = p.maxAmount ? `${p.maxAmount}` : "Max";
+      let tag = "Starter";
+      if (p.minAmount >= 5000) tag = "VIP";
+      else if (p.minAmount >= 1000) tag = "Pro";
+      else if (p.minAmount >= 100) tag = "Standard";
+
+      return {
+        id: p._id,
+        name: p.name,
+        tag: tag,
+        range: `$${minStr} - $${maxStr}`,
+        startRoi: p.startRoi,
+        maxRoi: p.maxRoi,
+      };
+    }
+    return p;
+  });
+
   return (
     <PublicLayout>
       {/* HERO */}
@@ -32,12 +71,20 @@ function HomePage() {
               Invest from just $10, track daily growth, build your referral network, and unlock multiple earning opportunities through one smart dashboard.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95">
-                <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="border-soft bg-white">
-                <Link to="/packages">View Packages</Link>
-              </Button>
+              {isAuthenticated ? (
+                <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95">
+                  <Link to="/dashboard">Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95">
+                    <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="border-soft bg-white">
+                    <Link to="/packages">View Packages</Link>
+                  </Button>
+                </>
+              )}
             </div>
             <div className="mt-8 grid grid-cols-3 gap-4 max-w-md">
               {[
@@ -137,7 +184,7 @@ function HomePage() {
             <h2 className="mt-3 text-3xl md:text-4xl">Pick a plan that fits your goals</h2>
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {packages.map((p) => (
+            {displayPackages.map((p) => (
               <Card key={p.id} className="glass-card-hover">
                 <CardContent className="p-6">
                   <Badge className="bg-gradient-to-r from-violet-400 to-blue-400 text-white border-0">{p.tag}</Badge>
@@ -149,7 +196,9 @@ function HomePage() {
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Auto reinvest</div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Manual claim</div>
                   </div>
-                  <Button asChild className="mt-5 w-full glass-button-primary"><Link to="/register">Select Package</Link></Button>
+                  <Button asChild className="mt-5 w-full glass-button-primary">
+                    <Link to={isAuthenticated ? "/dashboard/packages" : "/register"}>Select Package</Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -256,8 +305,14 @@ function HomePage() {
             <h2 className="text-3xl md:text-5xl text-white">Ready to Start with SkyRise Future?</h2>
             <p className="mx-auto mt-4 max-w-2xl text-white/85">Create your free account, explore packages, and manage your growth from one smart dashboard.</p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90"><Link to="/register">Create Free Account</Link></Button>
-              <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20"><Link to="/login">Login</Link></Button>
+              {isAuthenticated ? (
+                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90"><Link to="/dashboard">Go to Dashboard</Link></Button>
+              ) : (
+                <>
+                  <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90"><Link to="/register">Create Free Account</Link></Button>
+                  <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20"><Link to="/login">Login</Link></Button>
+                </>
+              )}
             </div>
           </div>
         </Card>

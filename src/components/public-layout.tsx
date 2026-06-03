@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
 
 const navItems = [
   { to: "/", label: "Home" },
@@ -16,6 +17,8 @@ const navItems = [
 export function PublicHeader() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { isAuthenticated } = useAuthStore();
+
   return (
     <header className="sticky top-0 z-40 w-full glass-navbar glass-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
@@ -35,8 +38,14 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 lg:flex">
-          <Button asChild variant="outline"><Link to="/login">Login</Link></Button>
-          <Button asChild className="glass-button-primary"><Link to="/register">Get Started</Link></Button>
+          {isAuthenticated ? (
+            <Button asChild className="glass-button-primary"><Link to="/dashboard">Dashboard</Link></Button>
+          ) : (
+            <>
+              <Button asChild variant="outline"><Link to="/login">Login</Link></Button>
+              <Button asChild className="glass-button-primary"><Link to="/register">Get Started</Link></Button>
+            </>
+          )}
         </div>
         <button className="lg:hidden hover:opacity-70 transition" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X /> : <Menu />}
@@ -51,8 +60,14 @@ export function PublicHeader() {
               </Link>
             ))}
             <div className="mt-3 flex gap-2">
-              <Button asChild variant="outline" className="flex-1"><Link to="/login">Login</Link></Button>
-              <Button asChild className="flex-1 glass-button-primary"><Link to="/register">Get Started</Link></Button>
+              {isAuthenticated ? (
+                <Button asChild className="flex-1 glass-button-primary" onClick={() => setOpen(false)}><Link to="/dashboard">Dashboard</Link></Button>
+              ) : (
+                <>
+                  <Button asChild variant="outline" className="flex-1" onClick={() => setOpen(false)}><Link to="/login">Login</Link></Button>
+                  <Button asChild className="flex-1 glass-button-primary" onClick={() => setOpen(false)}><Link to="/register">Get Started</Link></Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -60,6 +75,7 @@ export function PublicHeader() {
     </header>
   );
 }
+
 
 export function PublicFooter() {
   return (

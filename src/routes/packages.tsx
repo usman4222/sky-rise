@@ -4,7 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { packages } from "@/lib/mock-data";
+import { packagesApi } from "@/lib/api-packages";
+import { useAuthStore } from "@/store/authStore";
 
 export const Route = createFileRoute("/packages")({
   head: () => ({ meta: [
@@ -17,6 +20,42 @@ export const Route = createFileRoute("/packages")({
 });
 
 function PackagesPage() {
+  const { isAuthenticated } = useAuthStore();
+
+  const { data: apiPackages = [] } = useQuery({
+    queryKey: ["packages", "public"],
+    queryFn: async () => {
+      try {
+        const res = await packagesApi.getPublicPackages();
+        return res.packages || [];
+      } catch (err) {
+        console.error("Failed to fetch public packages:", err);
+        return [];
+      }
+    }
+  });
+
+  const displayPackages = (apiPackages.length > 0 ? apiPackages : packages).map((p: any) => {
+    if (p._id) {
+      const minStr = p.minAmount;
+      const maxStr = p.maxAmount ? `${p.maxAmount}` : "Max";
+      let tag = "Starter";
+      if (p.minAmount >= 5000) tag = "VIP";
+      else if (p.minAmount >= 1000) tag = "Pro";
+      else if (p.minAmount >= 100) tag = "Standard";
+
+      return {
+        id: p._id,
+        name: p.name,
+        tag: tag,
+        range: `$${minStr} - $${maxStr}`,
+        startRoi: p.startRoi,
+        maxRoi: p.maxRoi,
+      };
+    }
+    return p;
+  });
+
   return (
     <PublicLayout>
       <section className="bg-sky-gradient py-16">
@@ -28,7 +67,7 @@ function PackagesPage() {
       </section>
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {packages.map((p) => (
+          {displayPackages.map((p) => (
             <Card key={p.id} className="border-soft shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-6">
                 <Badge className="bg-gold/15 text-gold border-0">{p.tag}</Badge>
@@ -42,7 +81,9 @@ function PackagesPage() {
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-profit" /> Manual claim supported</div>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-profit" /> ROI growth every 10 days</div>
                 </div>
-                <Button asChild className="mt-6 w-full bg-primary-gradient text-primary-foreground"><Link to="/register">Select Package</Link></Button>
+                <Button asChild className="mt-6 w-full bg-primary-gradient text-primary-foreground">
+                  <Link to={isAuthenticated ? "/dashboard/packages" : "/register"}>Select Package</Link>
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -51,3 +92,4 @@ function PackagesPage() {
     </PublicLayout>
   );
 }
+

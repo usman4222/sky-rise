@@ -7,9 +7,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import FluidCursor from "@/components/fluid-cursor";
+// @ts-ignore
 import FollowCursor from "@/components/follow-cursor";
 
 function NotFoundComponent() {
@@ -116,8 +118,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <FluidCursor />
-      <FollowCursor />
+      <Toaster position="top-right" richColors />
+      {/* <FluidCursor /> */}
+      {/* <FollowCursor /> */}
     </QueryClientProvider>
   );
 }

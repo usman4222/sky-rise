@@ -1,10 +1,22 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TrendingUp, Shield, Users } from "lucide-react";
+import { TrendingUp, Shield, Users, Loader2 } from "lucide-react";
+
+import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import { useAuthStore } from "@/store/authStore";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
+import { auth } from "@/lib/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [
@@ -14,8 +26,89 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+function ForgotPasswordDialog() {
+  const [email, setEmail] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleReset = async () => {
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    try {
+      setIsSending(true);
+      await sendPasswordResetEmail(auth, email);
+      toast.success("Password reset email sent! Check your inbox.");
+      setIsOpen(false);
+      setEmail("");
+    } catch (error: any) {
+      toast.error(getFirebaseErrorMessage(error));
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <button type="button" className="text-primary hover:text-primary/80 font-medium text-sm">Forgot password?</button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Reset Password</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <p className="text-sm text-muted-foreground">Enter your email address and we will send you a link to reset your password securely via Firebase.</p>
+          <div className="space-y-2">
+            <Label htmlFor="reset-email">Email Address</Label>
+            <Input 
+              id="reset-email" 
+              type="email" 
+              placeholder="you@example.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+          <Button className="glass-button-primary" onClick={handleReset} disabled={isSending}>
+            {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Send Reset Link
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function LoginPage() {
   const navigate = useNavigate();
+  const router = useRouter();
+  const { login, isLoading, isAuthenticated } = useAuthStore();
+
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  const onSubmit = async (data: LoginInput) => {
+    try {
+      await login(data);
+      toast.success("Welcome back! Logged in successfully.");
+      router.invalidate();
+      navigate({ to: "/dashboard", replace: true });
+    } catch (error: any) {
+      toast.error(getFirebaseErrorMessage(error));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-liquid-bg">
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-4 py-10 md:px-6 lg:grid-cols-2">
@@ -28,15 +121,44 @@ function LoginPage() {
             <CardContent className="p-8">
               <h1 className="text-3xl font-bold">Welcome back</h1>
               <p className="mt-2 text-sm text-muted-foreground">Sign in to access your dashboard.</p>
-              <form className="mt-8 space-y-5" onSubmit={(e) => { e.preventDefault(); navigate({ to: "/dashboard" }); }}>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Email or User ID</Label><Input placeholder="you@example.com" /></div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Password</Label><Input type="password" placeholder="••••••••" /></div>
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer"><Checkbox /> Remember me</label>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium">Forgot password?</a>
+              
+              <form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)}>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold" htmlFor="email">Email Address</Label>
+                  <Input 
+                    id="email" 
+                    type="email"
+                    placeholder="you@example.com" 
+                    {...register("email")}
+                    aria-invalid={!!errors.email}
+                  />
+                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                 </div>
-                <Button type="submit" className="w-full glass-button-primary">Login</Button>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold" htmlFor="password">Password</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    {...register("password")}
+                    aria-invalid={!!errors.password}
+                  />
+                  {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+                </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox /> Remember me
+                  </label>
+                  <ForgotPasswordDialog />
+                </div>
+                
+                <Button type="submit" className="w-full glass-button-primary" disabled={isLoading}>
+                  {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in...</> : "Login"}
+                </Button>
               </form>
+              
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 Don't have an account? <Link to="/register" className="text-primary font-semibold hover:text-primary/80">Create one</Link>
               </p>
