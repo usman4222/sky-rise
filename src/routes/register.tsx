@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Gift, Loader2, CheckCircle } from "lucide-react";
+import { Gift, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
@@ -27,6 +27,8 @@ function RegisterPage() {
   const router = useRouter();
   const { register: registerAction, isLoading, isAuthenticated } = useAuthStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -125,13 +127,45 @@ function RegisterPage() {
               
               <div className="space-y-2">
                 <Label className="text-sm font-semibold" htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" {...register("password")} aria-invalid={!!errors.password} />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className="pr-10"
+                    {...register("password")} 
+                    aria-invalid={!!errors.password} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
               </div>
               
               <div className="space-y-2">
                 <Label className="text-sm font-semibold" htmlFor="confirmPassword">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" placeholder="••••••••" {...register("confirmPassword")} aria-invalid={!!errors.confirmPassword} />
+                <div className="relative">
+                  <Input 
+                    id="confirmPassword" 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className="pr-10"
+                    {...register("confirmPassword")} 
+                    aria-invalid={!!errors.confirmPassword} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
                 {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
               </div>
               

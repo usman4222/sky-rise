@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TrendingUp, Shield, Users, Loader2 } from "lucide-react";
+import { TrendingUp, Shield, Users, Loader2, Eye, EyeOff } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
@@ -87,6 +87,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const { login, isLoading, isAuthenticated } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -137,13 +138,23 @@ function LoginPage() {
                 
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold" htmlFor="password">Password</Label>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    placeholder="••••••••" 
-                    {...register("password")}
-                    aria-invalid={!!errors.password}
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      className="pr-10"
+                      {...register("password")}
+                      aria-invalid={!!errors.password}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                 </div>
                 

@@ -187,26 +187,38 @@ function DashboardHome() {
               <h2 className="text-base font-bold text-foreground">Global Platform Metrics</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-              <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" />
+              <Link to="/dashboard/admin/users" className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" />
+              </Link>
               <StatCard icon={DollarSign} label="Total Deposited" value={`$${Number(adminStats?.totalDeposited || 0).toFixed(2)}`} accent="profit" />
-              <StatCard icon={Wallet} label="Total Withdrawn" value={`$${Number(adminStats?.totalWithdrawn || 0).toFixed(2)}`} accent="profit" />
-              <StatCard icon={Timer} label="Pending Withdrawals" value={adminStats?.pendingWithdrawals || 0} accent="gold" />
-              <StatCard icon={FileText} label="Pending KYC" value={adminStats?.pendingKyc || 0} accent="gold" />
-              <StatCard icon={CheckCircle2} label="Active Packages" value={adminStats?.activePackagesCount || 0} accent="primary" />
+              <Link to="/dashboard/admin/withdrawals" className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={Wallet} label="Total Withdrawn" value={`$${Number(adminStats?.totalWithdrawn || 0).toFixed(2)}`} accent="profit" />
+              </Link>
+              <Link to="/dashboard/admin/withdrawals" className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={Timer} label="Pending Withdrawals" value={adminStats?.pendingWithdrawals || 0} accent="gold" />
+              </Link>
+              <Link to="/dashboard/admin/kyc" className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={FileText} label="Pending KYC" value={adminStats?.pendingKyc || 0} accent="gold" />
+              </Link>
+              <Link to="/dashboard/packages" className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={CheckCircle2} label="Active Packages" value={adminStats?.activePackagesCount || 0} accent="primary" />
+              </Link>
             </div>
           </div>
 
           {/* Quick Tasks */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-soft shadow-card">
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="border-soft shadow-card flex flex-col h-full">
               <CardHeader><CardTitle className="text-sm font-semibold">Compliance & KYC Queue</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  Verify customer identity documents to ensure AML compliance and platform security.
-                </p>
-                <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-soft">
-                  <div className="text-xs font-semibold">Pending KYC Applications</div>
-                  <Badge className="bg-amber-500/10 text-amber-500 border-0 font-mono font-semibold">{adminStats?.pendingKyc || 0}</Badge>
+              <CardContent className="flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Verify customer identity documents to ensure AML compliance and platform security.
+                  </p>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-soft">
+                    <div className="text-xs font-semibold">Pending KYC Applications</div>
+                    <Badge className="bg-amber-500/10 text-amber-500 border-0 font-mono font-semibold">{adminStats?.pendingKyc || 0}</Badge>
+                  </div>
                 </div>
                 <Button asChild className="w-full bg-primary-gradient text-white text-xs h-9">
                   <Link to="/dashboard/admin/kyc">Process KYC Documents</Link>
@@ -214,18 +226,38 @@ function DashboardHome() {
               </CardContent>
             </Card>
 
-            <Card className="border-soft shadow-card">
+            <Card className="border-soft shadow-card flex flex-col h-full">
               <CardHeader><CardTitle className="text-sm font-semibold">Financial Approvals</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  Audit and approve withdrawal requests and review manual weekly salary claims.
-                </p>
-                <div className="p-3 rounded-xl bg-secondary/30 border border-soft text-center">
-                  <div className="text-[10px] text-muted-foreground uppercase font-semibold">Pending Withdrawals</div>
-                  <div className="text-base font-bold text-foreground font-mono mt-1">{adminStats?.pendingWithdrawals || 0}</div>
+              <CardContent className="flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Audit and approve withdrawal requests and review manual weekly salary claims.
+                  </p>
+                  <div className="p-3 rounded-xl bg-secondary/30 border border-soft text-center">
+                    <div className="text-[10px] text-muted-foreground uppercase font-semibold">Pending Withdrawals</div>
+                    <div className="text-base font-bold text-foreground font-mono mt-1">{adminStats?.pendingWithdrawals || 0}</div>
+                  </div>
                 </div>
-                <Button asChild variant="outline" className="w-full text-xs h-9">
+                <Button asChild className="w-full bg-primary-gradient text-white text-xs h-9">
                   <Link to="/dashboard/admin/withdrawals">Withdrawals Queue</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-soft shadow-card flex flex-col h-full">
+              <CardHeader><CardTitle className="text-sm font-semibold">Investment Packages</CardTitle></CardHeader>
+              <CardContent className="flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Create new investment packages, adjust starting/maximum ROI rates, or toggle package visibilities.
+                  </p>
+                  <div className="p-3 rounded-xl bg-secondary/30 border border-soft text-center">
+                    <div className="text-[10px] text-muted-foreground uppercase font-semibold">Active Investment Packages</div>
+                    <div className="text-base font-bold text-foreground font-mono mt-1">{adminStats?.activePackagesCount || 0}</div>
+                  </div>
+                </div>
+                <Button asChild className="w-full bg-primary-gradient text-white text-xs h-9">
+                  <Link to="/dashboard/packages">Manage Investment Packages</Link>
                 </Button>
               </CardContent>
             </Card>

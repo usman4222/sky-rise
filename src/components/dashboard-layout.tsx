@@ -18,7 +18,7 @@ const nav = [
   { to: "/dashboard/roi", label: "Daily ROI", icon: TrendingUp },
   { to: "/dashboard/team", label: "Referral Team", icon: Users },
   { to: "/dashboard/levels", label: "Level Income", icon: Layers },
-  { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift, hasAdmin: true },
+  {to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
   { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
   { to: "/dashboard/weekly-salary", label: "VIP Salary Claims", icon: Crown },
   { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
@@ -51,7 +51,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         {onClose && <button onClick={onClose} className="lg:hidden hover:opacity-70 transition"><X size={18} /></button>}
       </div>
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-        {nav.filter(n => !isAdmin || n.to === "/dashboard").map((n) => {
+        {nav.filter(n => !isAdmin || n.hasAdmin).map((n) => {
           const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
           const Icon = n.icon;
           return (
