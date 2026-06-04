@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Mail, MessageCircle, FileQuestion, Loader2, Clock, CheckCircle, AlertCircle, Send, MessageSquare, RotateCw } from "lucide-react";
 import { supportApi } from "@/lib/api-support";
 import { useAuthStore } from "@/store/authStore";
+import { SimplePagination } from "@/components/simple-pagination";
 
 export const Route = createFileRoute("/dashboard/support")({ component: SupportPage });
 
@@ -24,14 +25,13 @@ function SupportPage() {
 
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  
-  // Detailed view modal state
-  const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState("");
+  const [page, setPage] = useState(1);
 
   const { data: ticketsData, isLoading: loadingTickets, refetch: refetchTickets, isFetching } = useQuery({
-    queryKey: ["supportTickets"],
-    queryFn: () => supportApi.getTickets(),
+    queryKey: ["supportTickets", page],
+    queryFn: () => supportApi.getTickets(page, 10),
     refetchOnWindowFocus: false,
     refetchInterval: 5000, // Poll every 5 seconds for a real-time live support experience!
   });
@@ -271,6 +271,11 @@ function SupportPage() {
               </TableBody>
             </Table>
           )}
+          <SimplePagination
+            currentPage={page}
+            totalPages={ticketsData?.pagination?.totalPages || 1}
+            onPageChange={setPage}
+          />
         </CardContent>
       </Card>
 

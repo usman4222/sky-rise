@@ -34,10 +34,12 @@ function PackagesDash() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: (vars: { id: string; amount: number }) => packagesApi.purchasePackage(vars.id, vars.amount),
+    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual' }) => 
+      packagesApi.purchasePackage(vars.id, vars.amount, true, vars.roiClaimMode),
     onSuccess: () => {
       toast.success("Investment confirmed! It will automatically activate at the end of the day.");
       queryClient.invalidateQueries({ queryKey: ["packages"] });
+      queryClient.invalidateQueries({ queryKey: ["myInvestments"] });
     },
     onError: (err) => toast.error(getFirebaseErrorMessage(err))
   });
@@ -106,7 +108,7 @@ function PackagesDash() {
               isAdmin={isAdmin}
               isPurchasing={purchaseMutation.isPending}
               isToggling={toggleMutation.isPending}
-              onPurchase={(amount) => purchaseMutation.mutate({ id: p._id, amount })}
+              onPurchase={(amount, roiClaimMode) => purchaseMutation.mutate({ id: p._id, amount, roiClaimMode })}
               onToggle={(isActive) => toggleMutation.mutate({ id: p._id, isActive })}
               onUpdate={(data) => updateMutation.mutate({ id: p._id, data })}
               isUpdating={updateMutation.isPending && updateMutation.variables?.id === p._id}
@@ -124,20 +126,26 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
   isPurchasing: boolean;
   isToggling: boolean;
   isUpdating: boolean;
-  onPurchase: (amt: number) => void;
+  onPurchase: (amt: number, mode: 'auto' | 'manual') => void;
   onToggle: (active: boolean) => void;
   onUpdate: (data: Partial<PackageData>) => void;
 }) {
   const [amount, setAmount] = useState(pkg.minAmount);
+  const [roiClaimMode, setRoiClaimMode] = useState<'auto' | 'manual'>('auto');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const bonus = Math.min(amount * 0.1, 45); // Mock logic for display
   const real = amount - bonus;
 
+  let tag = "Starter";
+  if (pkg.minAmount >= 5000) tag = "VIP";
+  else if (pkg.minAmount >= 1000) tag = "Pro";
+  else if (pkg.minAmount >= 100) tag = "Standard";
+
   return (
-    <Card className={`glass-card-hover transition-all ${!pkg.isActive ? 'opacity-70 grayscale' : ''}`}>
-      <CardContent className="p-6">
+    <Card className={`glass-card-hover transition-all flex flex-col h-full ${!pkg.isActive ? 'opacity-70 grayscale' : ''}`}>
+      <CardContent className="p-6 pb-8 flex flex-col flex-1">
         <div className="flex items-center justify-between">
-          <Badge className="glass-pill">{pkg.name}</Badge>
+          <Badge className="glass-pill">{tag}</Badge>
           {isAdmin && (
             <Switch 
               checked={pkg.isActive} 
@@ -151,7 +159,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
         <div className="mt-1 text-sm text-muted-foreground">${pkg.minAmount} - ${pkg.maxAmount || "Unlimited"}</div>
         <div className="my-4 h-px bg-border" />
         
-        <div className="space-y-2 text-sm">
+        <div className="space-y-2 text-sm mb-5">
           <div className="flex justify-between"><span className="text-muted-foreground">Starting ROI</span><span className="font-semibold">{pkg.startRoi}%</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Max ROI</span><span className="font-semibold text-profit">{pkg.maxRoi}%</span></div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-profit" /> Activates at End of Day</div>
@@ -169,7 +177,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
             }}
             isPending={isUpdating}
             trigger={
-              <Button variant="outline" className="mt-5 w-full gap-2 border-primary/50 text-primary hover:bg-primary/10">
+              <Button variant="outline" className="mt-auto w-full gap-2 border-primary/50 text-primary hover:bg-primary/10">
                 <Edit size={16} /> Edit Package
               </Button>
             }
@@ -177,7 +185,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
         ) : (
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="mt-5 w-full glass-button-primary">Invest Now</Button>
+              <Button className="mt-auto w-full glass-button-primary">Invest Now</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -196,6 +204,37 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                   />
                   <div className="text-xs text-muted-foreground">Range: ${pkg.minAmount} - ${pkg.maxAmount || "Unlimited"}</div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label>ROI Claim Mode</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setRoiClaimMode("auto")}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                        roiClaimMode === "auto"
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border hover:border-primary/50 text-muted-foreground"
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">Auto-Collect</span>
+                      <span className="text-[10px] opacity-80 mt-1">ROI is credited directly to your balance every 24h.</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRoiClaimMode("manual")}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                        roiClaimMode === "manual"
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border hover:border-primary/50 text-muted-foreground"
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">Manual-Claim</span>
+                      <span className="text-[10px] opacity-80 mt-1">Claim manually inside a strict 1-hour window, or lose it.</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div className="rounded-xl glass-panel p-4 space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-muted-foreground">10% Bonus Applicable</span><span className="font-semibold">${bonus.toFixed(2)}</span></div>
                   <div className="flex justify-between border-t border-soft pt-2"><span>Real Payment Required</span><span className="font-bold text-primary">${real.toFixed(2)}</span></div>
@@ -204,7 +243,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
               <DialogFooter>
                 <Button 
                   className="w-full glass-button-primary" 
-                  onClick={() => onPurchase(amount)}
+                  onClick={() => onPurchase(amount, roiClaimMode)}
                   disabled={isPurchasing}
                 >
                   {isPurchasing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

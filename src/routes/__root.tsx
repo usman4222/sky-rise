@@ -13,6 +13,8 @@ import appCss from "../styles.css?url";
 import FluidCursor from "@/components/fluid-cursor";
 // @ts-ignore
 import FollowCursor from "@/components/follow-cursor";
+import { GearLoader } from "@/components/gear-loader";
+
 
 function NotFoundComponent() {
   return (
@@ -117,6 +119,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <GearLoader />
       <Outlet />
       <Toaster position="top-right" richColors />
       {/* <FluidCursor /> */}

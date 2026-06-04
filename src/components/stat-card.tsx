@@ -4,7 +4,7 @@ import { LucideIcon } from "lucide-react";
 export function StatCard({
   icon: Icon, label, value, trend, accent = "primary",
 }: {
-  icon: LucideIcon; label: string; value: string; trend?: string;
+  icon: LucideIcon; label: string; value: string | number; trend?: string;
   accent?: "primary" | "gold" | "profit";
 }) {
   const accents: Record<string, string> = {
@@ -13,17 +13,21 @@ export function StatCard({
     profit: "bg-gradient-to-br from-emerald-400 to-cyan-400 text-white",
   };
   return (
-    <Card className="glass-card-hover">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-foreground">{value}</p>
-            {trend && <p className="mt-2 text-xs font-medium text-emerald-500">{trend}</p>}
+    <Card className="glass-card-hover overflow-hidden">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-tight">
+            {label}
+          </p>
+          <div className={`grid h-9 w-9 place-items-center rounded-full shadow-soft flex-shrink-0 ${accents[accent]}`}>
+            <Icon size={18} />
           </div>
-          <div className={`grid h-12 w-12 place-items-center rounded-full shadow-soft ${accents[accent]}`}>
-            <Icon size={22} />
-          </div>
+        </div>
+        <div className="mt-3">
+          <p className="text-2xl font-extrabold tracking-tight text-foreground break-all leading-none">
+            {value}
+          </p>
+          {trend && <p className="mt-1.5 text-xs font-semibold text-emerald-500 leading-none">{trend}</p>}
         </div>
       </CardContent>
     </Card>

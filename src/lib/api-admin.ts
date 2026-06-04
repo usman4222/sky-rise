@@ -3,9 +3,20 @@ import { api } from "./api";
 export const adminApi = {
   getAdminDashboard: () => api.get("/admin/dashboard"),
   
-  getDeposits: (status?: string) => api.get(`/admin/deposits${status ? `?status=${status}` : ''}`),
-  getWithdrawals: (status?: string) => api.get(`/admin/withdrawals${status ? `?status=${status}` : ''}`),
-  getKyc: (status?: string) => api.get(`/admin/kyc${status ? `?status=${status}` : ''}`),
+  getDeposits: (status?: string, page?: number, limit?: number) => 
+    api.get(`/admin/deposits?page=${page || 1}&limit=${limit || 10}${status ? `&status=${status}` : ''}`),
+  getWithdrawals: (status?: string, page?: number, limit?: number) => 
+    api.get(`/admin/withdrawals?page=${page || 1}&limit=${limit || 10}${status ? `&status=${status}` : ''}`),
+  getKyc: (status?: string, page?: number, limit?: number) => 
+    api.get(`/admin/kyc?page=${page || 1}&limit=${limit || 10}${status ? `&status=${status}` : ''}`),
+  getUsers: (search?: string, page?: number, limit?: number) => 
+    api.get(`/admin/users?page=${page || 1}&limit=${limit || 10}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+  getUserDetail: (id: string) => 
+    api.get(`/admin/users/${id}`),
+  suspendUser: (id: string) => 
+    api.post(`/admin/users/${id}/suspend`),
+  activateUser: (id: string) => 
+    api.post(`/admin/users/${id}/activate`),
   
   // Action handles both approve and reject
   processDeposit: (id: string, data: { action: "approve" | "reject"; adminNotes?: string }) => 

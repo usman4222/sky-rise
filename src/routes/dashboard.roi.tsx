@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,21 +10,27 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Timer, Loader2 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { investmentsApi } from "@/lib/api-investments";
+import { SimplePagination } from "@/components/simple-pagination";
 
 export const Route = createFileRoute("/dashboard/roi")({ component: RoiPage });
 
 function RoiPage() {
   // 1. Fetch active investments to calculate current running ROI details
-  const { data: investmentsData, isLoading: isInvestmentsLoading } = useQuery({
+  const { data: investments = [], isLoading: isInvestmentsLoading } = useQuery({
     queryKey: ["myInvestments"],
-    queryFn: () => investmentsApi.getMyInvestments(),
+    queryFn: async () => {
+      const res = await investmentsApi.getMyInvestments();
+      return res.investments || [];
+    },
     refetchOnWindowFocus: false,
   });
 
+  const [page, setPage] = useState(1);
+
   // 2. Fetch ROI payouts history list
   const { data: roiHistoryData, isLoading: isRoiHistoryLoading } = useQuery({
-    queryKey: ["roiHistory"],
-    queryFn: () => investmentsApi.getRoiHistory(),
+    queryKey: ["roiHistory", page],
+    queryFn: () => investmentsApi.getRoiHistory(page, 10),
     refetchOnWindowFocus: false,
   });
 
@@ -39,7 +46,6 @@ function RoiPage() {
     );
   }
 
-  const investments = investmentsData?.investments || [];
   const activeInvestments = investments.filter((i: any) => i.status === "active");
   const roiHistory = roiHistoryData?.roiHistory || [];
 
@@ -156,7 +162,7 @@ function RoiPage() {
                     <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>{r.userInvestment?.package?.name || "Standard Share"}</TableCell>
                     <TableCell>{r.roiPercent}%</TableCell>
-                    <TableCell className="font-semibold text-profit">${r.amount.toFixed(4)}</TableCell>
+                    <TableCell className="font-semibold text-profit">${r.amount.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge className={r.isCompounded ? "bg-profit/10 text-profit border-0" : "bg-primary/10 text-primary border-0"}>
                         {r.isCompounded ? "Compounded" : "Wallet Credited"}
@@ -170,6 +176,11 @@ function RoiPage() {
               )}
             </TableBody>
           </Table>
+          <SimplePagination
+            currentPage={page}
+            totalPages={roiHistoryData?.pagination?.totalPages || 1}
+            onPageChange={setPage}
+          />
         </CardContent>
       </Card>
     </DashboardLayout>

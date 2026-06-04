@@ -54,7 +54,7 @@ function WithdrawPage() {
   });
 
   const { data: history = [] } = useQuery({
-    queryKey: ["ledgerHistory"],
+    queryKey: ["ledgerHistory", "withdrawal"],
     queryFn: async () => {
       const res = await financeApi.getLedgerHistory();
       return (res.history || []).filter((h: any) => h.category === "withdrawal" || h.category === "capital_withdrawal");
@@ -199,12 +199,33 @@ function WithdrawPage() {
                 <Label>Amount (USD)</Label>
                 <Input type="number" placeholder="0.00" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} />
               </div>
+
+              {Number(withdrawAmount) > 0 && (
+                <div className="rounded-xl bg-secondary/50 border border-soft p-3 text-xs space-y-1.5">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Withdrawal Fee (5%):</span>
+                    <span className="font-medium">${(Number(withdrawAmount) * 0.05).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-soft pt-1.5 text-foreground font-semibold">
+                    <span>Net Payable Amount:</span>
+                    <span>${(Number(withdrawAmount) * 0.95).toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start gap-2 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                <Clock className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <span className="font-semibold">Processing Notice:</span> All withdrawal requests take **1 hour to 12 hours** to process and verify.
+                </div>
+              </div>
+
               <Button 
                 className="w-full bg-primary-gradient text-primary-foreground" 
                 onClick={() => withdrawMutation.mutate()}
                 disabled={withdrawMutation.isPending || !accountId || !withdrawAmount}
               >
-                {withdrawMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit Automatic Payout"}
+                {withdrawMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit Withdrawal Request"}
               </Button>
             </div>
           </CardContent>

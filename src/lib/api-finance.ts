@@ -33,5 +33,6 @@ export const financeApi = {
   // Transfers & Ledger
   transferTeamBonus: (data: { recipientIdOrCode: string; amount: number }) => api.post("/finance/transfer-bonus", data),
   getWallets: () => api.get("/finance/wallets"),
-  getLedgerHistory: () => api.get("/finance/history"),
+  getLedgerHistory: (page?: number, limit?: number) =>
+    api.get(`/finance/history?page=${page || 1}&limit=${limit || 10}`),
 };

@@ -28,9 +28,17 @@ function RegisterPage() {
   const { register: registerAction, isLoading, isAuthenticated } = useAuthStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterInput>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const referralCode = params.get("ref");
+    if (referralCode) {
+      setValue("sponsorCode", referralCode);
+    }
+  }, [setValue]);
 
   useEffect(() => {
     // Only auto-navigate if not currently showing the success modal
@@ -131,7 +139,11 @@ function RegisterPage() {
                 <Checkbox className="mt-0.5" required /> I agree to the Terms, Privacy Policy, and platform rules.
               </label>
               
-              <Button type="submit" className="sm:col-span-2 w-full glass-button-primary mt-2" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className={`sm:col-span-2 w-full glass-button-primary mt-2 ${isLoading ? "fluid-loading-btn" : ""}`} 
+                disabled={isLoading}
+              >
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Registering...</> : "Register"}
               </Button>
             </form>

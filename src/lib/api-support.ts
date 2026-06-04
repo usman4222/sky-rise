@@ -32,12 +32,19 @@ export interface TicketsListResponse {
   success: boolean;
   message: string;
   tickets: SupportTicketItem[];
+  pagination?: {
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
 }
 
 export const supportApi = {
   submitTicket: (data: { subject: string; message: string; priority?: string }) => 
     api.post<TicketResponse>("/support/tickets", data),
-  getTickets: () => api.get<TicketsListResponse>("/support/tickets"),
+  getTickets: (page?: number, limit?: number) =>
+    api.get<TicketsListResponse>(`/support/tickets?page=${page || 1}&limit=${limit || 10}`),
   replyTicket: (ticketId: string, data: { message: string }) =>
     api.post<TicketResponse>(`/support/tickets/${ticketId}/reply`, data),
   updateTicketStatus: (ticketId: string, data: { status: string }) =>

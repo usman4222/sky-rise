@@ -2,7 +2,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
-  User, LifeBuoy, LogOut, Bell, Search, Menu, X
+  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -20,9 +20,10 @@ const nav = [
   { to: "/dashboard/levels", label: "Level Income", icon: Layers },
   { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift, hasAdmin: true },
   { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
-  { to: "/dashboard/vip", label: "VIP Salary", icon: Crown },
+  { to: "/dashboard/weekly-salary", label: "VIP Salary Claims", icon: Crown },
   { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
-  { to: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownToLine, hasAdmin: true },
+  { to: "/dashboard/withdraw", label: "Withdraw Funds", icon: ArrowDownToLine },
+  { to: "/dashboard/payment-methods", label: "Saved Accounts", icon: CreditCard },
   { to: "/dashboard/transactions", label: "Transactions", icon: Receipt },
   { to: "/dashboard/profile", label: "Profile", icon: User },
   { to: "/dashboard/support", label: "Support", icon: LifeBuoy },
@@ -50,7 +51,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         {onClose && <button onClick={onClose} className="lg:hidden hover:opacity-70 transition"><X size={18} /></button>}
       </div>
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-        {nav.map((n) => {
+        {nav.filter(n => !isAdmin || n.to === "/dashboard").map((n) => {
           const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
           const Icon = n.icon;
           return (
@@ -74,6 +75,41 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-foreground/45 tracking-wider uppercase border-t border-glass-border/30 mt-4">
+              Admin Center
+            </div>
+            {[
+              { to: "/dashboard/admin/users", label: "Users Management", icon: Users },
+              { to: "/dashboard/admin/kyc", label: "Verify KYC Queue", icon: User },
+              { to: "/dashboard/admin/withdrawals", label: "Verify Withdrawals Queue", icon: ArrowDownToLine },
+              { to: "/dashboard/admin/weekly-salary", label: "Verify Salary Queue", icon: Crown },
+            ].map((n) => {
+              const active = pathname.startsWith(n.to);
+              const Icon = n.icon;
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                    active
+                      ? "bg-primary-gradient text-white shadow-soft"
+                      : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon size={18} />
+                    <span className="truncate">{n.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </>
+        )}
+
         <button 
           onClick={handleLogout} 
           className="mt-4 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
@@ -88,6 +124,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 export function DashboardLayout({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user, fetchProfile } = useAuthStore();
+  const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
 
   useEffect(() => {
     fetchProfile();
@@ -126,10 +163,12 @@ export function DashboardLayout({ title, children }: { title: string; children: 
             <Bell size={18} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-gold animate-pulse" />
           </Button>
-          <div className="hidden sm:flex flex-col text-right">
-            <span className="text-xs text-muted-foreground font-medium">Wallet</span>
-            <span className="text-sm font-bold text-primary">${walletBalance.toFixed(2)}</span>
-          </div>
+          {!isAdmin && (
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-xs text-muted-foreground font-medium">Wallet</span>
+              <span className="text-sm font-bold text-primary">${walletBalance.toFixed(2)}</span>
+            </div>
+          )}
           <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30">
             <AvatarFallback className="bg-primary-gradient text-white font-semibold">
               {getInitials(user?.name)}

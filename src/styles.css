@@ -635,3 +635,388 @@
   }
 }
 
+
+/* Gear Loader Overlay Container */
+.gear-loader-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--gradient-liquid-bg);
+  background-attachment: fixed;
+  z-index: 99999;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gear-loader-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Gear System Base */
+.gear-system {
+  position: relative;
+  width: 350px;
+  height: 280px;
+  transform-origin: center center;
+  transition: transform 0.2s ease-out;
+}
+
+/* SVGs and rotations */
+.gear-wrapper {
+  position: absolute;
+}
+.gear {
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.gear-cw {
+  animation-name: rotateCW;
+}
+.gear-ccw {
+  animation-name: rotateCCW;
+}
+@keyframes rotateCW {
+  to { transform: rotate(360deg); }
+}
+@keyframes rotateCCW {
+  to { transform: rotate(-360deg); }
+}
+.gear-glow {
+  filter: drop-shadow(0 0 6px var(--gear-color));
+}
+
+/* Loading bar container */
+.loading-bar-container {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 250px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.loading-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #e94560, #ffb830, #00d2ff);
+  background-size: 200% 100%;
+  animation: barShimmer 1.5s linear infinite;
+  transition: width 0.05s linear;
+}
+@keyframes barShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Steam Rising Effect */
+.steam {
+  position: absolute;
+  border-radius: 50%;
+  animation: steamRise 2.0s ease-out forwards;
+  background: var(--primary);
+}
+@keyframes steamRise {
+  0% {
+    opacity: 0.8;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) translateX(var(--drift)) scale(0.3);
+  }
+}
+
+/* Processing Text */
+.loading-text {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   Button Animations (Hover Glow & Fluid Loading)
+   ========================================== */
+
+/* 1. Glowing Hover Animation for styled design buttons */
+.glass-button:not(:disabled):not([aria-disabled="true"]),
+.glass-btn:not(:disabled):not([aria-disabled="true"]),
+.glass-button-primary:not(:disabled):not([aria-disabled="true"]),
+.glass-btn-primary:not(:disabled):not([aria-disabled="true"]),
+.glass-button-secondary:not(:disabled):not([aria-disabled="true"]),
+.glass-btn-secondary:not(:disabled):not([aria-disabled="true"]),
+.glass-button-gold:not(:disabled):not([aria-disabled="true"]),
+.glass-btn-gold:not(:disabled):not([aria-disabled="true"]),
+.btn-liquid:not(:disabled):not([aria-disabled="true"]) {
+  position: relative;
+  z-index: 0;
+}
+
+.glass-button:not(:disabled):not([aria-disabled="true"])::before,
+.glass-btn:not(:disabled):not([aria-disabled="true"])::before,
+.glass-button-primary:not(:disabled):not([aria-disabled="true"])::before,
+.glass-btn-primary:not(:disabled):not([aria-disabled="true"])::before,
+.glass-button-secondary:not(:disabled):not([aria-disabled="true"])::before,
+.glass-btn-secondary:not(:disabled):not([aria-disabled="true"])::before,
+.glass-button-gold:not(:disabled):not([aria-disabled="true"])::before,
+.glass-btn-gold:not(:disabled):not([aria-disabled="true"])::before,
+.btn-liquid:not(:disabled):not([aria-disabled="true"])::before {
+  content: '';
+  background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background-size: 400%;
+  z-index: -2;
+  filter: blur(5px);
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  animation: glowing 20s linear infinite;
+  opacity: 0;
+  transition: opacity .3s ease-in-out;
+  border-radius: inherit;
+}
+
+.glass-button:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-btn:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-button-primary:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-btn-primary:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-button-secondary:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-btn-secondary:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-button-gold:not(:disabled):not([aria-disabled="true"]):hover::before,
+.glass-btn-gold:not(:disabled):not([aria-disabled="true"]):hover::before,
+.btn-liquid:not(:disabled):not([aria-disabled="true"]):hover::before {
+  opacity: 1;
+}
+
+/* Always active glow helper class for landing page buttons */
+.always-glow::before {
+  opacity: 1 !important;
+}
+
+.glass-button:not(:disabled):not([aria-disabled="true"])::after,
+.glass-btn:not(:disabled):not([aria-disabled="true"])::after,
+.glass-button-primary:not(:disabled):not([aria-disabled="true"])::after,
+.glass-btn-primary:not(:disabled):not([aria-disabled="true"])::after,
+.glass-button-secondary:not(:disabled):not([aria-disabled="true"])::after,
+.glass-btn-secondary:not(:disabled):not([aria-disabled="true"])::after,
+.glass-button-gold:not(:disabled):not([aria-disabled="true"])::after,
+.glass-btn-gold:not(:disabled):not([aria-disabled="true"])::after,
+.btn-liquid:not(:disabled):not([aria-disabled="true"])::after {
+  z-index: -1;
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  left: 0;
+  top: 0;
+  border-radius: inherit;
+}
+
+/* Click feedback transition (Flash colored glow internally) */
+.glass-button:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-btn:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-button-primary:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-btn-primary:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-button-secondary:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-btn-secondary:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-button-gold:not(:disabled):not([aria-disabled="true"]):active::after,
+.glass-btn-gold:not(:disabled):not([aria-disabled="true"]):active::after,
+.btn-liquid:not(:disabled):not([aria-disabled="true"]):active::after {
+  background: transparent !important;
+}
+
+.glass-button:not(:disabled):not([aria-disabled="true"]):active,
+.glass-btn:not(:disabled):not([aria-disabled="true"]):active,
+.glass-button-primary:not(:disabled):not([aria-disabled="true"]):active,
+.glass-btn-primary:not(:disabled):not([aria-disabled="true"]):active,
+.glass-button-secondary:not(:disabled):not([aria-disabled="true"]):active,
+.glass-btn-secondary:not(:disabled):not([aria-disabled="true"]):active,
+.glass-button-gold:not(:disabled):not([aria-disabled="true"]):active,
+.glass-btn-gold:not(:disabled):not([aria-disabled="true"]):active,
+.btn-liquid:not(:disabled):not([aria-disabled="true"]):active {
+  color: #000 !important;
+}
+
+@keyframes glowing {
+  0% { background-position: 0 0; }
+  50% { background-position: 400% 0; }
+  100% { background-position: 0 0; }
+}
+
+
+/* 2. Fluid Wave Button Loading Animation */
+.fluid-loading-btn {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  opacity: 1 !important;
+  transition: all 0.3s ease !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.fluid-loading-btn::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -150% !important;
+  width: 260% !important;
+  height: 260% !important;
+  background: var(--gradient-primary) !important;
+  border-radius: 38% !important;
+  transform: translateX(-50%) rotate(0deg) !important;
+  animation: fluidFill 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards, fluidRotate 6s linear infinite !important;
+  z-index: -1 !important;
+  box-shadow: 0 0 20px rgba(123, 92, 255, 0.6) !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+.fluid-loading-btn::after {
+  display: none !important;
+}
+
+.fluid-loading-btn > * {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.dark .fluid-loading-btn {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+@keyframes ambientShine {
+  0%, 100% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0.07;
+  }
+}
+
+/* ── Landing Page Bouncing Blob Glassmorphism Cards ── */
+.landing-card-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background: transparent !important;
+  box-shadow: 20px 20px 60px rgba(190, 190, 190, 0.15), -20px -20px 60px rgba(255, 255, 255, 0.8) !important;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dark .landing-card-container {
+  box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.35), -20px -20px 60px rgba(255, 255, 255, 0.01) !important;
+}
+
+.landing-card-blob {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  opacity: 1;
+  filter: blur(12px);
+  animation: blob-bounce 5s infinite ease;
+  pointer-events: none;
+}
+
+/* Blob theme variations with vibrant colors */
+.blob-primary {
+  background-color: #7b5cff;
+}
+.blob-gold {
+  background-color: #f7b84f;
+}
+.blob-profit {
+  background-color: #18b66a;
+}
+.blob-red {
+  background-color: #ff0000;
+}
+
+.landing-card-glass {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(24px);
+  border-radius: 10px;
+  overflow: hidden;
+  outline: 2px solid white;
+  pointer-events: none;
+}
+
+.dark .landing-card-glass {
+  background: rgba(15, 18, 30, 0.90);
+  outline: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.landing-card-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+@keyframes blob-bounce {
+  0% {
+    transform: translate(-100%, -100%) translate3d(0, 0, 0);
+  }
+
+  25% {
+    transform: translate(-100%, -100%) translate3d(100%, 0, 0);
+  }
+
+  50% {
+    transform: translate(-100%, -100%) translate3d(100%, 100%, 0);
+  }
+
+  75% {
+    transform: translate(-100%, -100%) translate3d(0, 100%, 0);
+  }
+
+  100% {
+    transform: translate(-100%, -100%) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fluidFill {
+  0% {
+    bottom: -150%;
+  }
+  100% {
+    bottom: -30%;
+  }
+}
+
+@keyframes fluidRotate {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}

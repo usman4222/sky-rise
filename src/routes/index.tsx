@@ -16,6 +16,33 @@ import { useAuthStore } from "@/store/authStore";
 
 export const Route = createFileRoute("/")({ component: HomePage });
 
+function LandingCard({
+  children,
+  className = "",
+  blobColor = "primary",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  blobColor?: "primary" | "gold" | "profit" | "red";
+}) {
+  const blobClasses = {
+    primary: "blob-primary",
+    gold: "blob-gold",
+    profit: "blob-profit",
+    red: "blob-red"
+  };
+
+  return (
+    <div className={`landing-card-container hover:scale-[1.015] hover:shadow-lg transition-all duration-300 ${className}`}>
+      <div className={`landing-card-blob ${blobClasses[blobColor]}`} />
+      <div className="landing-card-glass" />
+      <div className="landing-card-content p-6">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function HomePage() {
   const { isAuthenticated } = useAuthStore();
 
@@ -72,15 +99,15 @@ function HomePage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               {isAuthenticated ? (
-                <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95">
+                <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95 always-glow">
                   <Link to="/dashboard">Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
               ) : (
                 <>
-                  <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95">
+                  <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-elevated hover:opacity-95 always-glow">
                     <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline" className="border-soft bg-white">
+                  <Button asChild size="lg" variant="outline" className="border-soft bg-white always-glow">
                     <Link to="/packages">View Packages</Link>
                   </Button>
                 </>
@@ -163,15 +190,13 @@ function HomePage() {
             { icon: Crown, title: "VIP Weekly Salary", desc: "Qualify for VIP ranks and receive weekly salary rewards." },
             { icon: Trophy, title: "Achievement Rewards", desc: "Unlock rank rewards based on 5-level team business." },
           ].map((f) => (
-            <Card key={f.title} className="glass-card-hover">
-              <CardContent className="p-6">
-                <div className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-blue-400 text-white shadow-soft">
-                  <f.icon size={24} />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
-              </CardContent>
-            </Card>
+            <LandingCard key={f.title} blobColor="primary">
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-blue-400 text-white shadow-soft">
+                <f.icon size={24} />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-foreground">{f.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+            </LandingCard>
           ))}
         </div>
       </section>
@@ -185,22 +210,20 @@ function HomePage() {
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {displayPackages.map((p) => (
-              <Card key={p.id} className="glass-card-hover">
-                <CardContent className="p-6">
-                  <Badge className="bg-gradient-to-r from-violet-400 to-blue-400 text-white border-0">{p.tag}</Badge>
-                  <h3 className="mt-3 text-lg font-semibold">{p.name}</h3>
-                  <div className="mt-1 text-sm text-muted-foreground">{p.range}</div>
-                  <div className="mt-5 space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Starting ROI</span><span className="font-semibold">{p.startRoi}%</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Max ROI</span><span className="font-semibold text-emerald-500">{p.maxRoi}%</span></div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Auto reinvest</div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Manual claim</div>
-                  </div>
-                  <Button asChild className="mt-5 w-full glass-button-primary">
-                    <Link to={isAuthenticated ? "/dashboard/packages" : "/register"}>Select Package</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <LandingCard key={p.id} blobColor={p.tag === "VIP" ? "gold" : p.tag === "Standard" ? "profit" : "primary"}>
+                <Badge className="bg-gradient-to-r from-violet-400 to-blue-400 text-white border-0 w-fit">{p.tag}</Badge>
+                <h3 className="mt-3 text-lg font-semibold text-foreground">{p.name}</h3>
+                <div className="mt-1 text-sm text-muted-foreground">{p.range}</div>
+                <div className="mt-5 space-y-2 text-sm flex-1">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Starting ROI</span><span className="font-semibold">{p.startRoi}%</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Max ROI</span><span className="font-semibold text-emerald-500">{p.maxRoi}%</span></div>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Auto reinvest</div>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Manual claim</div>
+                </div>
+                <Button asChild className="mt-5 w-full glass-button-primary always-glow">
+                  <Link to={isAuthenticated ? "/dashboard/packages" : "/register"}>Select Package</Link>
+                </Button>
+              </LandingCard>
             ))}
           </div>
         </div>
@@ -214,13 +237,11 @@ function HomePage() {
         </div>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {incomeModules.map((m, i) => (
-            <Card key={m.title} className="glass-card-hover">
-              <CardContent className="p-6">
-                <div className="text-sm font-bold text-primary bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">0{i + 1}</div>
-                <h3 className="mt-3 text-base font-semibold">{m.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{m.desc}</p>
-              </CardContent>
-            </Card>
+            <LandingCard key={m.title} blobColor="primary">
+              <div className="text-sm font-bold text-primary bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">0{i + 1}</div>
+              <h3 className="mt-3 text-base font-semibold text-foreground">{m.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{m.desc}</p>
+            </LandingCard>
           ))}
         </div>
       </section>
@@ -235,20 +256,18 @@ function HomePage() {
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {vipRanks.map((v) => (
-              <Card key={v.rank} className="border-soft bg-white shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-5 w-5 text-gold" />
-                    <span className="font-bold">{v.rank}</span>
-                  </div>
-                  <div className="mt-4 text-xs text-muted-foreground">Business / Leg</div>
-                  <div className="text-lg font-bold">${v.leg.toLocaleString()}</div>
-                  <div className="mt-3 text-xs text-muted-foreground">Weekly Salary</div>
-                  <div className="text-lg font-bold text-profit">${v.weekly}</div>
-                  <div className="mt-3 text-xs text-muted-foreground">~ Monthly</div>
-                  <div className="text-base font-semibold">${v.monthly}</div>
-                </CardContent>
-              </Card>
+              <LandingCard key={v.rank} blobColor="gold">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-gold" />
+                  <span className="font-bold text-foreground">{v.rank}</span>
+                </div>
+                <div className="mt-4 text-xs text-muted-foreground">Business / Leg</div>
+                <div className="text-base font-bold">${v.leg.toLocaleString()}</div>
+                <div className="mt-3 text-xs text-muted-foreground">Weekly Salary</div>
+                <div className="text-base font-bold text-profit">${v.weekly}</div>
+                <div className="mt-3 text-xs text-muted-foreground">~ Monthly</div>
+                <div className="text-sm font-semibold">${v.monthly}</div>
+              </LandingCard>
             ))}
           </div>
         </div>
@@ -262,20 +281,18 @@ function HomePage() {
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {achievements.map((a, i) => (
-            <Card key={a.name} className="glass-card-hover">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-amber-300 to-orange-400 text-white shadow-soft"><Trophy size={18} /></div>
-                  <span className="text-xs font-medium text-muted-foreground">Rank {i + 1}</span>
-                </div>
-                <h3 className="mt-3 text-base font-semibold">{a.name}</h3>
-                <div className="mt-2 text-xs text-muted-foreground">Business</div>
-                <div className="text-sm font-bold">${a.business.toLocaleString()}</div>
-                <div className="mt-2 text-xs text-muted-foreground">Reward</div>
-                <div className="text-base font-bold text-emerald-500">${a.reward.toLocaleString()}</div>
-                <Progress value={(i + 1) * 10} className="mt-3 h-1.5" />
-              </CardContent>
-            </Card>
+            <LandingCard key={a.name} blobColor="gold">
+              <div className="flex items-center gap-2">
+                <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-amber-300 to-orange-400 text-white shadow-soft"><Trophy size={18} /></div>
+                <span className="text-xs font-medium text-muted-foreground">Rank {i + 1}</span>
+              </div>
+              <h3 className="mt-3 text-base font-semibold text-foreground">{a.name}</h3>
+              <div className="mt-2 text-xs text-muted-foreground">Business</div>
+              <div className="text-sm font-bold">${a.business.toLocaleString()}</div>
+              <div className="mt-2 text-xs text-muted-foreground">Reward</div>
+              <div className="text-base font-bold text-emerald-500">${a.reward.toLocaleString()}</div>
+              <Progress value={(i + 1) * 10} className="mt-3 h-1.5" />
+            </LandingCard>
           ))}
         </div>
       </section>
@@ -306,11 +323,11 @@ function HomePage() {
             <p className="mx-auto mt-4 max-w-2xl text-white/85">Create your free account, explore packages, and manage your growth from one smart dashboard.</p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               {isAuthenticated ? (
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90"><Link to="/dashboard">Go to Dashboard</Link></Button>
+                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 always-glow"><Link to="/dashboard">Go to Dashboard</Link></Button>
               ) : (
                 <>
-                  <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90"><Link to="/register">Create Free Account</Link></Button>
-                  <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20"><Link to="/login">Login</Link></Button>
+                  <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 always-glow"><Link to="/register">Create Free Account</Link></Button>
+                  <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 always-glow"><Link to="/login">Login</Link></Button>
                 </>
               )}
             </div>

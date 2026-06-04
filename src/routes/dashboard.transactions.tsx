@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { financeApi } from "@/lib/api-finance";
+import { SimplePagination } from "@/components/simple-pagination";
 
 export const Route = createFileRoute("/dashboard/transactions")({ component: TxPage });
 
@@ -15,10 +16,11 @@ const filters = ["All", "ROI", "Referral", "Bonus", "Transfer", "VIP Salary", "A
 
 function TxPage() {
   const [filter, setFilter] = useState("All");
+  const [page, setPage] = useState(1);
 
   const { data: ledgerData, isLoading, error } = useQuery({
-    queryKey: ["ledgerHistory"],
-    queryFn: () => financeApi.getLedgerHistory(),
+    queryKey: ["ledgerHistory", page],
+    queryFn: () => financeApi.getLedgerHistory(page, 10),
     refetchOnWindowFocus: false,
   });
 
@@ -151,6 +153,11 @@ function TxPage() {
               </TableBody>
             </Table>
           </div>
+          <SimplePagination
+            currentPage={page}
+            totalPages={ledgerData?.pagination?.totalPages || 1}
+            onPageChange={setPage}
+          />
         </CardContent>
       </Card>
     </DashboardLayout>
