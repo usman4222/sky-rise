@@ -304,7 +304,7 @@ function WeeklySalaryPage() {
               totalPages={historyRes?.pagination?.totalPages || 1}
               onPageChange={setPage}
             />
-          </CardContent>>
+          </CardContent>
         </Card>
       </div>
     </DashboardLayout>
