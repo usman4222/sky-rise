@@ -1,0 +1,227 @@
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { api } from "@/lib/api";
+import { auth } from "@/lib/firebase";
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut
+} from "firebase/auth";
+import type { LoginInput, RegisterInput } from "@/lib/validations/auth";
+
+export interface UserProfile {
+  id: string;
+  firebaseUid: string;
+  name: string;
+  email: string;
+  phone?: string;
+  referralCode: string;
+  sponsor?: string;
+  kycStatus: string;
+  status?: string;
+  vipRank?: number;
+  achievementRank?: number;
+  roles?: string[];
+  role?: string;
+  wallets?: any;
+  signupBonus?: any;
+  unlockedLevels?: number[];
+}
+
+interface AuthState {
+  token: string | null;
+  user: UserProfile | null;
+  roles: string[];
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isHydrated: boolean;
+  
+  // Actions
+  setAuth: (token: string, user: UserProfile, roles?: string[]) => void;
+  clearAuth: () => void;
+  login: (credentials: LoginInput) => Promise<void>;
+  register: (data: RegisterInput) => Promise<void>;
+  logout: () => Promise<void>;
+  fetchProfile: () => Promise<void>;
+  setHydrated: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      token: null,
+      user: null,
+      roles: [],
+      isAuthenticated: false,
+      isLoading: false,
+      isHydrated: false,
+
+      setHydrated: () => set({ isHydrated: true }),
+
+      setAuth: (token, user, roles = []) => {
+        set({
+          token,
+          user,
+          roles,
+          isAuthenticated: true,
+        });
+      },
+
+      clearAuth: () => {
+        set({
+          token: null,
+          user: null,
+          roles: [],
+          isAuthenticated: false,
+        });
+      },
+
+      login: async (credentials) => {
+        set({ isLoading: true });
+        try {
+          // 1. Authenticate with Firebase
+          const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+          const idToken = await userCredential.user.getIdToken();
+          
+          // Temporarily set token so api client could use it, but we override header anyway
+          get().setAuth(idToken, {} as any, []);
+          
+          // 2. Fetch or Sync with MongoDB backend using Firebase token
+          const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
+            headers: { Authorization: `Bearer ${idToken}` }
+          });
+          
+          if (response && response.user) {
+            get().setAuth(idToken, response.user, response.user.roles || []);
+          }
+        } catch (error: any) {
+          get().clearAuth();
+          throw error;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      register: async (data) => {
+        set({ isLoading: true });
+        try {
+          const { confirmPassword, password, email, ...payload } = data;
+          
+          // 1. Create User in Firebase Auth
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const idToken = await userCredential.user.getIdToken();
+          
+          // 2. Sync profile details to MongoDB backend
+          const response = await api.post<{ user: UserProfile }>(
+            "/firebase-auth/sync",
+            { idToken, ...payload },
+            { headers: { Authorization: `Bearer ${idToken}` } }
+          );
+          
+          if (response && response.user) {
+            get().setAuth(idToken, response.user, response.user.roles || []);
+          }
+        } catch (error: any) {
+          throw error;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      logout: async () => {
+        set({ isLoading: true });
+        try {
+          await signOut(auth);
+        } finally {
+          get().clearAuth();
+          set({ isLoading: false });
+        }
+      },
+
+      fetchProfile: async () => {
+        const cachedToken = get().token;
+        console.log("[Auth Debug] fetchProfile triggered. Cached token:", Boolean(cachedToken));
+        if (!cachedToken) {
+          console.warn("[Auth Debug] No cached token found, skipping profile fetch.");
+          return;
+        }
+        
+        set({ isLoading: true });
+        try {
+          console.log("[Auth Debug] Attempting profile fetch using cached token...");
+          try {
+            const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
+              headers: { Authorization: `Bearer ${cachedToken}` }
+            });
+            
+            if (response && response.user) {
+              console.log("[Auth Debug] Backend verified user successfully with cached token:", response.user.email);
+              get().setAuth(cachedToken, response.user, response.user.roles || []);
+              set({ isLoading: false });
+              return; // Success, no need to query Firebase SDK
+            }
+          } catch (cachedError: any) {
+            console.warn("[Auth Debug] Cached token verification failed, checking Firebase SDK...", cachedError.message || cachedError);
+          }
+
+          // Fallback: If cached token failed, use Firebase SDK to get a fresh token
+          let firebaseUser = auth.currentUser;
+          console.log("[Auth Debug] Current auth.currentUser state:", firebaseUser ? `UID: ${firebaseUser.uid}` : "null (waiting for SDK)");
+
+          if (!firebaseUser) {
+            console.log("[Auth Debug] Subscribing to onAuthStateChanged...");
+            firebaseUser = await new Promise((resolve) => {
+              const unsubscribe = auth.onAuthStateChanged((u) => {
+                console.log("[Auth Debug] onAuthStateChanged fired. User:", u ? `UID: ${u.uid}` : "null");
+                unsubscribe();
+                resolve(u);
+              });
+            });
+          }
+
+          if (!firebaseUser) {
+            console.warn("[Auth Debug] No Firebase user resolved from SDK. Clearing auth.");
+            get().clearAuth();
+            return;
+          }
+
+          // Get fresh token from Firebase
+          console.log("[Auth Debug] Fetching fresh ID token from Firebase...");
+          const idToken = await firebaseUser.getIdToken(true);
+          console.log("[Auth Debug] Fresh token retrieved successfully.");
+          
+          console.log("[Auth Debug] Calling backend /firebase-auth/me with fresh token...");
+          const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
+            headers: { Authorization: `Bearer ${idToken}` }
+          });
+          
+          if (response && response.user) {
+            console.log("[Auth Debug] Backend verified user successfully with fresh token:", response.user.email);
+            get().setAuth(idToken, response.user, response.user.roles || []);
+          } else {
+            console.warn("[Auth Debug] Backend response did not contain user data with fresh token.");
+            get().clearAuth();
+          }
+        } catch (error: any) {
+          console.error("[Auth Debug] Error during fetchProfile fallback:", error.message || error);
+          get().clearAuth();
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+    }),
+    {
+      name: "auth-storage", 
+      storage: createJSONStorage(() => (typeof window !== "undefined" ? window.localStorage : (null as any))),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
+      partialize: (state) => ({ 
+        token: state.token, 
+        user: state.user, 
+        roles: state.roles, 
+        isAuthenticated: state.isAuthenticated 
+      }), 
+    }
+  )
+);
