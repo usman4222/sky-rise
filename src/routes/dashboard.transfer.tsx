@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 
 import { financeApi } from "@/lib/api-finance";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -57,11 +57,11 @@ function TransferPage() {
                 <Input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
               </div>
               <Button 
-                className="w-full bg-primary-gradient text-primary-foreground"
+                className="w-full bg-primary-gradient text-primary-foreground h-14 rounded-full text-base font-semibold"
                 onClick={() => transferMutation.mutate()}
                 disabled={transferMutation.isPending || !recipient || !amount}
               >
-                {transferMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Send Transfer"}
+                {transferMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : "Send Transfer"}
               </Button>
             </div>
           </CardContent>

@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowDownToLine, Loader2, Eye, Check, X, AlertCircle, ShieldAlert, CreditCard } from "lucide-react";
+import { ArrowDownToLine, Eye, Check, X, AlertCircle, ShieldAlert, CreditCard } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -135,9 +136,7 @@ function AdminWithdrawalsPage() {
           <CardHeader><CardTitle className="text-sm font-bold">Withdrawal Requests</CardTitle></CardHeader>
           <CardContent className="overflow-x-auto">
             {isLoading ? (
-              <div className="flex h-40 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Payout Queue..." className="h-40" />
             ) : withdrawals.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
                 <AlertCircle className="h-8 w-8 text-muted-foreground/50" />

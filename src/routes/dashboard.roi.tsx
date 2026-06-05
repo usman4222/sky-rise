@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Timer, Loader2 } from "lucide-react";
+import { AlertTriangle, Timer } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { investmentsApi } from "@/lib/api-investments";
 import { SimplePagination } from "@/components/simple-pagination";
@@ -39,9 +40,7 @@ function RoiPage() {
   if (isLoading) {
     return (
       <DashboardLayout title="Daily ROI">
-        <div className="flex h-[350px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <GearSectionLoader text="Loading ROI Data..." className="h-[350px]" />
       </DashboardLayout>
     );
   }

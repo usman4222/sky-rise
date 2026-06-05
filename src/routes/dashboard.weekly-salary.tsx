@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Award, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Calendar, Loader2, HelpCircle, ArrowRight } from "lucide-react";
+import { Award, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Calendar, HelpCircle, ArrowRight } from "lucide-react";
+import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -97,9 +98,7 @@ function WeeklySalaryPage() {
             </div>
             <CardContent className="p-6">
               {isEligibleLoading ? (
-                <div className="flex h-36 items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+                <GearSectionLoader text="Checking VIP Eligibility..." className="min-h-[144px]" />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                   <div className="space-y-4">
@@ -177,8 +176,8 @@ function WeeklySalaryPage() {
 
                           <DialogFooter className="pt-2">
                             <Button type="button" variant="outline" onClick={() => setIsClaimOpen(false)}>Cancel</Button>
-                            <Button type="submit" className="glass-button-primary" disabled={claimMutation.isPending}>
-                              {claimMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                             <Button type="submit" className="glass-button-primary" disabled={claimMutation.isPending}>
+                              {claimMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
                               Submit Request
                             </Button>
                           </DialogFooter>
@@ -224,9 +223,7 @@ function WeeklySalaryPage() {
           </CardHeader>
           <CardContent>
             {isEligibleLoading ? (
-              <div className="flex h-24 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Downline Legs..." className="min-h-[120px] py-4" />
             ) : legs.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
                 <AlertTriangle size={24} className="text-muted-foreground/50" />
@@ -259,9 +256,7 @@ function WeeklySalaryPage() {
           </CardHeader>
           <CardContent className="overflow-x-auto">
             {isHistoryLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Salary History..." />
             ) : requests.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground text-sm flex flex-col items-center justify-center gap-1">
                 <CheckCircle2 size={24} className="text-muted-foreground/55" />

@@ -160,7 +160,7 @@ function HomePage() {
                 ))}
               </CardContent>
             </Card>
-            <div className="absolute -bottom-4 -left-4 hidden sm:block">
+            {/* <div className="absolute -bottom-4 -left-4 hidden sm:block">
               <Card className="border-soft shadow-elevated">
                 <CardContent className="flex items-center gap-3 p-3">
                   <div className="grid h-9 w-9 place-items-center rounded-lg bg-profit/10 text-profit"><BarChart3 size={16} /></div>
@@ -170,7 +170,7 @@ function HomePage() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShieldCheck, Loader2, Eye, Check, X, AlertCircle } from "lucide-react";
+import { ShieldCheck, Eye, Check, X, AlertCircle } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 
 import { adminApi } from "@/lib/api-admin";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -107,9 +108,7 @@ function AdminKycPage() {
           <CardHeader><CardTitle>KYC Application Queue</CardTitle></CardHeader>
           <CardContent className="overflow-x-auto">
             {isLoading ? (
-              <div className="flex h-40 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading KYC Applications..." className="h-40" />
             ) : kycRecords.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
                 <AlertCircle className="h-8 w-8 text-muted-foreground/50" />

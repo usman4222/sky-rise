@@ -4,7 +4,8 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, Lock, Loader2 } from "lucide-react";
+import { Trophy, CheckCircle2, Lock } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 import { rewardsApi } from "@/lib/api-rewards";
 
 export const Route = createFileRoute("/dashboard/achievements")({ component: AchPage });
@@ -19,9 +20,7 @@ function AchPage() {
   if (isLoading) {
     return (
       <DashboardLayout title="Achievement Rewards">
-        <div className="flex h-[350px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <GearSectionLoader text="Loading Achievements..." className="h-[350px]" />
       </DashboardLayout>
     );
   }

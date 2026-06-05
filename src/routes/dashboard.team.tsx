@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Copy, Share2, Loader2 } from "lucide-react";
+import { Copy, Share2 } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 
 import { networkApi } from "@/lib/api-network";
 import { useAuthStore } from "@/store/authStore";
@@ -47,7 +48,7 @@ function TeamPage() {
             </div>
             
             {isLoading ? (
-              <div className="flex justify-center p-4"><Loader2 className="animate-spin text-primary" /></div>
+              <GearSectionLoader text="Loading Team Summary..." className="min-h-[100px]" />
             ) : (
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-xl border border-soft bg-white p-4">
@@ -72,7 +73,7 @@ function TeamPage() {
         <CardHeader><CardTitle>Direct Referrals List</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           {isLoading ? (
-            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>
+            <GearSectionLoader text="Loading Referral List..." />
           ) : (
             <Table>
               <TableHeader>
@@ -80,23 +81,17 @@ function TeamPage() {
                   <TableHead>User Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Join Date</TableHead>
-                  <TableHead>KYC Status</TableHead>
                   <TableHead>Account Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {directs.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">No direct referrals yet. Share your link!</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No direct referrals yet. Share your link!</TableCell></TableRow>
                 ) : directs.map((r: any) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.name}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{r.email}</TableCell>
                     <TableCell>{new Date(r.joinedAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Badge className={r.kycStatus === "approved" ? "bg-emerald-500/10 text-emerald-500 border-0 capitalize" : "bg-gold/15 text-gold border-0 capitalize"}>
-                        {r.kycStatus}
-                      </Badge>
-                    </TableCell>
                     <TableCell>
                       <Badge className={r.status === "active" ? "bg-profit/10 text-profit border-0 capitalize" : "bg-destructive/10 text-destructive border-0 capitalize"}>
                         {r.status}

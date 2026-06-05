@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { CheckCircle2, Loader2, Plus, Edit, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Plus, Edit, ShieldAlert } from "lucide-react";
+import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 
 import { packagesApi, type PackageData } from "@/lib/api-packages";
 import { useAuthStore } from "@/store/authStore";
@@ -34,7 +35,7 @@ function PackagesDash() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual' }) => 
+    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual' }) =>
       packagesApi.purchasePackage(vars.id, vars.amount, true, vars.roiClaimMode),
     onSuccess: () => {
       toast.success("Investment confirmed! It will automatically activate at the end of the day.");
@@ -74,7 +75,7 @@ function PackagesDash() {
 
   return (
     <DashboardLayout title="Investment Packages">
-      
+
       {isAdmin && (
         <div className="mb-6 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
@@ -84,7 +85,7 @@ function PackagesDash() {
               <p className="text-xs text-muted-foreground">You are viewing all packages, including hidden ones.</p>
             </div>
           </div>
-          
+
           <PackageFormDialog
             isOpen={isCreateModalOpen}
             onOpenChange={setIsCreateModalOpen}
@@ -98,13 +99,13 @@ function PackagesDash() {
       )}
 
       {isLoading ? (
-        <div className="flex h-40 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        <GearSectionLoader text="Loading Investment Packages..." />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {packages.map((p) => (
-            <PackageCard 
-              key={p._id} 
-              pkg={p} 
+            <PackageCard
+              key={p._id}
+              pkg={p}
               isAdmin={isAdmin}
               isPurchasing={purchaseMutation.isPending}
               isToggling={toggleMutation.isPending}
@@ -120,9 +121,9 @@ function PackagesDash() {
   );
 }
 
-function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggling, onUpdate, isUpdating }: { 
-  pkg: PackageData; 
-  isAdmin?: boolean; 
+function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggling, onUpdate, isUpdating }: {
+  pkg: PackageData;
+  isAdmin?: boolean;
   isPurchasing: boolean;
   isToggling: boolean;
   isUpdating: boolean;
@@ -147,18 +148,18 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
         <div className="flex items-center justify-between">
           <Badge className="glass-pill">{tag}</Badge>
           {isAdmin && (
-            <Switch 
-              checked={pkg.isActive} 
+            <Switch
+              checked={pkg.isActive}
               disabled={isToggling}
-              onCheckedChange={(c) => onToggle(c)} 
+              onCheckedChange={(c) => onToggle(c)}
             />
           )}
         </div>
-        
+
         <h3 className="mt-3 text-lg font-semibold">{pkg.name}</h3>
         <div className="mt-1 text-sm text-muted-foreground">${pkg.minAmount} - ${pkg.maxAmount || "Unlimited"}</div>
         <div className="my-4 h-px bg-border" />
-        
+
         <div className="space-y-2 text-sm mb-5">
           <div className="flex justify-between"><span className="text-muted-foreground">Starting ROI</span><span className="font-semibold">{pkg.startRoi}%</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Max ROI</span><span className="font-semibold text-profit">{pkg.maxRoi}%</span></div>
@@ -194,28 +195,33 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
               </DialogHeader>
               <div className="space-y-4 py-2">
                 <div className="space-y-1.5">
-                  <Label>Investment Amount (USD)</Label>
-                  <Input 
-                    type="number" 
-                    value={amount} 
-                    onChange={(e) => setAmount(Number(e.target.value))} 
-                    min={pkg.minAmount} 
-                    max={pkg.maxAmount} 
+                  <Label className="block mb-3">
+                    Investment Amount (USD)
+                  </Label>
+
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    min={pkg.minAmount}
+                    max={pkg.maxAmount}
                   />
-                  <div className="text-xs text-muted-foreground">Range: ${pkg.minAmount} - ${pkg.maxAmount || "Unlimited"}</div>
+
+                  <div className="text-xs text-muted-foreground">
+                    Range: ${pkg.minAmount} - ${pkg.maxAmount || "Unlimited"}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>ROI Claim Mode</Label>
+                  <Label className="block mb-3">ROI Claim Mode</Label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setRoiClaimMode("auto")}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
-                        roiClaimMode === "auto"
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-border hover:border-primary/50 text-muted-foreground"
-                      }`}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${roiClaimMode === "auto"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border hover:border-primary/50 text-muted-foreground"
+                        }`}
                     >
                       <span className="text-xs font-semibold">Auto-Collect</span>
                       <span className="text-[10px] opacity-80 mt-1">ROI is credited directly to your balance every 24h.</span>
@@ -223,11 +229,10 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                     <button
                       type="button"
                       onClick={() => setRoiClaimMode("manual")}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
-                        roiClaimMode === "manual"
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-border hover:border-primary/50 text-muted-foreground"
-                      }`}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${roiClaimMode === "manual"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border hover:border-primary/50 text-muted-foreground"
+                        }`}
                     >
                       <span className="text-xs font-semibold">Manual-Claim</span>
                       <span className="text-[10px] opacity-80 mt-1">Claim manually inside a strict 1-hour window, or lose it.</span>
@@ -241,12 +246,12 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                 </div>
               </div>
               <DialogFooter>
-                <Button 
-                  className="w-full glass-button-primary" 
+                <Button
+                  className="w-full glass-button-primary h-14 text-base rounded-full"
                   onClick={() => onPurchase(amount, roiClaimMode)}
                   disabled={isPurchasing}
                 >
-                  {isPurchasing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isPurchasing ? <GearSpinner className="mr-2 h-5 w-5" /> : null}
                   Confirm & Purchase
                 </Button>
               </DialogFooter>
@@ -291,7 +296,7 @@ function PackageFormDialog({
       setFormData(initialData);
     } else if (!isOpen && !initialData) {
       setFormData({
-        name: "", minAmount: 10, maxAmount: 1000, startRoi: 0.5, maxRoi: 1.5, 
+        name: "", minAmount: 10, maxAmount: 1000, startRoi: 0.5, maxRoi: 1.5,
         durationMonths: 12, earlyWithdrawalPenaltyMonths: 5, earlyWithdrawalPenaltyPercent: 15,
         isHidden: false, isActive: true
       });
@@ -323,31 +328,31 @@ function PackageFormDialog({
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <Label>Package Name</Label>
+              <Label className="block mb-2">Package Name</Label>
               <Input required name="name" value={formData.name || ""} onChange={handleChange} placeholder="e.g. Package A" />
             </div>
             <div className="space-y-2">
-              <Label>Min Amount ($)</Label>
+              <Label className="block mb-2">Min Amount ($)</Label>
               <Input required type="number" name="minAmount" value={formData.minAmount || 0} onChange={handleChange} min={1} />
             </div>
             <div className="space-y-2">
-              <Label>Max Amount ($)</Label>
+              <Label className="block mb-2">Max Amount ($)</Label>
               <Input required type="number" name="maxAmount" value={formData.maxAmount || 0} onChange={handleChange} min={1} />
             </div>
             <div className="space-y-2">
-              <Label>Start ROI (%)</Label>
+              <Label className="block mb-2">Start ROI (%)</Label>
               <Input required type="number" step="0.1" name="startRoi" value={formData.startRoi || 0} onChange={handleChange} min={0} />
             </div>
             <div className="space-y-2">
-              <Label>Max ROI (%)</Label>
+              <Label className="block mb-2">Max ROI (%)</Label>
               <Input required type="number" step="0.1" name="maxRoi" value={formData.maxRoi || 0} onChange={handleChange} min={0} />
             </div>
             <div className="space-y-2">
-              <Label>Penalty Free Months</Label>
+              <Label className="block mb-2">Penalty Free Months</Label>
               <Input required type="number" name="earlyWithdrawalPenaltyMonths" value={formData.earlyWithdrawalPenaltyMonths || 0} onChange={handleChange} min={0} />
             </div>
             <div className="space-y-2">
-              <Label>Early Withdrawal Penalty (%)</Label>
+              <Label className="block mb-2">Early Withdrawal Penalty (%)</Label>
               <Input required type="number" name="earlyWithdrawalPenaltyPercent" value={formData.earlyWithdrawalPenaltyPercent || 0} onChange={handleChange} min={0} />
             </div>
           </div>
@@ -361,7 +366,7 @@ function PackageFormDialog({
           <DialogFooter className="mt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={isPending} className="glass-button-primary">
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isPending && <GearSpinner className="mr-2 h-4 w-4" />}
               {initialData ? "Save Changes" : "Create Package"}
             </Button>
           </DialogFooter>

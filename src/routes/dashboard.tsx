@@ -7,16 +7,16 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardLayoutWrapper() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isHydrated } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isHydrated && !isAuthenticated) {
       navigate({ to: "/login", replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isHydrated, isAuthenticated, navigate]);
 
-  if (!isAuthenticated) {
+  if (!isHydrated || !isAuthenticated) {
     return null;
   }
 

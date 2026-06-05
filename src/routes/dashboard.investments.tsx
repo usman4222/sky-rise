@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Loader2, Coins, ArrowRightLeft, Gift, Clock } from "lucide-react";
+import { Coins, ArrowRightLeft, Gift, Clock } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 
 import { investmentsApi } from "@/lib/api-investments";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -113,7 +114,7 @@ function Investments() {
         <CardHeader><CardTitle>Active & Past Investments</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           {isLoading ? (
-            <div className="flex h-40 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+            <GearSectionLoader text="Loading Investments..." />
           ) : (
             <Table>
               <TableHeader>

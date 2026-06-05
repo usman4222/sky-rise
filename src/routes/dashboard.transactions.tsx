@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 import { financeApi } from "@/lib/api-finance";
 import { SimplePagination } from "@/components/simple-pagination";
 
@@ -27,9 +27,7 @@ function TxPage() {
   if (isLoading) {
     return (
       <DashboardLayout title="Transactions">
-        <div className="flex h-[350px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <GearSectionLoader text="Loading Transactions..." className="h-[350px]" />
       </DashboardLayout>
     );
   }

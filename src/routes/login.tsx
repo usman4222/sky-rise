@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { TrendingUp, Shield, Users, Loader2, Eye, EyeOff } from "lucide-react";
+import { TrendingUp, Shield, Users, Eye, EyeOff } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
@@ -17,12 +17,15 @@ import { auth } from "@/lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [
-    { title: "Login — SkyRise Future" },
-    { name: "description", content: "Sign in to your SkyRise Future account to manage investments, team, ROI, and rewards." },
-  ]}),
+  head: () => ({
+    meta: [
+      { title: "Login — SkyRise Future" },
+      { name: "description", content: "Sign in to your SkyRise Future account to manage investments, team, ROI, and rewards." },
+    ]
+  }),
   component: LoginPage,
 });
 
@@ -62,10 +65,10 @@ function ForgotPasswordDialog() {
           <p className="text-sm text-muted-foreground">Enter your email address and we will send you a link to reset your password securely via Firebase.</p>
           <div className="space-y-2">
             <Label htmlFor="reset-email">Email Address</Label>
-            <Input 
-              id="reset-email" 
-              type="email" 
-              placeholder="you@example.com" 
+            <Input
+              id="reset-email"
+              type="email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -74,7 +77,7 @@ function ForgotPasswordDialog() {
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
           <Button className="glass-button-primary" onClick={handleReset} disabled={isSending}>
-            {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isSending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
             Send Reset Link
           </Button>
         </DialogFooter>
@@ -86,7 +89,7 @@ function ForgotPasswordDialog() {
 function LoginPage() {
   const navigate = useNavigate();
   const router = useRouter();
-  const { login, isLoading, isAuthenticated } = useAuthStore();
+  const { login, isLoading, isAuthenticated, isHydrated } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginInput>({
@@ -94,10 +97,10 @@ function LoginPage() {
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isHydrated && isAuthenticated) {
       navigate({ to: "/dashboard", replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isHydrated, isAuthenticated, navigate]);
 
   const onSubmit = async (data: LoginInput) => {
     try {
@@ -122,27 +125,27 @@ function LoginPage() {
             <CardContent className="p-8">
               <h1 className="text-3xl font-bold">Welcome back</h1>
               <p className="mt-2 text-sm text-muted-foreground">Sign in to access your dashboard.</p>
-              
-              <form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)}>
+
+              <form className="mt-8 mb-6 space-y-5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold" htmlFor="email">Email Address</Label>
-                  <Input 
-                    id="email" 
+                  <Label className="text-sm block mb-2 font-semibold" htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
                     type="email"
-                    placeholder="you@example.com" 
+                    placeholder="you@example.com"
                     {...register("email")}
                     aria-invalid={!!errors.email}
                   />
                   {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold" htmlFor="password">Password</Label>
+                  <Label className="text-sm block mb-2 font-semibold" htmlFor="password">Password</Label>
                   <div className="relative">
-                    <Input 
-                      id="password" 
-                      type={showPassword ? "text" : "password"} 
-                      placeholder="••••••••" 
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
                       className="pr-10"
                       {...register("password")}
                       aria-invalid={!!errors.password}
@@ -157,23 +160,23 @@ function LoginPage() {
                   </div>
                   {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                 </div>
-                
+
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <Checkbox /> Remember me
                   </label>
                   <ForgotPasswordDialog />
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  className={`w-full glass-button-primary ${isLoading ? "fluid-loading-btn" : ""}`} 
+
+                <Button
+                  type="submit"
+                  className={`w-full glass-button-primary ${isLoading ? "fluid-loading-btn" : ""}`}
                   disabled={isLoading}
                 >
-                  {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in...</> : "Login"}
+                  {isLoading ? <><GearSpinner className="mr-2 h-4 w-4" /> Logging in...</> : "Login"}
                 </Button>
               </form>
-              
+
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 Don't have an account? <Link to="/register" className="text-primary font-semibold hover:text-primary/80">Create one</Link>
               </p>
@@ -182,7 +185,7 @@ function LoginPage() {
         </div>
         <div className="order-1 lg:order-2">
           <Card className="overflow-hidden">
-            <div className="bg-primary-gradient p-8 text-white">
+            <div className="bg-primary-gradient p-8 mb-6 text-white">
               <h2 className="text-2xl font-bold">One secure dashboard</h2>
               <p className="mt-2 text-white/85 text-sm leading-relaxed">Manage your investments, team, ROI, and rewards — all in one secure place.</p>
             </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Cog } from 'lucide-react';
 
 // Gear configurations: [x, y, r, teeth, color, dir, speed]
 const gears = [
@@ -17,6 +18,86 @@ interface SteamParticle {
   opacity: number;
   size: string;
 }
+
+// Helper to calculate SVG path data for a gear
+function getGearPath(r: number, teeth: number) {
+  const toothHeight = r * 0.2;
+  const innerR = r - toothHeight;
+  const outerR = r + toothHeight;
+  const svgSize = (outerR + 4) * 2;
+  const cx = svgSize / 2;
+  const cy = svgSize / 2;
+
+  let pathData = '';
+  const angleStep = (Math.PI * 2) / teeth;
+
+  for (let i = 0; i < teeth; i++) {
+    const a1 = i * angleStep;
+    const a2 = a1 + angleStep * 0.15;
+    const a3 = a1 + angleStep * 0.35;
+    const a4 = a1 + angleStep * 0.5;
+    const a5 = a1 + angleStep * 0.65;
+    const a6 = a1 + angleStep * 0.85;
+
+    const points = [
+      [cx + Math.cos(a1) * innerR, cy + Math.sin(a1) * innerR],
+      [cx + Math.cos(a2) * innerR, cy + Math.sin(a2) * innerR],
+      [cx + Math.cos(a3) * outerR, cy + Math.sin(a3) * outerR],
+      [cx + Math.cos(a4) * outerR, cy + Math.sin(a4) * outerR],
+      [cx + Math.cos(a5) * outerR, cy + Math.sin(a5) * outerR],
+      [cx + Math.cos(a6) * innerR, cy + Math.sin(a6) * innerR],
+    ];
+
+    if (i === 0) {
+      pathData += `M ${points[0][0]} ${points[0][1]} `;
+    }
+    points.slice(1).forEach(p => {
+      pathData += `L ${p[0]} ${p[1]} `;
+    });
+  }
+  pathData += 'Z';
+
+  return { pathData, svgSize, cx, cy };
+}
+
+const renderGear = (config: typeof gears[0], index: number) => {
+  const { r, teeth, color, dir, speed } = config;
+  const { pathData, svgSize, cx, cy } = getGearPath(r, teeth);
+  const holeR = r * 0.25;
+
+  return (
+    <div
+      key={index}
+      className="gear-wrapper"
+      style={{
+        left: `${config.x - svgSize / 2}px`,
+        top: `${config.y - svgSize / 2}px`,
+        width: `${svgSize}px`,
+        height: `${svgSize}px`,
+        // @ts-ignore
+        '--gear-color': color,
+      }}
+    >
+      <div 
+        className={`gear gear-${dir} gear-glow`} 
+        style={{ animationDuration: `${speed}s` }}
+      >
+        <svg width={svgSize} height={svgSize} viewBox={`0 0 ${svgSize} ${svgSize}`}>
+          <g>
+            <path d={pathData} fill="none" stroke={color} strokeWidth="2" opacity="0.9"/>
+            <circle cx={cx} cy={cy} r={holeR} fill="none" stroke={color} strokeWidth="2" opacity="0.7"/>
+            <circle cx={cx} cy={cy} r={r * 0.08} fill={color} opacity="0.8"/>
+            {/* Spoke Lines */}
+            <line x1={cx} y1={cy - holeR} x2={cx} y2={cy - r * 0.6} stroke={color} strokeWidth="1.5" opacity="0.4"/>
+            <line x1={cx} y1={cy + holeR} x2={cx} y2={cy + r * 0.6} stroke={color} strokeWidth="1.5" opacity="0.4"/>
+            <line x1={cx - holeR} y1={cy} x2={cx - r * 0.6} y2={cy} stroke={color} strokeWidth="1.5" opacity="0.4"/>
+            <line x1={cx + holeR} y1={cy} x2={cx + r * 0.6} y2={cy} stroke={color} strokeWidth="1.5" opacity="0.4"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+};
 
 export function GearLoader() {
   const [steamParticles, setSteamParticles] = useState<SteamParticle[]>([]);
@@ -67,83 +148,7 @@ export function GearLoader() {
     return () => clearInterval(steamInterval);
   }, [fadeOut]);
 
-
   if (!visible) return null;
-
-  // Render SVG gear template
-  const renderGear = (config: typeof gears[0], index: number) => {
-    const { r, teeth, color, dir, speed } = config;
-    const toothHeight = r * 0.2;
-    const innerR = r - toothHeight;
-    const outerR = r + toothHeight;
-    const svgSize = (outerR + 4) * 2;
-    const cx = svgSize / 2;
-    const cy = svgSize / 2;
-
-    let pathData = '';
-    const angleStep = (Math.PI * 2) / teeth;
-
-    for (let i = 0; i < teeth; i++) {
-      const a1 = i * angleStep;
-      const a2 = a1 + angleStep * 0.15;
-      const a3 = a1 + angleStep * 0.35;
-      const a4 = a1 + angleStep * 0.5;
-      const a5 = a1 + angleStep * 0.65;
-      const a6 = a1 + angleStep * 0.85;
-
-      const points = [
-        [cx + Math.cos(a1) * innerR, cy + Math.sin(a1) * innerR],
-        [cx + Math.cos(a2) * innerR, cy + Math.sin(a2) * innerR],
-        [cx + Math.cos(a3) * outerR, cy + Math.sin(a3) * outerR],
-        [cx + Math.cos(a4) * outerR, cy + Math.sin(a4) * outerR],
-        [cx + Math.cos(a5) * outerR, cy + Math.sin(a5) * outerR],
-        [cx + Math.cos(a6) * innerR, cy + Math.sin(a6) * innerR],
-      ];
-
-      if (i === 0) {
-        pathData += `M ${points[0][0]} ${points[0][1]} `;
-      }
-      points.slice(1).forEach(p => {
-        pathData += `L ${p[0]} ${p[1]} `;
-      });
-    }
-    pathData += 'Z';
-
-    const holeR = r * 0.25;
-
-    return (
-      <div
-        key={index}
-        className="gear-wrapper"
-        style={{
-          left: `${config.x - svgSize / 2}px`,
-          top: `${config.y - svgSize / 2}px`,
-          width: `${svgSize}px`,
-          height: `${svgSize}px`,
-          // @ts-ignore
-          '--gear-color': color,
-        }}
-      >
-        <div 
-          className={`gear gear-${dir} gear-glow`} 
-          style={{ animationDuration: `${speed}s` }}
-        >
-          <svg width={svgSize} height={svgSize} viewBox={`0 0 ${svgSize} ${svgSize}`}>
-            <g>
-              <path d={pathData} fill="none" stroke={color} strokeWidth="2" opacity="0.9"/>
-              <circle cx={cx} cy={cy} r={holeR} fill="none" stroke={color} strokeWidth="2" opacity="0.7"/>
-              <circle cx={cx} cy={cy} r={r * 0.08} fill={color} opacity="0.8"/>
-              {/* Spoke Lines */}
-              <line x1={cx} y1={cy - holeR} x2={cx} y2={cy - r * 0.6} stroke={color} strokeWidth="1.5" opacity="0.4"/>
-              <line x1={cx} y1={cy + holeR} x2={cx} y2={cy + r * 0.6} stroke={color} strokeWidth="1.5" opacity="0.4"/>
-              <line x1={cx - holeR} y1={cy} x2={cx - r * 0.6} y2={cy} stroke={color} strokeWidth="1.5" opacity="0.4"/>
-              <line x1={cx + holeR} y1={cy} x2={cx + r * 0.6} y2={cy} stroke={color} strokeWidth="1.5" opacity="0.4"/>
-            </g>
-          </svg>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className={`gear-loader-overlay  ${fadeOut ? 'fade-out' : ''}`}>
@@ -173,5 +178,29 @@ export function GearLoader() {
         <div className="loading-text">Processing</div>
       </div>
     </div>
+  );
+}
+
+// GearSectionLoader renders the gear system scaled down inside sections/cards
+export function GearSectionLoader({ className, text = "Loading System..." }: { className?: string; text?: string }) {
+  return (
+    <div className={`flex flex-col items-center justify-center p-6 min-h-[220px] overflow-hidden ${className || ""}`}>
+      <div className="gear-system scale-[0.6] origin-center -my-10">
+        {gears.map((config, index) => renderGear(config, index))}
+      </div>
+      <div className="text-[10px] tracking-[4px] uppercase text-muted-foreground/80 animate-pulse mt-4">
+        {text}
+      </div>
+    </div>
+  );
+}
+
+// GearSpinner renders a single spinning gear icon for buttons & small inline loadings
+export function GearSpinner({ className, size = 16 }: { className?: string; size?: number }) {
+  return (
+    <Cog 
+      size={size} 
+      className={`animate-spin text-inherit ${className || ""}`} 
+    />
   );
 }

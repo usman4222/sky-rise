@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Mail, MessageCircle, FileQuestion, Loader2, Clock, CheckCircle, AlertCircle, Send, MessageSquare, RotateCw } from "lucide-react";
+import { Mail, MessageCircle, FileQuestion, Clock, CheckCircle, AlertCircle, Send, MessageSquare, RotateCw } from "lucide-react";
+import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 import { supportApi } from "@/lib/api-support";
 import { useAuthStore } from "@/store/authStore";
 import { SimplePagination } from "@/components/simple-pagination";
@@ -143,7 +144,7 @@ function SupportPage() {
               >
                 {submitMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <GearSpinner className="mr-2 h-4 w-4" />
                     Submitting...
                   </>
                 ) : (
@@ -193,9 +194,7 @@ function SupportPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {loadingTickets ? (
-            <div className="flex h-32 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
+            <GearSectionLoader text="Loading Support Tickets..." />
           ) : (
             <Table>
               <TableHeader>
@@ -384,7 +383,7 @@ function SupportPage() {
                   disabled={replyMutation.isPending || !replyMessage.trim() || selectedTicket.status === "closed"}
                 >
                   {replyMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <GearSpinner className="h-4 w-4" />
                   ) : (
                     <Send size={15} />
                   )}

@@ -12,9 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Users, Loader2, Eye, Ban, CheckCircle, Search, Wallet, 
+  Users, Eye, Ban, CheckCircle, Search, Wallet, 
   Trophy, ArrowDownToLine, Receipt, UserCheck, AlertCircle, Network
 } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 
 import { adminApi } from "@/lib/api-admin";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -176,9 +177,7 @@ function AdminUsersPage() {
         <Card className="border-soft shadow-card">
           <CardContent className="p-0">
             {isListLoading ? (
-              <div className="flex h-48 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Members..." className="h-48" />
             ) : users.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
                 <AlertCircle className="h-8 w-8 text-muted-foreground/40" />
@@ -193,7 +192,6 @@ function AdminUsersPage() {
                       <TableHead className="font-bold text-foreground py-4">Phone</TableHead>
                       <TableHead className="font-bold text-foreground py-4">Referral Code</TableHead>
                       <TableHead className="font-bold text-foreground py-4">VIP Rank</TableHead>
-                      <TableHead className="font-bold text-foreground py-4">KYC Status</TableHead>
                       <TableHead className="font-bold text-foreground py-4">Status</TableHead>
                       <TableHead className="text-right font-bold text-foreground py-4">Action</TableHead>
                     </TableRow>
@@ -219,7 +217,6 @@ function AdminUsersPage() {
                           </span>
                         </TableCell>
                         <TableCell className="py-3">{getVipBadge(u.vipRank)}</TableCell>
-                        <TableCell className="py-3">{getKycBadge(u.kycStatus)}</TableCell>
                         <TableCell className="py-3">{getStatusBadge(u.status)}</TableCell>
                         <TableCell className="text-right py-3">
                           <Button 
@@ -261,9 +258,7 @@ function AdminUsersPage() {
           </DialogHeader>
 
           {isDetailLoading || !detailData ? (
-            <div className="flex h-64 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
+            <GearSectionLoader text="Loading Member Audit Profile..." className="h-64" />
           ) : (
             <div className="space-y-6 text-xs mt-2">
               {/* Header profile summary card */}

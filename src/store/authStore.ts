@@ -34,6 +34,7 @@ interface AuthState {
   roles: string[];
   isAuthenticated: boolean;
   isLoading: boolean;
+  isHydrated: boolean;
   
   // Actions
   setAuth: (token: string, user: UserProfile, roles?: string[]) => void;
@@ -42,6 +43,7 @@ interface AuthState {
   register: (data: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
+  setHydrated: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -52,6 +54,9 @@ export const useAuthStore = create<AuthState>()(
       roles: [],
       isAuthenticated: false,
       isLoading: false,
+      isHydrated: false,
+
+      setHydrated: () => set({ isHydrated: true }),
 
       setAuth: (token, user, roles = []) => {
         set({
@@ -134,24 +139,71 @@ export const useAuthStore = create<AuthState>()(
       },
 
       fetchProfile: async () => {
-        if (!get().token) return;
+        const cachedToken = get().token;
+        console.log("[Auth Debug] fetchProfile triggered. Cached token:", Boolean(cachedToken));
+        if (!cachedToken) {
+          console.warn("[Auth Debug] No cached token found, skipping profile fetch.");
+          return;
+        }
+        
         set({ isLoading: true });
         try {
-          // Safely grab fresh token if Firebase SDK has initialized the user
-          let idToken = get().token;
-          if (auth.currentUser) {
-             idToken = (await auth.currentUser.getIdToken(true)) || idToken;
+          console.log("[Auth Debug] Attempting profile fetch using cached token...");
+          try {
+            const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
+              headers: { Authorization: `Bearer ${cachedToken}` }
+            });
+            
+            if (response && response.user) {
+              console.log("[Auth Debug] Backend verified user successfully with cached token:", response.user.email);
+              get().setAuth(cachedToken, response.user, response.user.roles || []);
+              set({ isLoading: false });
+              return; // Success, no need to query Firebase SDK
+            }
+          } catch (cachedError: any) {
+            console.warn("[Auth Debug] Cached token verification failed, checking Firebase SDK...", cachedError.message || cachedError);
           }
+
+          // Fallback: If cached token failed, use Firebase SDK to get a fresh token
+          let firebaseUser = auth.currentUser;
+          console.log("[Auth Debug] Current auth.currentUser state:", firebaseUser ? `UID: ${firebaseUser.uid}` : "null (waiting for SDK)");
+
+          if (!firebaseUser) {
+            console.log("[Auth Debug] Subscribing to onAuthStateChanged...");
+            firebaseUser = await new Promise((resolve) => {
+              const unsubscribe = auth.onAuthStateChanged((u) => {
+                console.log("[Auth Debug] onAuthStateChanged fired. User:", u ? `UID: ${u.uid}` : "null");
+                unsubscribe();
+                resolve(u);
+              });
+            });
+          }
+
+          if (!firebaseUser) {
+            console.warn("[Auth Debug] No Firebase user resolved from SDK. Clearing auth.");
+            get().clearAuth();
+            return;
+          }
+
+          // Get fresh token from Firebase
+          console.log("[Auth Debug] Fetching fresh ID token from Firebase...");
+          const idToken = await firebaseUser.getIdToken(true);
+          console.log("[Auth Debug] Fresh token retrieved successfully.");
           
+          console.log("[Auth Debug] Calling backend /firebase-auth/me with fresh token...");
           const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
             headers: { Authorization: `Bearer ${idToken}` }
           });
           
           if (response && response.user) {
-             // TypeScript ensures idToken is string here, since it comes from get().token or auth
-            get().setAuth(idToken as string, response.user, response.user.roles || []);
+            console.log("[Auth Debug] Backend verified user successfully with fresh token:", response.user.email);
+            get().setAuth(idToken, response.user, response.user.roles || []);
+          } else {
+            console.warn("[Auth Debug] Backend response did not contain user data with fresh token.");
+            get().clearAuth();
           }
-        } catch (error) {
+        } catch (error: any) {
+          console.error("[Auth Debug] Error during fetchProfile fallback:", error.message || error);
           get().clearAuth();
         } finally {
           set({ isLoading: false });
@@ -161,6 +213,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage", 
       storage: createJSONStorage(() => (typeof window !== "undefined" ? window.localStorage : (null as any))),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
       partialize: (state) => ({ 
         token: state.token, 
         user: state.user, 

@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Plus, Trash2, Check, CreditCard, Landmark, Phone, Key, HelpCircle, Loader2 } from "lucide-react";
+import { Plus, Trash2, Check, CreditCard, Landmark, Phone, Key, HelpCircle } from "lucide-react";
+import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -164,9 +165,7 @@ function PaymentMethodsPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Payment Methods..." />
             ) : paymentMethods.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
                 <Landmark size={36} className="text-muted-foreground/45" />
@@ -185,7 +184,7 @@ function PaymentMethodsPage() {
                           </Badge>
                         )}
                       </div>
-                      
+
                       <div className="space-y-1">
                         <div className="text-xs text-muted-foreground">Account Holder / Title</div>
                         <div className="font-bold text-sm text-foreground">{pm.accountTitle}</div>
@@ -218,24 +217,24 @@ function PaymentMethodsPage() {
 
                     <div className="flex items-center gap-2 mt-4 pt-3 border-t border-glass-border-soft justify-end">
                       {!pm.isDefault && (
-                        <Button 
-                          onClick={() => setDefaultMutation.mutate(pm._id)} 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          onClick={() => setDefaultMutation.mutate(pm._id)}
+                          variant="ghost"
+                          size="sm"
                           className="h-8 text-[11px] hover:bg-primary/10 text-primary font-semibold"
                           disabled={setDefaultMutation.isPending}
                         >
                           Make Default
                         </Button>
                       )}
-                      <Button 
+                      <Button
                         onClick={() => {
                           if (confirm("Deactivate this payment method?")) {
                             deleteMutation.mutate(pm._id);
                           }
                         }}
-                        variant="ghost" 
-                        size="sm" 
+                        variant="ghost"
+                        size="sm"
                         className="h-8 text-[11px] text-destructive hover:bg-destructive/10 font-medium"
                         disabled={deleteMutation.isPending}
                       >
@@ -251,7 +250,7 @@ function PaymentMethodsPage() {
         </Card>
 
         {/* Add Payment Method Dialog */}
-        <Dialog open={isOpen} onOpenChange={(o) => { setIsOpen(o); if(!o) resetForm(); }}>
+        <Dialog open={isOpen} onOpenChange={(o) => { setIsOpen(o); if (!o) resetForm(); }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add Payment Method</DialogTitle>
@@ -260,7 +259,7 @@ function PaymentMethodsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs my-2">
               <div className="space-y-1.5">
-                <Label htmlFor="method-type">Payment Channel Type</Label>
+                <Label className="block mb-3" htmlFor="method-type">Payment Channel Type</Label>
                 <Select value={methodType} onValueChange={setMethodType}>
                   <SelectTrigger id="method-type">
                     <SelectValue />
@@ -276,33 +275,33 @@ function PaymentMethodsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="account-title">Account Holder Title (Full Name)</Label>
-                <Input 
-                  id="account-title" 
-                  placeholder="e.g. John Doe" 
-                  value={accountTitle} 
-                  onChange={(e) => setAccountTitle(e.target.value)} 
+                <Label className="block mb-3" htmlFor="account-title">Account Holder Title (Full Name)</Label>
+                <Input
+                  id="account-title"
+                  placeholder="e.g. John Doe"
+                  value={accountTitle}
+                  onChange={(e) => setAccountTitle(e.target.value)}
                 />
               </div>
 
               {methodType === "bank" && (
                 <>
                   <div className="space-y-1.5">
-                    <Label htmlFor="bank-name">Bank Name</Label>
-                    <Input 
-                      id="bank-name" 
-                      placeholder="e.g. Habib Bank Limited" 
-                      value={bankName} 
-                      onChange={(e) => setBankName(e.target.value)} 
+                    <Label className="block mb-3" htmlFor="bank-name">Bank Name</Label>
+                    <Input
+                      id="bank-name"
+                      placeholder="e.g. Habib Bank Limited"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="iban">IBAN (International Bank Account Number)</Label>
-                    <Input 
-                      id="iban" 
-                      placeholder="e.g. PK00HABB0000001234567890" 
-                      value={iban} 
-                      onChange={(e) => setIban(e.target.value)} 
+                    <Label className="block mb-3" htmlFor="iban">IBAN (International Bank Account Number)</Label>
+                    <Input
+                      id="iban"
+                      placeholder="e.g. PK00HABB0000001234567890"
+                      value={iban}
+                      onChange={(e) => setIban(e.target.value)}
                     />
                   </div>
                 </>
@@ -310,12 +309,12 @@ function PaymentMethodsPage() {
 
               {methodType === "usdt_trc20" && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="wallet-address">USDT TRC20 Wallet Address</Label>
-                  <Input 
-                    id="wallet-address" 
-                    placeholder="TRC20 Wallet Address starting with 'T'" 
-                    value={accountNumber} 
-                    onChange={(e) => setAccountNumber(e.target.value)} 
+                  <Label className="block mb-3" htmlFor="wallet-address">USDT TRC20 Wallet Address</Label>
+                  <Input
+                    id="wallet-address"
+                    placeholder="TRC20 Wallet Address starting with 'T'"
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
                   />
                   <span className="text-[10px] text-muted-foreground block mt-0.5">Please verify carefully. Payouts sent to wrong wallets cannot be recovered.</span>
                 </div>
@@ -324,21 +323,21 @@ function PaymentMethodsPage() {
               {methodType !== "bank" && methodType !== "usdt_trc20" && (
                 <>
                   <div className="space-y-1.5">
-                    <Label htmlFor="account-num">{methodType === "raast" ? "Raast ID / IBAN" : "Mobile Account Number"}</Label>
-                    <Input 
-                      id="account-num" 
-                      placeholder="e.g. 03001234567" 
-                      value={accountNumber} 
-                      onChange={(e) => setAccountNumber(e.target.value)} 
+                    <Label className="block mb-3" htmlFor="account-num">{methodType === "raast" ? "Raast ID / IBAN" : "Mobile Account Number"}</Label>
+                    <Input
+                      id="account-num"
+                      placeholder="e.g. 03001234567"
+                      value={accountNumber}
+                      onChange={(e) => setAccountNumber(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="phone-num">Mobile Number linked to account</Label>
-                    <Input 
-                      id="phone-num" 
-                      placeholder="e.g. 03001234567" 
-                      value={phoneNumber} 
-                      onChange={(e) => setPhoneNumber(e.target.value)} 
+                    <Label className="block mb-3" htmlFor="phone-num">Mobile Number linked to account</Label>
+                    <Input
+                      id="phone-num"
+                      placeholder="e.g. 03001234567"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
                     />
                   </div>
                 </>
@@ -346,21 +345,21 @@ function PaymentMethodsPage() {
 
               {methodType === "bank" && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="account-num-bank">Account Number</Label>
-                  <Input 
-                    id="account-num-bank" 
-                    placeholder="e.g. 1234567890123" 
-                    value={accountNumber} 
-                    onChange={(e) => setAccountNumber(e.target.value)} 
+                  <Label className="block mb-3" htmlFor="account-num-bank">Account Number</Label>
+                  <Input
+                    id="account-num-bank"
+                    placeholder="e.g. 1234567890123"
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
                   />
                 </div>
               )}
 
               <label className="flex items-center gap-2 mt-4 cursor-pointer text-xs font-semibold">
-                <input 
-                  type="checkbox" 
-                  checked={isDefault} 
-                  onChange={(e) => setIsDefault(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={isDefault}
+                  onChange={(e) => setIsDefault(e.target.checked)}
                   className="rounded border-glass-border text-primary focus:ring-primary h-4 w-4"
                 />
                 Set as default payout account
@@ -369,7 +368,7 @@ function PaymentMethodsPage() {
               <DialogFooter className="pt-4 flex gap-2">
                 <Button type="button" variant="outline" onClick={() => { setIsOpen(false); resetForm(); }}>Cancel</Button>
                 <Button type="submit" className="glass-button-primary" disabled={addMutation.isPending}>
-                  {addMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {addMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
                   Save Account
                 </Button>
               </DialogFooter>

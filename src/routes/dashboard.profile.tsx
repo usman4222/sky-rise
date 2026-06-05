@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldAlert, Loader2 } from "lucide-react"; 
+import { ShieldCheck, ShieldAlert } from "lucide-react"; 
+import { GearSpinner } from "@/components/gear-loader";
 import { useAuthStore } from "@/store/authStore";
 import { api } from "@/lib/api";
 import { 
@@ -96,28 +97,7 @@ function ProfilePage() {
         </Card>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle>KYC Status</CardTitle></CardHeader>
-            <CardContent>
-              {isKycVerified ? (
-                <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-400/20 to-cyan-400/20 p-4 border border-emerald-400/30">
-                  <ShieldCheck className="h-6 w-6 text-emerald-500" />
-                  <div>
-                    <div className="font-semibold text-sm">Verified</div>
-                    <div className="text-xs text-muted-foreground">Your identity has been verified.</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-400/20 to-orange-400/20 p-4 border border-amber-400/30">
-                  <ShieldAlert className="h-6 w-6 text-amber-500" />
-                  <div>
-                    <div className="font-semibold text-sm">Unverified</div>
-                    <div className="text-xs text-muted-foreground">Please complete KYC to unlock full access.</div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
 
           <Card>
             <CardHeader><CardTitle>Security</CardTitle></CardHeader>
@@ -135,7 +115,7 @@ function ProfilePage() {
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" className="w-full" disabled={!newPassword || newPassword.length < 6 || updatePasswordMutation.isPending}>
-                    {updatePasswordMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {updatePasswordMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
                     Update Password
                   </Button>
                 </AlertDialogTrigger>

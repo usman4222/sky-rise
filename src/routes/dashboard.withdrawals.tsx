@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/stat-card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, Wallet, Clock, CheckCheck, Coins, Plus, Loader2, ShieldAlert, Check, X } from "lucide-react";
+import { AlertTriangle, Wallet, Clock, CheckCheck, Coins, Plus, ShieldAlert, Check, X } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 
 import { financeApi } from "@/lib/api-finance";
 import { adminApi } from "@/lib/api-admin";
@@ -165,7 +166,7 @@ function WithdrawPage() {
                 </div>
                 <DialogFooter>
                   <Button onClick={() => addAccountMutation.mutate()} disabled={addAccountMutation.isPending || !newAccTitle || !newAccNumber} className="w-full glass-button-primary">
-                    {addAccountMutation.isPending ? <Loader2 className="animate-spin" /> : "Save Account"}
+                    {addAccountMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : "Save Account"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -221,11 +222,11 @@ function WithdrawPage() {
               </div>
 
               <Button 
-                className="w-full bg-primary-gradient text-primary-foreground" 
+                className="w-full bg-primary-gradient text-primary-foreground h-14 rounded-full text-base font-semibold" 
                 onClick={() => withdrawMutation.mutate()}
                 disabled={withdrawMutation.isPending || !accountId || !withdrawAmount}
               >
-                {withdrawMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit Withdrawal Request"}
+                {withdrawMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : "Submit Withdrawal Request"}
               </Button>
             </div>
           </CardContent>

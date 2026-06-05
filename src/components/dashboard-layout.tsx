@@ -18,7 +18,7 @@ const nav = [
   { to: "/dashboard/roi", label: "Daily ROI", icon: TrendingUp },
   { to: "/dashboard/team", label: "Referral Team", icon: Users },
   { to: "/dashboard/levels", label: "Level Income", icon: Layers },
-  {to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
+  { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
   { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
   { to: "/dashboard/weekly-salary", label: "VIP Salary Claims", icon: Crown },
   { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
@@ -59,11 +59,10 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
               key={n.to}
               to={n.to}
               onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                active
-                  ? "bg-primary-gradient text-white shadow-soft"
-                  : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
-              }`}
+              className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${active
+                ? "bg-primary-gradient text-white shadow-soft"
+                : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
+                }`}
             >
               <div className="flex items-center gap-3">
                 <Icon size={18} />
@@ -83,7 +82,6 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
             </div>
             {[
               { to: "/dashboard/admin/users", label: "Users Management", icon: Users },
-              { to: "/dashboard/admin/kyc", label: "Verify KYC Queue", icon: User },
               { to: "/dashboard/admin/withdrawals", label: "Verify Withdrawals Queue", icon: ArrowDownToLine },
               { to: "/dashboard/admin/weekly-salary", label: "Verify Salary Queue", icon: Crown },
             ].map((n) => {
@@ -94,11 +92,10 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                   key={n.to}
                   to={n.to}
                   onClick={onClose}
-                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                    active
-                      ? "bg-primary-gradient text-white shadow-soft"
-                      : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
-                  }`}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${active
+                    ? "bg-primary-gradient text-white shadow-soft"
+                    : "text-foreground/70 hover:bg-glass-surface-soft hover:text-foreground"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon size={18} />
@@ -110,8 +107,8 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           </>
         )}
 
-        <button 
-          onClick={handleLogout} 
+        <button
+          onClick={handleLogout}
           className="mt-4 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
         >
           <LogOut size={18} />Logout
@@ -138,7 +135,7 @@ export function DashboardLayout({ title, children }: { title: string; children: 
 
   // Calculate total balance from specific Firebase synced wallets
   const w = user?.wallets;
-  const walletBalance = w 
+  const walletBalance = w
     ? (w.deposit || 0) + (w.roi || 0) + (w.referral || 0) + (w.bonusReceived || 0) + (w.salary || 0) + (w.achievement || 0) - (w.withdrawal || 0)
     : 0;
 
@@ -155,14 +152,14 @@ export function DashboardLayout({ title, children }: { title: string; children: 
         <header className="sticky top-0 z-30 flex items-center gap-4 glass-navbar glass-blur-md px-4 py-3 md:px-6">
           <button className="lg:hidden hover:opacity-70 transition" onClick={() => setOpen(true)}><Menu /></button>
           <h1 className="text-base font-semibold md:text-lg flex-1 truncate text-foreground">{title}</h1>
-          <div className="relative hidden md:block">
+          {/* <div className="relative hidden md:block">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input placeholder="Search…" className="w-64 pl-10" />
-          </div>
-          <Button variant="ghost" size="icon" className="relative rounded-full">
+          </div> */}
+          {/* <Button variant="ghost" size="icon" className="relative rounded-full">
             <Bell size={18} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-gold animate-pulse" />
-          </Button>
+          </Button> */}
           {!isAdmin && (
             <div className="hidden sm:flex flex-col text-right">
               <span className="text-xs text-muted-foreground font-medium">Wallet</span>

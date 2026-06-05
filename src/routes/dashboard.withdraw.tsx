@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Landmark, ArrowUpRight, HelpCircle, Loader2, RefreshCw, PlusCircle, AlertCircle, XCircle } from "lucide-react";
+import { Landmark, ArrowUpRight, HelpCircle, RefreshCw, PlusCircle, AlertCircle, XCircle } from "lucide-react";
+import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { financeApi } from "@/lib/api-finance";
@@ -258,7 +259,7 @@ function WithdrawPage() {
                     className="w-full glass-button-primary h-10 font-bold"
                     disabled={requestMutation.isPending || numAmount < 10 || currentBal < numAmount}
                   >
-                    {requestMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {requestMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
                     Confirm Withdrawal Request
                   </Button>
                 </form>
@@ -306,9 +307,7 @@ function WithdrawPage() {
           </CardHeader>
           <CardContent className="overflow-x-auto">
             {isHistoryLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Withdrawal History..." />
             ) : withdrawals.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center justify-center gap-1">
                 <RefreshCw size={24} className="text-muted-foreground/50 animate-pulse mb-1" />

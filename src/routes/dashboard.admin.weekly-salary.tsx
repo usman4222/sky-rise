@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Award, Loader2, Check, X, ShieldAlert, AlertCircle, Eye } from "lucide-react";
+import { Award, Check, X, ShieldAlert, AlertCircle, Eye } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -115,9 +116,7 @@ function AdminWeeklySalaryPage() {
           </CardHeader>
           <CardContent className="overflow-x-auto">
             {isLoading ? (
-              <div className="flex h-36 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              <GearSectionLoader text="Loading Salary Claims..." className="h-36" />
             ) : requests.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
                 <AlertCircle className="h-8 w-8 text-muted-foreground/50" />

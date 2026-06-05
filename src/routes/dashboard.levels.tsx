@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Lock, Unlock, Loader2 } from "lucide-react";
+import { Lock, Unlock } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 import { useAuthStore } from "@/store/authStore";
 import { networkApi } from "@/lib/api-network";
 
@@ -133,7 +134,7 @@ function LevelsPage() {
                       >
                         {unlockMutation.isPending && unlockMutation.variables === l.level ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <GearSpinner className="mr-2 h-4 w-4" />
                             Unlocking...
                           </>
                         ) : (

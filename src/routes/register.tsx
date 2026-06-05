@@ -2,33 +2,80 @@ import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-r
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Gift, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Gift, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [
-    { title: "Register — SkyRise Future" },
-    { name: "description", content: "Create your free SkyRise Future account and receive a $5 registration bonus." },
-  ]}),
+  head: () => ({
+    meta: [
+      { title: "Register — SkyRise Future" },
+      { name: "description", content: "Create your free SkyRise Future account and receive a $5 registration bonus." },
+    ]
+  }),
   component: RegisterPage,
 });
 
 function RegisterPage() {
   const navigate = useNavigate();
   const router = useRouter();
-  const { register: registerAction, isLoading, isAuthenticated } = useAuthStore();
+  const { register: registerAction, isLoading, isAuthenticated, isHydrated } = useAuthStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const confettiContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showSuccessModal && confettiContainerRef.current) {
+      const container = confettiContainerRef.current;
+      const confettiColors = ['#EF2964', '#00C09D', '#2D87B0', '#48485E', '#EFFF1D'];
+      const confettiAnimations = ['slow', 'medium', 'fast'];
+
+      const innerContainer = document.createElement('div');
+      innerContainer.classList.add('confetti-container');
+      container.appendChild(innerContainer);
+
+      const interval = setInterval(() => {
+        const confettiEl = document.createElement('div');
+        const confettiSize = (Math.floor(Math.random() * 3) + 7) + 'px';
+        const confettiBackground = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        const confettiLeft = (Math.floor(Math.random() * container.offsetWidth)) + 'px';
+        const confettiAnimation = confettiAnimations[Math.floor(Math.random() * confettiAnimations.length)];
+        
+        confettiEl.classList.add('confetti', 'confetti--animation-' + confettiAnimation);
+        confettiEl.style.left = confettiLeft;
+        confettiEl.style.width = confettiSize;
+        confettiEl.style.height = confettiSize;
+        confettiEl.style.backgroundColor = confettiBackground;
+        
+        const removeTimeout = setTimeout(() => {
+          if (confettiEl.parentNode) {
+            confettiEl.parentNode.removeChild(confettiEl);
+          }
+        }, 3000);
+        
+        innerContainer.appendChild(confettiEl);
+      }, 25);
+
+      return () => {
+        clearInterval(interval);
+        if (innerContainer.parentNode) {
+          innerContainer.parentNode.removeChild(innerContainer);
+        }
+      };
+    }
+  }, [showSuccessModal]);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -43,17 +90,19 @@ function RegisterPage() {
   }, [setValue]);
 
   useEffect(() => {
-    // Only auto-navigate if not currently showing the success modal
-    if (isAuthenticated && !showSuccessModal) {
+    // Only auto-navigate if not currently showing the success modal, state has hydrated, and not just registered
+    if (isHydrated && isAuthenticated && !showSuccessModal && !justRegistered) {
       navigate({ to: "/dashboard", replace: true });
     }
-  }, [isAuthenticated, navigate, showSuccessModal]);
+  }, [isHydrated, isAuthenticated, navigate, showSuccessModal, justRegistered]);
 
   const onSubmit = async (data: RegisterInput) => {
     try {
+      setJustRegistered(true);
       await registerAction(data);
       setShowSuccessModal(true);
     } catch (error: any) {
+      setJustRegistered(false);
       toast.error(getFirebaseErrorMessage(error));
     }
   };
@@ -66,18 +115,23 @@ function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-liquid-bg relative">
-      
+
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-background border border-glass-border rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-500">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-              <CheckCircle className="h-10 w-10 text-emerald-500" />
+          <div ref={confettiContainerRef} className="absolute inset-0 pointer-events-none overflow-hidden z-0" />
+          
+          <div className="relative z-10 bg-background border border-glass-border rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="flex justify-center mb-6">
+              <div className="checkmark-circle">
+                <div className="background"></div>
+                <div className="checkmark draw"></div>
+              </div>
             </div>
             <h2 className="text-2xl font-bold mb-3 text-foreground">Congratulations!</h2>
             <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
               Your account has been successfully created. We've instantly credited your wallet with a <span className="text-gold font-bold text-base">$5 Welcome Bonus!</span>
             </p>
-            <Button onClick={handleGoToDashboard} className="w-full glass-button-primary h-12 text-base">
+            <Button onClick={handleGoToDashboard} className="w-full glass-button-primary h-12 text-base relative z-20">
               Go to Dashboard
             </Button>
           </div>
@@ -91,7 +145,7 @@ function RegisterPage() {
         </Link>
         <Card className="mt-8">
           <CardContent className="p-8">
-            <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-300/20 to-orange-400/20 p-3 border border-amber-300/40">
+            <div className="flex items-center gap-3 mb-3 rounded-2xl bg-gradient-to-r from-amber-300/20 to-orange-400/20 p-3 border border-amber-300/40">
               <div className="grid h-10 w-10 place-items-center rounded-full bg-gold-gradient text-gold-foreground"><Gift size={18} /></div>
               <div>
                 <div className="font-semibold text-sm">Get $5 free registration bonus</div>
@@ -99,42 +153,42 @@ function RegisterPage() {
               </div>
             </div>
             <h1 className="mt-6 text-3xl font-bold">Create your account</h1>
-            
-            <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+
+            <form className="mt-6 mb-3 grid gap-4 sm:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-2 sm:col-span-2">
-                <Label className="text-sm font-semibold" htmlFor="name">Full Name</Label>
+                <Label className="text-sm block mb-2 font-semibold" htmlFor="name">Full Name</Label>
                 <Input id="name" placeholder="Alex Morgan" {...register("name")} aria-invalid={!!errors.name} />
                 {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
               </div>
-              
+
               <div className="space-y-2">
-                <Label className="text-sm font-semibold" htmlFor="email">Email</Label>
+                <Label className="text-sm block mb-2 font-semibold" htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="you@example.com" {...register("email")} aria-invalid={!!errors.email} />
                 {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
               </div>
-              
+
               <div className="space-y-2">
-                <Label className="text-sm font-semibold" htmlFor="phone">Phone Number</Label>
+                <Label className="text-sm block mb-2 font-semibold" htmlFor="phone">Phone Number</Label>
                 <Input id="phone" placeholder="+1 555 0123" {...register("phone")} aria-invalid={!!errors.phone} />
                 {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
               </div>
-              
+
               <div className="space-y-2">
-                <Label className="text-sm font-semibold" htmlFor="sponsorCode">Sponsor / Referral ID (Optional)</Label>
+                <Label className="text-sm block mb-2 font-semibold" htmlFor="sponsorCode">Sponsor / Referral ID (Optional)</Label>
                 <Input id="sponsorCode" placeholder="SKY-10001" {...register("sponsorCode")} aria-invalid={!!errors.sponsorCode} />
                 {errors.sponsorCode && <p className="text-xs text-destructive">{errors.sponsorCode.message}</p>}
               </div>
-              
+
               <div className="space-y-2">
-                <Label className="text-sm font-semibold" htmlFor="password">Password</Label>
+                <Label className="text-sm block mb-2 font-semibold" htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Input 
-                    id="password" 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
                     className="pr-10"
-                    {...register("password")} 
-                    aria-invalid={!!errors.password} 
+                    {...register("password")}
+                    aria-invalid={!!errors.password}
                   />
                   <button
                     type="button"
@@ -146,17 +200,17 @@ function RegisterPage() {
                 </div>
                 {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
               </div>
-              
+
               <div className="space-y-2">
-                <Label className="text-sm font-semibold" htmlFor="confirmPassword">Confirm Password</Label>
+                <Label className="text-sm block mb-2 font-semibold" htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
-                  <Input 
-                    id="confirmPassword" 
-                    type={showConfirmPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
                     className="pr-10"
-                    {...register("confirmPassword")} 
-                    aria-invalid={!!errors.confirmPassword} 
+                    {...register("confirmPassword")}
+                    aria-invalid={!!errors.confirmPassword}
                   />
                   <button
                     type="button"
@@ -168,20 +222,20 @@ function RegisterPage() {
                 </div>
                 {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
               </div>
-              
+
               <label className="sm:col-span-2 flex items-start gap-2 text-sm text-muted-foreground mt-2">
                 <Checkbox className="mt-0.5" required /> I agree to the Terms, Privacy Policy, and platform rules.
               </label>
-              
-              <Button 
-                type="submit" 
-                className={`sm:col-span-2 w-full glass-button-primary mt-2 ${isLoading ? "fluid-loading-btn" : ""}`} 
+
+              <Button
+                type="submit"
+                className={`sm:col-span-2 w-full glass-button-primary mt-2 ${isLoading ? "fluid-loading-btn" : ""}`}
                 disabled={isLoading}
               >
-                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Registering...</> : "Register"}
+                {isLoading ? <><GearSpinner className="mr-2 h-4 w-4" /> Registering...</> : "Register"}
               </Button>
             </form>
-            
+
             <p className="mt-5 text-center text-sm text-muted-foreground">
               Already have an account? <Link to="/login" className="text-primary font-medium hover:text-primary/80">Login</Link>
             </p>

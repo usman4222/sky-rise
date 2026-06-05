@@ -10,8 +10,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   Wallet, TrendingUp, ArrowDownToLine, Users, Gift, Crown,
-  Copy, Trophy, Timer, ShieldAlert, FileText, CheckCircle2, DollarSign, Activity, Loader2, Clock
+  Copy, Trophy, Timer, ShieldAlert, FileText, CheckCircle2, DollarSign, Activity, Clock
 } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 import { useAuthStore } from "@/store/authStore";
 import { adminApi } from "@/lib/api-admin";
 import { financeApi } from "@/lib/api-finance";
@@ -186,7 +187,7 @@ function DashboardHome() {
               <ShieldAlert className="h-5 w-5 text-primary" />
               <h2 className="text-base font-bold text-foreground">Global Platform Metrics</h2>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               <Link to="/dashboard/admin/users" className="block transition-all hover:scale-[1.02] cursor-pointer">
                 <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" />
               </Link>
@@ -197,9 +198,6 @@ function DashboardHome() {
               <Link to="/dashboard/admin/withdrawals" className="block transition-all hover:scale-[1.02] cursor-pointer">
                 <StatCard icon={Timer} label="Pending Withdrawals" value={adminStats?.pendingWithdrawals || 0} accent="gold" />
               </Link>
-              <Link to="/dashboard/admin/kyc" className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={FileText} label="Pending KYC" value={adminStats?.pendingKyc || 0} accent="gold" />
-              </Link>
               <Link to="/dashboard/packages" className="block transition-all hover:scale-[1.02] cursor-pointer">
                 <StatCard icon={CheckCircle2} label="Active Packages" value={adminStats?.activePackagesCount || 0} accent="primary" />
               </Link>
@@ -207,24 +205,7 @@ function DashboardHome() {
           </div>
 
           {/* Quick Tasks */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <Card className="border-soft shadow-card flex flex-col h-full">
-              <CardHeader><CardTitle className="text-sm font-semibold">Compliance & KYC Queue</CardTitle></CardHeader>
-              <CardContent className="flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    Verify customer identity documents to ensure AML compliance and platform security.
-                  </p>
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-soft">
-                    <div className="text-xs font-semibold">Pending KYC Applications</div>
-                    <Badge className="bg-amber-500/10 text-amber-500 border-0 font-mono font-semibold">{adminStats?.pendingKyc || 0}</Badge>
-                  </div>
-                </div>
-                <Button asChild className="w-full bg-primary-gradient text-white text-xs h-9">
-                  <Link to="/dashboard/admin/kyc">Process KYC Documents</Link>
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 md:grid-cols-2">
 
             <Card className="border-soft shadow-card flex flex-col h-full">
               <CardHeader><CardTitle className="text-sm font-semibold">Financial Approvals</CardTitle></CardHeader>
@@ -389,7 +370,7 @@ function DashboardHome() {
                             disabled={claimRoiMutation.isPending}
                             className="w-full bg-gold hover:bg-gold/90 text-gold-foreground font-semibold text-xs h-9 flex gap-2 items-center justify-center"
                           >
-                            {claimRoiMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gift className="h-4 w-4" />}
+                            {claimRoiMutation.isPending ? <GearSpinner className="h-4 w-4" /> : <Gift className="h-4 w-4" />}
                             {claimRoiMutation.isPending ? "Claiming..." : "Collect ROI"}
                           </Button>
                         </div>

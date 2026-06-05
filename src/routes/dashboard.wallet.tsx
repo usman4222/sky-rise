@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Gift, Users, Upload, Loader2, Wallet, ShieldAlert, Check, X } from "lucide-react";
+import { Gift, Users, Upload, Wallet, ShieldAlert, Check, X } from "lucide-react";
+import { GearSpinner } from "@/components/gear-loader";
 
 import { financeApi } from "@/lib/api-finance";
 import { adminApi } from "@/lib/api-admin";
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/dashboard/wallet")({ component: WalletPag
 function WalletPage() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  
+
   const [depositAmount, setDepositAmount] = useState("");
   const [paymentMethodId, setPaymentMethodId] = useState("");
 
@@ -89,20 +90,20 @@ function WalletPage() {
   };
 
   const walletCards = [
-    { 
-      icon: Wallet, name: "Main Deposit Wallet", 
+    {
+      icon: Wallet, name: "Main Deposit Wallet",
       bal: walletsData?.deposit || 0, color: "emerald",
-      rules: ["Used to purchase investment packages"] 
+      rules: ["Used to purchase investment packages"]
     },
-    { 
-      icon: Gift, name: "Registration Bonus", 
+    {
+      icon: Gift, name: "Registration Bonus",
       bal: walletsData?.freeRegBonus || 0, color: "gold",
-      rules: ["Merged with your first investment"] 
+      rules: ["Merged with your first investment"]
     },
-    { 
-      icon: Users, name: "Team Bonus Received", 
+    {
+      icon: Users, name: "Team Bonus Received",
       bal: walletsData?.bonusReceived || 0, color: "primary",
-      rules: ["Use max 10% on package purchases"] 
+      rules: ["Use max 10% on package purchases"]
     },
   ];
 
@@ -116,7 +117,7 @@ function WalletPage() {
     <DashboardLayout title="Wallets & Deposits">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-bold">Your Assets</h2>
-        
+
         <Dialog>
           <DialogTrigger asChild>
             <Button className="glass-button-primary gap-2"><Upload size={16} /> Deposit Funds</Button>
@@ -130,7 +131,7 @@ function WalletPage() {
             </DialogHeader>
             <div className="space-y-4 py-3">
               <div className="space-y-1.5">
-                <Label>Select Payment Method</Label>
+                <Label className="block mb-3">Select Payment Method</Label>
                 <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
                   <SelectTrigger><SelectValue placeholder="Choose a payment method" /></SelectTrigger>
                   <SelectContent>
@@ -145,20 +146,20 @@ function WalletPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-1.5">
-                <Label>Amount to Deposit {selectedMethod ? `(${selectedMethod.currency})` : ""}</Label>
+                <Label className="block mb-3">Amount to Deposit {selectedMethod ? `(${selectedMethod.currency})` : ""}</Label>
                 <Input type="number" placeholder="100" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
               </div>
             </div>
             <DialogFooter>
-              <Button 
-                className="w-full glass-button-primary" 
+              <Button
+                className="w-full glass-button-primary"
                 onClick={handleDepositSubmit}
                 disabled={depositMutation.isPending}
               >
                 {depositMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <GearSpinner className="mr-2 h-4 w-4" />
                 ) : (
                   `Pay with ${selectedMethod?.gateway === "payfast" ? "PayFast" : "CoinPayments"}`
                 )}
@@ -175,7 +176,7 @@ function WalletPage() {
               <div className={`grid h-12 w-12 place-items-center rounded-xl ${styles[w.color]}`}><w.icon size={20} /></div>
               <h3 className="mt-4 text-base font-semibold">{w.name}</h3>
               <div className="mt-2 text-3xl font-bold">
-                {loadingWallets ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : `$${Number(w.bal).toFixed(2)}`}
+                {loadingWallets ? <GearSpinner className="h-6 w-6 text-muted-foreground" /> : `$${Number(w.bal).toFixed(2)}`}
               </div>
               <div className="mt-4 space-y-1.5">
                 {w.rules.map((r) => (

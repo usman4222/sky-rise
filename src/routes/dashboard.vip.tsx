@@ -6,7 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/stat-card";
-import { Crown, Trophy, Target, Layers, Loader2 } from "lucide-react";
+import { Crown, Trophy, Target, Layers } from "lucide-react";
+import { GearSectionLoader } from "@/components/gear-loader";
 import { rewardsApi } from "@/lib/api-rewards";
 
 export const Route = createFileRoute("/dashboard/vip")({ component: VipDash });
@@ -21,9 +22,7 @@ function VipDash() {
   if (isLoading) {
     return (
       <DashboardLayout title="VIP Salary">
-        <div className="flex h-[350px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <GearSectionLoader text="Loading VIP Status..." className="h-[350px]" />
       </DashboardLayout>
     );
   }
