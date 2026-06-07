@@ -10,6 +10,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus, Trash2, Check, CreditCard, Landmark, Phone, Key, HelpCircle } from "lucide-react";
 import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 
@@ -227,20 +238,36 @@ function PaymentMethodsPage() {
                           Make Default
                         </Button>
                       )}
-                      <Button
-                        onClick={() => {
-                          if (confirm("Deactivate this payment method?")) {
-                            deleteMutation.mutate(pm._id);
-                          }
-                        }}
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 text-[11px] text-destructive hover:bg-destructive/10 font-medium"
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 size={13} className="mr-1" />
-                        Delete
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-[11px] text-destructive hover:bg-destructive/10 font-medium"
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 size={13} className="mr-1" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Deactivate Payment Method</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to deactivate this payment method? You will no longer be able to select it for withdrawals.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteMutation.mutate(pm._id)}
+                              className="bg-destructive text-white hover:bg-destructive/90 border-0 shadow-sm"
+                            >
+                              Deactivate
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}

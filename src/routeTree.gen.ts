@@ -41,6 +41,7 @@ import { Route as DashboardAdminWeeklySalaryRouteImport } from './routes/dashboa
 import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard.admin.users'
 import { Route as DashboardAdminKycRouteImport } from './routes/dashboard.admin.kyc'
 import { Route as DashboardAdminDepositsRouteImport } from './routes/dashboard.admin.deposits'
+import { Route as DashboardAdminBannersRouteImport } from './routes/dashboard.admin.banners'
 
 const VipRoute = VipRouteImport.update({
   id: '/vip',
@@ -204,6 +205,11 @@ const DashboardAdminDepositsRoute = DashboardAdminDepositsRouteImport.update({
   path: '/admin/deposits',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminBannersRoute = DashboardAdminBannersRouteImport.update({
+  id: '/admin/banners',
+  path: '/admin/banners',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/withdraw': typeof DashboardWithdrawRoute
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/admin/banners': typeof DashboardAdminBannersRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/dashboard/withdraw': typeof DashboardWithdrawRoute
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/admin/banners': typeof DashboardAdminBannersRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/dashboard/withdraw': typeof DashboardWithdrawRoute
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/admin/banners': typeof DashboardAdminBannersRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/dashboard/withdraw'
     | '/dashboard/withdrawals'
     | '/dashboard/'
+    | '/dashboard/admin/banners'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/dashboard/withdraw'
     | '/dashboard/withdrawals'
     | '/dashboard'
+    | '/dashboard/admin/banners'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/dashboard/withdraw'
     | '/dashboard/withdrawals'
     | '/dashboard/'
+    | '/dashboard/admin/banners'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
@@ -650,6 +662,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminDepositsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/admin/banners': {
+      id: '/dashboard/admin/banners'
+      path: '/admin/banners'
+      fullPath: '/dashboard/admin/banners'
+      preLoaderRoute: typeof DashboardAdminBannersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -671,6 +690,7 @@ interface DashboardRouteChildren {
   DashboardWithdrawRoute: typeof DashboardWithdrawRoute
   DashboardWithdrawalsRoute: typeof DashboardWithdrawalsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardAdminBannersRoute: typeof DashboardAdminBannersRoute
   DashboardAdminDepositsRoute: typeof DashboardAdminDepositsRoute
   DashboardAdminKycRoute: typeof DashboardAdminKycRoute
   DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
@@ -696,6 +716,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardWithdrawRoute: DashboardWithdrawRoute,
   DashboardWithdrawalsRoute: DashboardWithdrawalsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAdminBannersRoute: DashboardAdminBannersRoute,
   DashboardAdminDepositsRoute: DashboardAdminDepositsRoute,
   DashboardAdminKycRoute: DashboardAdminKycRoute,
   DashboardAdminUsersRoute: DashboardAdminUsersRoute,

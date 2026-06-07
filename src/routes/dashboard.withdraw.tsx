@@ -7,6 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -353,19 +364,34 @@ function WithdrawPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         {w.status === "pending" && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-7 text-[10px] text-destructive hover:bg-destructive/10"
-                            onClick={() => {
-                              if (confirm("Cancel this withdrawal request and refund your balance?")) {
-                                cancelMutation.mutate(w._id);
-                              }
-                            }}
-                            disabled={cancelMutation.isPending}
-                          >
-                            Cancel Request
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-7 text-[10px] text-destructive hover:bg-destructive/10"
+                              >
+                                Cancel Request
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Cancel Withdrawal Request</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to cancel this withdrawal request and refund your balance?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>No, Keep Request</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => cancelMutation.mutate(w._id)}
+                                  className="bg-destructive text-white hover:bg-destructive/90 border-0 shadow-sm"
+                                >
+                                  Yes, Cancel & Refund
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </TableCell>
                     </TableRow>

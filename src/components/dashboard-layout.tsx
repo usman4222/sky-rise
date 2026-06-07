@@ -2,12 +2,14 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
-  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Pencil
+  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Pencil,
+  Image, Copy, Home, Clock
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/authStore";
 
@@ -84,6 +86,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
               { to: "/dashboard/admin/users", label: "Users Management", icon: Users },
               { to: "/dashboard/admin/withdrawals", label: "Verify Withdrawals Queue", icon: ArrowDownToLine },
               { to: "/dashboard/admin/weekly-salary", label: "Verify Salary Queue", icon: Crown },
+              { to: "/dashboard/admin/banners", label: "Manage Banners", icon: Image },
             ].map((n) => {
               const active = pathname.startsWith(n.to);
               const Icon = n.icon;
@@ -127,6 +130,64 @@ export function DashboardLayout({ title, children }: { title: string; children: 
   const showMobileProfile = !isAdmin && isDashboardHome;
 
   useEffect(() => {
+    // Ensure dark class is never applied
+    window.document.documentElement.classList.remove('dark');
+  }, []);
+
+  const tabs = [
+    {
+      id: "home",
+      label: "Home",
+      to: "/dashboard",
+      icon: Home,
+      isActive: pathname === "/dashboard" || pathname === "/dashboard/",
+      color: "text-primary",
+      borderColor: "border-primary/40",
+      shadowColor: "shadow-[0_8px_24px_rgba(123,92,255,0.25)]",
+    },
+    {
+      id: "market",
+      label: "Market",
+      to: "/dashboard/packages",
+      icon: Package,
+      isActive: pathname.startsWith("/dashboard/packages"),
+      color: "text-primary",
+      borderColor: "border-primary/40",
+      shadowColor: "shadow-[0_8px_24px_rgba(123,92,255,0.25)]",
+    },
+    {
+      id: "wallet",
+      label: "Wallet",
+      to: "/dashboard/investments",
+      icon: Wallet,
+      isActive: pathname.startsWith("/dashboard/investments") || pathname.startsWith("/dashboard/withdraw"),
+      color: "text-[#18b66a]",
+      borderColor: "border-[#18b66a]/40",
+      shadowColor: "shadow-[0_8px_24px_rgba(24,182,106,0.25)]",
+    },
+    {
+      id: "history",
+      label: "History",
+      to: "/dashboard/transactions",
+      icon: Clock,
+      isActive: pathname.startsWith("/dashboard/transactions"),
+      color: "text-primary",
+      borderColor: "border-primary/40",
+      shadowColor: "shadow-[0_8px_24px_rgba(123,92,255,0.25)]",
+    },
+    {
+      id: "more",
+      label: "More",
+      onClick: () => setOpen(true),
+      icon: Menu,
+      isActive: open,
+      color: "text-primary",
+      borderColor: "border-primary/40",
+      shadowColor: "shadow-[0_8px_24px_rgba(123,92,255,0.25)]",
+    },
+  ];
+
+  useEffect(() => {
     fetchProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -151,8 +212,7 @@ export function DashboardLayout({ title, children }: { title: string; children: 
     ? (w.deposit || 0) + (w.roi || 0) + (w.referral || 0) + (w.bonusReceived || 0) + (w.salary || 0) + (w.achievement || 0) - (w.withdrawal || 0)
     : 0;
 
-  const addressStr = user?.id ? `0x${user.id.slice(0, 10)}...${user.id.slice(-4)}` : "0x0000...0000";
-  const sponsorStr = user?.sponsor ? `INVITED BY • ${user.sponsor.toUpperCase()}` : "INVITED BY • NONE";
+  const sponsorStr = user?.sponsor ? `SPONSORED BY • ${user.sponsor.toUpperCase()}` : "SPONSORED BY • NONE";
   const joinedStr = getJoinedDate(user?.createdAt);
 
   return (
@@ -182,6 +242,7 @@ export function DashboardLayout({ title, children }: { title: string; children: 
               <span className="text-sm font-bold text-primary">${walletBalance.toFixed(2)}</span>
             </div>
           )}
+
           <Link to="/dashboard/profile" className="cursor-pointer transition hover:opacity-80">
             <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30">
               {user?.imageUrl && (
@@ -193,16 +254,16 @@ export function DashboardLayout({ title, children }: { title: string; children: 
             </Avatar>
           </Link>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-liquid-bg">
+        <main className="flex-1 p-4 pb-24 md:pb-6 md:p-6 lg:p-8 bg-gradient-liquid-bg">
           {showMobileProfile && (
             <div className="mb-6 block lg:hidden">
-              <div className="relative flex items-center justify-between p-4 rounded-2xl border border-purple-500/20 bg-[#ffffff]/80 backdrop-blur-md shadow-lg shadow-purple-950/20">
+              <div className="relative flex items-center justify-between p-4 rounded-2xl border border-glass-border/30 bg-glass-surface/35 backdrop-blur-md shadow-card">
                 <div className="flex items-center gap-4">
-                  {/* Avatar with purple ring */}
+                  {/* Avatar with primary ring */}
                   <div className="relative animate-fade-in">
-                    <Avatar className="h-16 w-16 ring-2 ring-purple-600 ring-offset-2 ring-offset-[#0d0a15]">
+                    <Avatar className="h-16 w-16 ring-2 ring-primary ring-offset-2 ring-offset-background">
                       {user?.imageUrl ? (
-                        <AvatarImage src={user.imageUrl} alt={user.name} className="object-cover animate-fade-in" />
+                        <AvatarImage src={user.imageUrl} alt={user.name || "User Avatar"} className="object-cover animate-fade-in" />
                       ) : null}
                       <AvatarFallback className="bg-primary-gradient text-white text-lg font-bold">
                         {getInitials(user?.name)}
@@ -212,12 +273,22 @@ export function DashboardLayout({ title, children }: { title: string; children: 
 
                   {/* User Info */}
                   <div className="flex flex-col">
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                       {user?.name || "User"}
                     </h3>
-                    <span className="text-xs text-blue-400 font-mono mt-0.5">
-                      {addressStr}
-                    </span>
+                    {user?.referralCode && (
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(user.referralCode);
+                          toast.success("Referral code copied!");
+                        }}
+                        className="flex items-center gap-1.5 text-xs text-primary font-mono mt-0.5 font-semibold hover:opacity-80 active:scale-95 transition-all text-left bg-transparent border-0 p-0 cursor-pointer"
+                        title="Click to copy referral code"
+                      >
+                        <span>REF: {user.referralCode.toUpperCase()}</span>
+                        <Copy size={11} className="shrink-0" />
+                      </button>
+                    )}
                     <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider mt-1">
                       {sponsorStr}
                     </span>
@@ -239,6 +310,59 @@ export function DashboardLayout({ title, children }: { title: string; children: 
           )}
           {children}
         </main>
+
+        {/* Bottom Navigation Bar for Mobile */}
+        {!isAdmin && (
+          <div className="fixed bottom-4 left-4 right-4 z-40 lg:hidden bg-white/90 dark:bg-[#111625]/90 border border-glass-border/30 dark:border-glass-border/10 backdrop-blur-md rounded-full shadow-[0_16px_48px_rgba(0,0,0,0.15)] flex items-center justify-around py-1 px-2 max-w-lg mx-auto select-none">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const content = (
+                <div className="flex flex-col items-center justify-center relative">
+                  <div className={tab.isActive
+                    ? `rounded-full p-2 shadow-md flex items-center justify-center border bg-white dark:bg-slate-900 transition-all transform duration-300 -translate-y-3 scale-110 ${tab.borderColor} ${tab.color} ${tab.shadowColor}`
+                    : "flex items-center justify-center p-1.5 transition-all text-muted-foreground/70"
+                  }>
+                    <Icon
+                      size={20}
+                      className={tab.isActive
+                        ? `${tab.color} stroke-[2.5]`
+                        : "stroke-[1.8]"
+                      }
+                    />
+                  </div>
+                  <span className={`text-[9px] font-bold mt-0.5 transition-all ${tab.isActive
+                      ? `${tab.color} font-extrabold`
+                      : "text-muted-foreground/85"
+                    }`}>
+                    {tab.label}
+                  </span>
+                </div>
+              );
+
+              if (tab.to) {
+                return (
+                  <Link
+                    key={tab.id}
+                    to={tab.to}
+                    className="flex-1 flex flex-col items-center justify-center py-0.5 transition-all"
+                  >
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={tab.onClick}
+                  className="flex-1 flex flex-col items-center justify-center py-0.5 transition-all bg-transparent border-0 cursor-pointer"
+                >
+                  {content}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

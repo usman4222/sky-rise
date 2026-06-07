@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -19,12 +19,65 @@ import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 export const Route = createFileRoute("/dashboard/packages")({ component: PackagesDash });
 
+/** Derives a display tag from the package's minAmount — keep in sync with PackageCard */
+function getTag(minAmount: number): string {
+  if (minAmount >= 5000) return "VIP";
+  if (minAmount >= 1000) return "Pro";
+  if (minAmount >= 100) return "Standard";
+  return "Starter";
+}
+
+const FILTER_OPTIONS = ["All", "Starter", "Standard", "Pro", "VIP"] as const;
+type FilterOption = typeof FILTER_OPTIONS[number];
+
 function PackagesDash() {
   const { user } = useAuthStore();
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
   const queryClient = useQueryClient();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterOption>("All");
+
+  // Purchase success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [purchasedInfo, setPurchasedInfo] = useState<{ name: string; amount: number } | null>(null);
+  const confettiContainerRef = useRef<HTMLDivElement>(null);
+
+  // Confetti effect — identical to registration page
+  useEffect(() => {
+    if (showSuccessModal && confettiContainerRef.current) {
+      const container = confettiContainerRef.current;
+      const confettiColors = ['#EF2964', '#00C09D', '#2D87B0', '#48485E', '#EFFF1D'];
+      const confettiAnimations = ['slow', 'medium', 'fast'];
+
+      const innerContainer = document.createElement('div');
+      innerContainer.classList.add('confetti-container');
+      container.appendChild(innerContainer);
+
+      const interval = setInterval(() => {
+        const confettiEl = document.createElement('div');
+        const confettiSize = (Math.floor(Math.random() * 3) + 7) + 'px';
+        const confettiBackground = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        const confettiLeft = (Math.floor(Math.random() * container.offsetWidth)) + 'px';
+        const confettiAnimation = confettiAnimations[Math.floor(Math.random() * confettiAnimations.length)];
+        confettiEl.classList.add('confetti', 'confetti--animation-' + confettiAnimation);
+        confettiEl.style.left = confettiLeft;
+        confettiEl.style.width = confettiSize;
+        confettiEl.style.height = confettiSize;
+        confettiEl.style.backgroundColor = confettiBackground;
+        const removeTimeout = setTimeout(() => {
+          if (confettiEl.parentNode) confettiEl.parentNode.removeChild(confettiEl);
+        }, 3000);
+        innerContainer.appendChild(confettiEl);
+      }, 25);
+
+      return () => {
+        clearInterval(interval);
+        if (innerContainer.parentNode) innerContainer.parentNode.removeChild(innerContainer);
+      };
+    }
+  }, [showSuccessModal]);
+
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ["packages", isAdmin],
@@ -35,10 +88,15 @@ function PackagesDash() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual' }) =>
+    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual'; name: string; closeDialog: () => void }) =>
       packagesApi.purchasePackage(vars.id, vars.amount, true, vars.roiClaimMode),
-    onSuccess: () => {
-      toast.success("Investment confirmed! It will automatically activate at the end of the day.");
+    onSuccess: (_, vars) => {
+      // Close the invest dialog first, then show the celebration after the close animation
+      vars.closeDialog();
+      setTimeout(() => {
+        setPurchasedInfo({ name: vars.name, amount: vars.amount });
+        setShowSuccessModal(true);
+      }, 320);
       queryClient.invalidateQueries({ queryKey: ["packages"] });
       queryClient.invalidateQueries({ queryKey: ["myInvestments"] });
     },
@@ -76,6 +134,47 @@ function PackagesDash() {
   return (
     <DashboardLayout title="Investment Packages">
 
+      {/* ── Purchase Success Modal ── */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 success-backdrop-in">
+          <div ref={confettiContainerRef} className="absolute inset-0 pointer-events-none overflow-hidden z-0" />
+          <div className="success-modal-pop relative z-10 bg-background border border-glass-border rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="flex justify-center mb-6">
+              <div className="checkmark-circle">
+                <div className="background" />
+                <div className="checkmark draw" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mb-2 text-foreground">Investment Confirmed!</h2>
+            {purchasedInfo && (
+              <p className="text-muted-foreground text-sm mb-1 leading-relaxed">
+                You've invested{" "}
+                <span className="text-primary font-bold">${purchasedInfo.amount.toFixed(2)}</span>{" "}
+                in <span className="text-foreground font-semibold">{purchasedInfo.name}</span>.
+              </p>
+            )}
+            <p className="text-muted-foreground text-xs mb-6 leading-relaxed">
+              Your investment will activate at end of day and start earning daily ROI automatically.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/dashboard/investments"
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full glass-button-primary h-12 text-base flex items-center justify-center rounded-full font-bold"
+              >
+                View My Investments
+              </Link>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Stay on Packages
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isAdmin && (
         <div className="mb-6 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
@@ -101,21 +200,51 @@ function PackagesDash() {
       {isLoading ? (
         <GearSectionLoader text="Loading Investment Packages..." />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {packages.map((p) => (
-            <PackageCard
-              key={p._id}
-              pkg={p}
-              isAdmin={isAdmin}
-              isPurchasing={purchaseMutation.isPending}
-              isToggling={toggleMutation.isPending}
-              onPurchase={(amount, roiClaimMode) => purchaseMutation.mutate({ id: p._id, amount, roiClaimMode })}
-              onToggle={(isActive) => toggleMutation.mutate({ id: p._id, isActive })}
-              onUpdate={(data) => updateMutation.mutate({ id: p._id, data })}
-              isUpdating={updateMutation.isPending && updateMutation.variables?.id === p._id}
-            />
-          ))}
-        </div>
+        <>
+          {/* ── Filter Pills ── */}
+          <div className="mb-5 flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap pb-1">
+            {FILTER_OPTIONS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
+                  activeFilter === f
+                    ? "bg-primary-gradient text-white border-transparent shadow-[0_4px_14px_rgba(123,92,255,0.35)] scale-[1.04]"
+                    : "bg-white border-[#d0d0d8] text-foreground/75 hover:text-primary hover:border-primary/60 hover:bg-primary/5"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {/* ── Package Grid ── */}
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {packages
+              .filter((p) => activeFilter === "All" || getTag(p.minAmount) === activeFilter)
+              .map((p) => (
+                <PackageCard
+                  key={p._id}
+                  pkg={p}
+                  isAdmin={isAdmin}
+                  isPurchasing={purchaseMutation.isPending}
+                  isToggling={toggleMutation.isPending}
+                  onPurchase={(amount, roiClaimMode, closeDialog) => purchaseMutation.mutate({ id: p._id, amount, roiClaimMode, name: p.name, closeDialog })}
+                  onToggle={(isActive) => toggleMutation.mutate({ id: p._id, isActive })}
+                  onUpdate={(data) => updateMutation.mutate({ id: p._id, data })}
+                  isUpdating={updateMutation.isPending && updateMutation.variables?.id === p._id}
+                />
+              ))}
+
+            {/* Empty state when filter has no results */}
+            {packages.filter((p) => activeFilter === "All" || getTag(p.minAmount) === activeFilter).length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
+                <span className="text-4xl">📦</span>
+                <p className="text-sm font-medium">No <span className="text-primary">{activeFilter}</span> packages available right now.</p>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </DashboardLayout>
   );
@@ -127,20 +256,18 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
   isPurchasing: boolean;
   isToggling: boolean;
   isUpdating: boolean;
-  onPurchase: (amt: number, mode: 'auto' | 'manual') => void;
+  onPurchase: (amt: number, mode: 'auto' | 'manual', closeDialog: () => void) => void;
   onToggle: (active: boolean) => void;
   onUpdate: (data: Partial<PackageData>) => void;
 }) {
   const [amount, setAmount] = useState(pkg.minAmount);
   const [roiClaimMode, setRoiClaimMode] = useState<'auto' | 'manual'>('auto');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [investDialogOpen, setInvestDialogOpen] = useState(false);
   const bonus = Math.min(amount * 0.1, 45); // Mock logic for display
   const real = amount - bonus;
 
-  let tag = "Starter";
-  if (pkg.minAmount >= 5000) tag = "VIP";
-  else if (pkg.minAmount >= 1000) tag = "Pro";
-  else if (pkg.minAmount >= 100) tag = "Standard";
+  let tag = getTag(pkg.minAmount);
 
   return (
     <Card className={`glass-card-hover transition-all flex flex-col h-full ${!pkg.isActive ? 'opacity-70 grayscale' : ''}`}>
@@ -184,7 +311,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
             }
           />
         ) : (
-          <Dialog>
+          <Dialog open={investDialogOpen} onOpenChange={setInvestDialogOpen}>
             <DialogTrigger asChild>
               <Button className="mt-auto w-full glass-button-primary">Invest Now</Button>
             </DialogTrigger>
@@ -248,7 +375,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
               <DialogFooter>
                 <Button
                   className="w-full glass-button-primary h-14 text-base rounded-full"
-                  onClick={() => onPurchase(amount, roiClaimMode)}
+                  onClick={() => onPurchase(amount, roiClaimMode, () => setInvestDialogOpen(false))}
                   disabled={isPurchasing}
                 >
                   {isPurchasing ? <GearSpinner className="mr-2 h-5 w-5" /> : null}

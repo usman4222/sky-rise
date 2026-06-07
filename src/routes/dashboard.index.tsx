@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
+import { bannersApi } from "@/lib/api-banners";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   Wallet, TrendingUp, ArrowDownToLine, Users, Gift, Crown,
-  Copy, Trophy, Timer, ShieldAlert, FileText, CheckCircle2, DollarSign, Activity, Clock
+  Copy, Trophy, Timer, ShieldAlert, FileText, CheckCircle2, DollarSign, Activity, Clock,
+  ArrowLeftRight, ArrowUpToLine
 } from "lucide-react";
 import { GearSpinner } from "@/components/gear-loader";
 import { useAuthStore } from "@/store/authStore";
@@ -18,7 +20,7 @@ import { adminApi } from "@/lib/api-admin";
 import { financeApi } from "@/lib/api-finance";
 import { investmentsApi } from "@/lib/api-investments";
 import { rewardsApi } from "@/lib/api-rewards";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // Define RoiCountdown component for real-time ROI tracking & auto-refresh
 function RoiCountdown({ targetDate }: { targetDate: string }) {
@@ -64,6 +66,112 @@ function RoiCountdown({ targetDate }: { targetDate: string }) {
   }, [targetDate, queryClient]);
 
   return <span className="font-mono text-profit font-bold animate-pulse">{timeLeft}</span>;
+}
+
+// Custom touch-swipeable, auto-sliding Banner Carousel
+function BannerSlider() {
+  const navigate = useNavigate();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { data: bannersRes } = useQuery({
+    queryKey: ["activeBanners"],
+    queryFn: bannersApi.getBanners,
+    refetchOnWindowFocus: false,
+  });
+
+  const banners = bannersRes?.banners || [];
+
+  // Auto slide interval
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % banners.length;
+      handleDotClick(nextIndex);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, banners.length]);
+
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const index = Math.round(container.scrollLeft / container.clientWidth);
+    if (index !== currentIndex && index >= 0 && index < banners.length) {
+      setCurrentIndex(index);
+    }
+  };
+
+  const handleDotClick = (index: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.scrollTo({
+      left: index * container.clientWidth,
+      behavior: "smooth"
+    });
+    setCurrentIndex(index);
+  };
+
+  const handleBannerClick = (banner: any) => {
+    if (!banner.link) return;
+    if (banner.link.startsWith("http://") || banner.link.startsWith("https://")) {
+      window.open(banner.link, "_blank", "noopener,noreferrer");
+    } else {
+      navigate({ to: banner.link });
+    }
+  };
+
+  if (banners.length === 0) return null;
+
+  return (
+    <div className="relative mb-6 rounded-2xl overflow-hidden border border-glass-border/30 shadow-card bg-glass-surface/35 group select-none">
+      {/* Scroll Snap Slides Container */}
+      <div 
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none cursor-pointer"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {banners.map((b) => (
+          <div 
+            key={b._id}
+            onClick={() => handleBannerClick(b)}
+            className="min-w-full aspect-[21/9] sm:aspect-[24/7] snap-start snap-always relative overflow-hidden active:scale-[0.99] transition-transform duration-150"
+          >
+            <img 
+              src={b.imageUrl} 
+              alt={b.title || "Banner"} 
+              className="object-cover w-full h-full select-none"
+              draggable={false}
+            />
+            {b.title && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-left">
+                <h3 className="text-sm sm:text-base font-bold text-white tracking-wide drop-shadow-md">
+                  {b.title}
+                </h3>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Page Indicator Dots */}
+      {banners.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 bg-black/35 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+          {banners.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleDotClick(idx)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? "w-4 bg-primary" : "w-1.5 bg-white/50 hover:bg-white/80"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export const Route = createFileRoute("/dashboard/")({ component: DashboardHome });
@@ -259,6 +367,46 @@ function DashboardHome() {
         </div>
       ) : (
         <>
+          <BannerSlider />
+
+          {/* Quick Actions Card */}
+          <div className="mt-4 mb-6 max-w-xl mx-auto sm:mx-0 bg-glass-surface/35 border border-glass-border/30 backdrop-blur-md rounded-2xl p-4 shadow-card">
+            <div className="grid grid-cols-3 divide-x divide-glass-border/20">
+              {/* Deposit Option */}
+              <Link 
+                to="/dashboard/wallet"
+                className="flex flex-col items-center justify-center gap-2 hover:opacity-85 active:scale-95 transition-all"
+              >
+                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all hover:scale-105">
+                  <ArrowDownToLine size={20} className="stroke-[2.2]" />
+                </div>
+                <span className="text-xs font-bold text-foreground">Deposit</span>
+              </Link>
+
+              {/* Withdrawal Option */}
+              <Link 
+                to="/dashboard/withdraw"
+                className="flex flex-col items-center justify-center gap-2 hover:opacity-85 active:scale-95 transition-all"
+              >
+                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all hover:scale-105">
+                  <ArrowUpToLine size={20} className="stroke-[2.2]" />
+                </div>
+                <span className="text-xs font-bold text-foreground">Withdrawal</span>
+              </Link>
+
+              {/* Transfer Option */}
+              <Link 
+                to="/dashboard/transfer"
+                className="flex flex-col items-center justify-center gap-2 hover:opacity-85 active:scale-95 transition-all"
+              >
+                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all hover:scale-105">
+                  <ArrowLeftRight size={20} className="stroke-[2.2]" />
+                </div>
+                <span className="text-xs font-bold text-foreground">Transfer</span>
+              </Link>
+            </div>
+          </div>
+
           {hasPendingClaims && (
             <div className="mb-6 rounded-xl p-4 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/20 flex items-center justify-between shadow-sm animate-pulse">
               <div className="flex items-center gap-3">

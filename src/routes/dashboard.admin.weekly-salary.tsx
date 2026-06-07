@@ -8,6 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -249,18 +260,34 @@ function AdminWeeklySalaryPage() {
                       <X size={14} className="mr-1" />
                       Reject Request
                     </Button>
-                    <Button 
-                      className="h-9 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                      onClick={() => {
-                        if (confirm("Approve salary and credit user's wallet?")) {
-                          approveMutation.mutate(selectedRequest._id);
-                        }
-                      }}
-                      disabled={approveMutation.isPending}
-                    >
-                      <Check size={14} className="mr-1" />
-                      Approve & Credit Salary
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          className="h-9 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                          disabled={approveMutation.isPending}
+                        >
+                          <Check size={14} className="mr-1" />
+                          Approve & Credit Salary
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Approve Salary Request</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to approve this weekly salary request and credit the user's wallet? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => approveMutation.mutate(selectedRequest._id)}
+                            className="bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-sm"
+                          >
+                            Approve & Credit
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 )}
               </div>
