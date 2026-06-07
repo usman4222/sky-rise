@@ -15,6 +15,8 @@ export interface UserProfile {
   name: string;
   email: string;
   phone?: string;
+  imageUrl?: string;
+  imagePublicId?: string;
   referralCode: string;
   sponsor?: string;
   kycStatus: string;

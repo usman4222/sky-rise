@@ -1213,4 +1213,34 @@ textarea:focus {
   }
 }
 
+/* Premium Liquid Glass Gradient Scrollbar for Dashboard Sidebar */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 92, 255, 0.65) transparent;
+}
+
+/* Chrome, Safari, Edge, Opera */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  background-image: var(--gradient-primary);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background-image: linear-gradient(135deg, #a275ff 0%, #756eff 45%, #76ece0 100%);
+  box-shadow: 0 0 10px rgba(123, 92, 255, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+
 

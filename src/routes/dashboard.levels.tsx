@@ -48,7 +48,7 @@ function LevelsPage() {
   ].map(l => {
     const isUnlocked = unlockedLevels.includes(l.level);
     const isPrevUnlocked = unlockedLevels.includes(l.level - 1);
-    
+
     // Split pay calculations: $5 fee. Up to 50% paid via bonusActivation wallet.
     const standardFee = 5.0;
     const maxBonusPaid = Math.min(bonusActivation, standardFee * 0.5);
@@ -89,12 +89,12 @@ function LevelsPage() {
               <div className="mt-3 text-2xl font-bold">{l.income}%</div>
               <div className="text-xs text-muted-foreground">Level Income</div>
               <p className="mt-3 text-xs text-muted-foreground min-h-[32px]">{l.requirement}</p>
-              
+
               {!l.unlocked && (
                 <Dialog open={openDialogId === l.level} onOpenChange={(open) => setOpenDialogId(open ? l.level : null)}>
                   <DialogTrigger asChild>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="mt-4 w-full bg-primary-gradient text-primary-foreground"
                       disabled={!l.canUnlock}
                     >
@@ -127,7 +127,7 @@ function LevelsPage() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button 
+                      <Button
                         className="w-full bg-primary-gradient text-primary-foreground"
                         disabled={unlockMutation.isPending || !l.hasEnoughCash}
                         onClick={() => unlockMutation.mutate(l.level)}

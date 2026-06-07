@@ -29,7 +29,7 @@ function RoiCountdown({ targetDate }: { targetDate: string }) {
     let timer: NodeJS.Timeout;
     const calculateTimeLeft = () => {
       const difference = new Date(targetDate).getTime() - Date.now();
-      
+
       if (difference <= 0) {
         setTimeLeft("Payout due");
         // Auto-refresh stats when timer expires to show newly distributed ROI immediately
@@ -187,7 +187,7 @@ function DashboardHome() {
               <ShieldAlert className="h-5 w-5 text-primary" />
               <h2 className="text-base font-bold text-foreground">Global Platform Metrics</h2>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               <Link to="/dashboard/admin/users" className="block transition-all hover:scale-[1.02] cursor-pointer">
                 <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" />
               </Link>
@@ -304,7 +304,7 @@ function DashboardHome() {
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <StatCard icon={Wallet} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="primary" />
             <StatCard icon={TrendingUp} label="Daily ROI Target" value="Active" accent="profit" />
             <StatCard icon={ArrowDownToLine} label="Withdrawal Balance" value={`$${(walletsData?.withdrawal || 0).toFixed(2)}`} accent="primary" />
@@ -415,10 +415,10 @@ function DashboardHome() {
                 </div>
                 <div className="flex items-center gap-2 rounded-lg bg-secondary p-2.5">
                   <input readOnly value={referralLink} className="flex-1 bg-transparent text-xs outline-none text-foreground" />
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-8 w-8" 
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
                     onClick={() => {
                       navigator.clipboard.writeText(referralLink);
                     }}

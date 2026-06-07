@@ -2,10 +2,10 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
-  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard
+  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Pencil
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -50,7 +50,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         </Link>
         {onClose && <button onClick={onClose} className="lg:hidden hover:opacity-70 transition"><X size={18} /></button>}
       </div>
-      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-2 sidebar-scroll">
         {nav.filter(n => !isAdmin || n.hasAdmin).map((n) => {
           const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
           const Icon = n.icon;
@@ -122,6 +122,9 @@ export function DashboardLayout({ title, children }: { title: string; children: 
   const [open, setOpen] = useState(false);
   const { user, fetchProfile } = useAuthStore();
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isDashboardHome = pathname === "/dashboard" || pathname === "/dashboard/";
+  const showMobileProfile = !isAdmin && isDashboardHome;
 
   useEffect(() => {
     fetchProfile();
@@ -133,11 +136,24 @@ export function DashboardLayout({ title, children }: { title: string; children: 
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
+  const getJoinedDate = (createdAt?: string) => {
+    if (!createdAt) return "JOINED • -";
+    const date = new Date(createdAt);
+    const day = date.getDate();
+    const month = date.toLocaleString("en-US", { month: "short" }).toUpperCase();
+    const year = date.getFullYear();
+    return `JOINED • ${day} ${month}, ${year}`;
+  };
+
   // Calculate total balance from specific Firebase synced wallets
   const w = user?.wallets;
   const walletBalance = w
     ? (w.deposit || 0) + (w.roi || 0) + (w.referral || 0) + (w.bonusReceived || 0) + (w.salary || 0) + (w.achievement || 0) - (w.withdrawal || 0)
     : 0;
+
+  const addressStr = user?.id ? `0x${user.id.slice(0, 10)}...${user.id.slice(-4)}` : "0x0000...0000";
+  const sponsorStr = user?.sponsor ? `INVITED BY • ${user.sponsor.toUpperCase()}` : "INVITED BY • NONE";
+  const joinedStr = getJoinedDate(user?.createdAt);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -166,13 +182,63 @@ export function DashboardLayout({ title, children }: { title: string; children: 
               <span className="text-sm font-bold text-primary">${walletBalance.toFixed(2)}</span>
             </div>
           )}
-          <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30">
-            <AvatarFallback className="bg-primary-gradient text-white font-semibold">
-              {getInitials(user?.name)}
-            </AvatarFallback>
-          </Avatar>
+          <Link to="/dashboard/profile" className="cursor-pointer transition hover:opacity-80">
+            <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30">
+              {user?.imageUrl && (
+                <AvatarImage src={user.imageUrl} alt={user.name || "User Avatar"} className="object-cover" />
+              )}
+              <AvatarFallback className="bg-primary-gradient text-white font-semibold">
+                {getInitials(user?.name)}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-liquid-bg">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-liquid-bg">
+          {showMobileProfile && (
+            <div className="mb-6 block lg:hidden">
+              <div className="relative flex items-center justify-between p-4 rounded-2xl border border-purple-500/20 bg-[#ffffff]/80 backdrop-blur-md shadow-lg shadow-purple-950/20">
+                <div className="flex items-center gap-4">
+                  {/* Avatar with purple ring */}
+                  <div className="relative animate-fade-in">
+                    <Avatar className="h-16 w-16 ring-2 ring-purple-600 ring-offset-2 ring-offset-[#0d0a15]">
+                      {user?.imageUrl ? (
+                        <AvatarImage src={user.imageUrl} alt={user.name} className="object-cover animate-fade-in" />
+                      ) : null}
+                      <AvatarFallback className="bg-primary-gradient text-white text-lg font-bold">
+                        {getInitials(user?.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+
+                  {/* User Info */}
+                  <div className="flex flex-col">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                      {user?.name || "User"}
+                    </h3>
+                    <span className="text-xs text-blue-400 font-mono mt-0.5">
+                      {addressStr}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider mt-1">
+                      {sponsorStr}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
+                      {joinedStr}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Edit Button */}
+                <Link
+                  to="/dashboard/profile"
+                  className="flex items-center justify-center h-10 w-10 rounded-full border border-primary-gradient/30 bg-primary-gradient text-white transition-all active:scale-95"
+                >
+                  <Pencil size={16} />
+                </Link>
+              </div>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );
