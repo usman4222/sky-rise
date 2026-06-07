@@ -369,41 +369,40 @@ function DashboardHome() {
         <>
           <BannerSlider />
 
-          {/* Quick Actions Card */}
-          <div className="mt-4 mb-6 max-w-xl mx-auto sm:mx-0 bg-glass-surface/35 border border-glass-border/30 backdrop-blur-md rounded-2xl p-4 shadow-card">
-            <div className="grid grid-cols-3 divide-x divide-glass-border/20">
-              {/* Deposit Option */}
-              <Link 
-                to="/dashboard/wallet"
-                className="flex flex-col items-center justify-center gap-2 hover:opacity-85 active:scale-95 transition-all"
-              >
-                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all hover:scale-105">
-                  <ArrowDownToLine size={20} className="stroke-[2.2]" />
-                </div>
-                <span className="text-xs font-bold text-foreground">Deposit</span>
-              </Link>
+          {/* Quick Actions + Stat Cards — unified layout */}
+          <div className="mt-4 mb-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-              {/* Withdrawal Option */}
-              <Link 
-                to="/dashboard/withdraw"
-                className="flex flex-col items-center justify-center gap-2 hover:opacity-85 active:scale-95 transition-all"
-              >
-                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all hover:scale-105">
-                  <ArrowUpToLine size={20} className="stroke-[2.2]" />
-                </div>
-                <span className="text-xs font-bold text-foreground">Withdrawal</span>
-              </Link>
+            {/* Quick Actions — takes 1 col on desktop */}
+            <div className="lg:col-span-1 bg-glass-surface/35 border border-glass-border/30 backdrop-blur-md rounded-2xl p-5 shadow-card flex flex-col justify-center gap-5">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center lg:text-left">Quick Actions</p>
+              <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2">
+                {[
+                  { to: "/dashboard/wallet", icon: ArrowDownToLine, label: "Deposit" },
+                  { to: "/dashboard/withdraw", icon: ArrowUpToLine, label: "Withdrawal" },
+                  { to: "/dashboard/transfer", icon: ArrowLeftRight, label: "Transfer" },
+                ].map(({ to, icon: Icon, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3 hover:opacity-85 active:scale-95 transition-all group"
+                  >
+                    <div className="h-11 w-11 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all group-hover:scale-105 shrink-0">
+                      <Icon size={18} className="stroke-[2.2]" />
+                    </div>
+                    <span className="text-xs font-bold text-foreground">{label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-              {/* Transfer Option */}
-              <Link 
-                to="/dashboard/transfer"
-                className="flex flex-col items-center justify-center gap-2 hover:opacity-85 active:scale-95 transition-all"
-              >
-                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary-gradient text-white shadow-[0_4px_12px_rgba(123,92,255,0.25)] border border-primary/20 transition-all hover:scale-105">
-                  <ArrowLeftRight size={20} className="stroke-[2.2]" />
-                </div>
-                <span className="text-xs font-bold text-foreground">Transfer</span>
-              </Link>
+            {/* Stat Cards — 3 col on desktop */}
+            <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-3">
+              <StatCard icon={Wallet} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="primary" />
+              <StatCard icon={TrendingUp} label="Daily ROI Target" value="Active" accent="profit" />
+              <StatCard icon={ArrowDownToLine} label="Withdrawal Balance" value={`$${(walletsData?.withdrawal || 0).toFixed(2)}`} accent="primary" />
+              <StatCard icon={Users} label="Referral Wallet" value={`$${(walletsData?.referral || 0).toFixed(2)}`} accent="profit" />
+              <StatCard icon={Gift} label="Team Bonus Received" value={`$${(walletsData?.bonusReceived || 0).toFixed(2)}`} accent="gold" />
+              <StatCard icon={Crown} label="Account Level" value={accountLevelStr} accent="gold" />
             </div>
           </div>
 
