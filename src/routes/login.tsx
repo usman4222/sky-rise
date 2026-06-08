@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { Logo } from "@/components/logo";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -117,9 +118,8 @@ function LoginPage() {
     <div className="min-h-screen bg-gradient-liquid-bg">
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-4 py-10 md:px-6 lg:grid-cols-2">
         <div className="order-2 lg:order-1">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-primary-gradient shadow-soft" />
-            <span className="text-lg font-bold">Sky<span className="text-primary">Rise</span></span>
+          <Link to="/">
+            <Logo size={36} />
           </Link>
           <Card className="mt-8">
             <CardContent className="p-8">

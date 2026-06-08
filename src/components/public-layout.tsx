@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
+import { Logo } from "@/components/logo";
 
 const navItems = [
   { to: "/", label: "Home" },
@@ -22,9 +23,8 @@ export function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 w-full glass-navbar glass-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="h-10 w-10 rounded-full bg-primary-gradient shadow-soft" />
-          <span className="text-lg font-bold tracking-tight">Sky<span className="text-primary">Rise</span></span>
+        <Link to="/">
+          <Logo size={36} />
         </Link>
         <nav className="hidden items-center gap-1 lg:flex">
           {navItems.map((n) => (
@@ -82,10 +82,7 @@ export function PublicFooter() {
     <footer className="mt-24 glass-navbar glass-blur-md">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-4 md:px-6">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-primary-gradient shadow-soft" />
-            <span className="text-lg font-bold">Sky<span className="text-primary">Rise</span></span>
-          </div>
+          <Logo size={36} />
           <p className="mt-3 text-sm text-muted-foreground">A modern global investment-style platform with daily ROI tracking, referral team building, and VIP reward programs.</p>
         </div>
         <div>

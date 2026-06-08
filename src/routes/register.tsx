@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { Logo } from "@/components/logo";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -139,9 +140,8 @@ function RegisterPage() {
       )}
 
       <div className="mx-auto max-w-2xl px-4 py-12 md:px-6">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <div className="h-10 w-10 rounded-full bg-primary-gradient shadow-soft" />
-          <span className="text-lg font-bold">SkyRise <span className="text-primary">Future</span></span>
+        <Link to="/">
+          <Logo size={36} />
         </Link>
         <Card className="mt-8">
           <CardContent className="p-8">

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/authStore";
+import { Logo } from "@/components/logo";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true, hasAdmin: true },
@@ -46,9 +47,8 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   return (
     <aside className="flex h-full w-64 flex-col glass-sidebar glass-blur-md">
       <div className="flex items-center justify-between px-6 py-5 border-b border-glass-border">
-        <Link to="/" className="flex items-center gap-2" onClick={onClose}>
-          <div className="h-8 w-8 rounded-full bg-primary-gradient shadow-soft" />
-          <span className="font-bold text-foreground">Sky<span className="text-primary">Rise</span></span>
+        <Link to="/" onClick={onClose}>
+          <Logo />
         </Link>
         {onClose && <button onClick={onClose} className="lg:hidden hover:opacity-70 transition"><X size={18} /></button>}
       </div>

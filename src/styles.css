@@ -52,110 +52,110 @@
 :root {
   --radius: 1.15rem;
 
-  /* SkyRise Liquid Glass light palette */
-  --background: #f7f3ee;
-  --foreground: #172036;
-  --card: rgba(255, 255, 255, 0.46);
-  --card-foreground: #172036;
-  --popover: rgba(255, 255, 255, 0.72);
-  --popover-foreground: #172036;
+  /* Nequlix Capital inspired forest green and gold theme */
+  --background: #F4F7F6;
+  --foreground: #0B2019;
+  --card: #ffffff;
+  --card-foreground: #0B2019;
+  --popover: #ffffff;
+  --popover-foreground: #0B2019;
 
-  --primary: #7b5cff;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(255, 255, 255, 0.55);
-  --secondary-foreground: #172036;
-  --muted: rgba(255, 255, 255, 0.38);
-  --muted-foreground: #66708a;
-  --accent: rgba(116, 240, 222, 0.28);
-  --accent-foreground: #172036;
-  --destructive: #ef4444;
+  --primary: #FFCD29;
+  --primary-foreground: #003B26;
+  --secondary: #E2E9E6;
+  --secondary-foreground: #0B2019;
+  --muted: #EDF1EF;
+  --muted-foreground: #5A6F66;
+  --accent: rgba(0, 75, 50, 0.08);
+  --accent-foreground: #004B32;
+  --destructive: #D32F2F;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.58);
-  --input: rgba(255, 255, 255, 0.58);
-  --ring: rgba(123, 92, 255, 0.45);
+  --border: #E2E9E6;
+  --input: #ffffff;
+  --ring: rgba(255, 205, 41, 0.45);
 
-  --gold: #f7b84f;
-  --gold-foreground: #3d2700;
-  --profit: #18b66a;
+  --gold: #FFCD29;
+  --gold-foreground: #003B26;
+  --profit: #0F9F59;
   --profit-foreground: #ffffff;
-  --aqua: #60eadb;
-  --violet: #8d65ff;
-  --rose: #ff9ecf;
+  --aqua: #56B990;
+  --violet: #005C3B;
+  --rose: #F27A7A;
 
-  /* Liquid glass surfaces */
-  --glass-surface: rgba(255, 255, 255, 0.38);
-  --glass-surface-soft: rgba(255, 255, 255, 0.26);
-  --glass-surface-strong: rgba(255, 255, 255, 0.64);
-  --glass-border: rgba(255, 255, 255, 0.62);
-  --glass-border-soft: rgba(255, 255, 255, 0.34);
-  --glass-highlight: rgba(255, 255, 255, 0.82);
-  --glass-shadow: 0 24px 70px rgba(73, 83, 130, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.74);
-  --glass-shadow-soft: 0 14px 40px rgba(73, 83, 130, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.64);
-  --glass-shadow-hover: 0 28px 80px rgba(91, 96, 160, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.82);
+  /* Liquid glass surfaces adapted to Nequlix theme */
+  --glass-surface: rgba(255, 255, 255, 0.88);
+  --glass-surface-soft: rgba(255, 255, 255, 0.45);
+  --glass-surface-strong: #ffffff;
+  --glass-border: rgba(0, 59, 38, 0.08);
+  --glass-border-soft: rgba(0, 59, 38, 0.04);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 16px 40px rgba(0, 45, 30, 0.05);
+  --glass-shadow-soft: 0 10px 24px rgba(0, 45, 30, 0.03);
+  --glass-shadow-hover: 0 20px 48px rgba(0, 45, 30, 0.08);
 
-  --gradient-sky: linear-gradient(135deg, #fbf7f0 0%, #ecf7ff 44%, #f8efff 100%);
+  --gradient-sky: linear-gradient(135deg, #F4F7F6 0%, #EBF0EE 100%);
   --gradient-liquid-bg:
-    radial-gradient(circle at 12% 10%, rgba(139, 96, 255, 0.34), transparent 30%),
-    radial-gradient(circle at 86% 14%, rgba(87, 234, 220, 0.38), transparent 32%),
-    radial-gradient(circle at 70% 86%, rgba(255, 155, 205, 0.34), transparent 36%),
-    linear-gradient(135deg, #f8f1e9 0%, #eef7ff 48%, #fbf1f7 100%);
-  --gradient-primary: linear-gradient(135deg, #8c5cff 0%, #635bff 45%, #57e5d6 100%);
-  --gradient-secondary: linear-gradient(135deg, #5fe7dc 0%, #6b8cff 100%);
-  --gradient-gold: linear-gradient(135deg, #f6b84f 0%, #ffd987 100%);
-  --gradient-profit: linear-gradient(135deg, #19b86a 0%, #57e5a1 100%);
-  --gradient-rose: linear-gradient(135deg, #ff9ecf 0%, #8c5cff 100%);
+    radial-gradient(circle at 12% 10%, rgba(15, 159, 89, 0.08), transparent 30%),
+    radial-gradient(circle at 86% 14%, rgba(255, 205, 41, 0.1), transparent 32%),
+    radial-gradient(circle at 70% 86%, rgba(0, 59, 38, 0.06), transparent 36%),
+    linear-gradient(135deg, #F4F7F6 0%, #EBF0EE 100%);
+  --gradient-primary: linear-gradient(135deg, #FFCD29 0%, #F5B800 100%);
+  --gradient-secondary: linear-gradient(135deg, #004B32 0%, #002D1E 100%);
+  --gradient-gold: linear-gradient(135deg, #FFCD29 0%, #F2A900 100%);
+  --gradient-profit: linear-gradient(135deg, #0F9F59 0%, #15B866 100%);
+  --gradient-rose: linear-gradient(135deg, #E25C5C 0%, #B82C2C 100%);
 
-  --shadow-soft: 0 10px 30px rgba(73, 83, 130, 0.10);
-  --shadow-card: 0 18px 45px rgba(73, 83, 130, 0.14);
-  --shadow-elevated: 0 30px 85px rgba(73, 83, 130, 0.22);
-  --shadow-glow: 0 0 45px rgba(123, 92, 255, 0.28), 0 0 70px rgba(96, 234, 219, 0.20);
+  --shadow-soft: 0 8px 24px rgba(0, 45, 30, 0.04);
+  --shadow-card: 0 16px 40px rgba(0, 45, 30, 0.06);
+  --shadow-elevated: 0 24px 60px rgba(0, 45, 30, 0.1);
+  --shadow-glow: 0 0 45px rgba(255, 205, 41, 0.25), 0 0 70px rgba(15, 159, 89, 0.15);
 
-  --sidebar: rgba(255, 255, 255, 0.42);
-  --sidebar-foreground: #172036;
-  --sidebar-primary: #7b5cff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.48);
-  --sidebar-accent-foreground: #172036;
-  --sidebar-border: rgba(255, 255, 255, 0.58);
-  --sidebar-ring: rgba(123, 92, 255, 0.45);
+  --sidebar: #003B26;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #FFCD29;
+  --sidebar-primary-foreground: #003B26;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(255, 205, 41, 0.45);
 }
 
 .dark {
-  --background: #0f1220;
-  --foreground: #f7f8ff;
-  --card: rgba(28, 32, 52, 0.48);
-  --card-foreground: #f7f8ff;
-  --popover: rgba(28, 32, 52, 0.72);
-  --popover-foreground: #f7f8ff;
-  --primary: #9a7cff;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(255, 255, 255, 0.10);
-  --secondary-foreground: #f7f8ff;
-  --muted: rgba(255, 255, 255, 0.10);
-  --muted-foreground: #aab2c8;
-  --accent: rgba(96, 234, 219, 0.16);
-  --accent-foreground: #f7f8ff;
-  --border: rgba(255, 255, 255, 0.16);
-  --input: rgba(255, 255, 255, 0.14);
-  --ring: rgba(154, 124, 255, 0.52);
-  --glass-surface: rgba(28, 32, 52, 0.42);
-  --glass-surface-soft: rgba(28, 32, 52, 0.30);
-  --glass-surface-strong: rgba(28, 32, 52, 0.64);
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-border-soft: rgba(255, 255, 255, 0.10);
-  --glass-highlight: rgba(255, 255, 255, 0.24);
-  --glass-shadow: 0 24px 70px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.14);
-  --glass-shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.24), inset 0 1px 1px rgba(255, 255, 255, 0.10);
+  --background: #001f14;
+  --foreground: #F4F7F6;
+  --card: rgba(0, 45, 30, 0.45);
+  --card-foreground: #F4F7F6;
+  --popover: rgba(0, 45, 30, 0.72);
+  --popover-foreground: #F4F7F6;
+  --primary: #FFCD29;
+  --primary-foreground: #003B26;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #F4F7F6;
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: #A2B4AC;
+  --accent: rgba(255, 205, 41, 0.16);
+  --accent-foreground: #F4F7F6;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.06);
+  --ring: rgba(255, 205, 41, 0.52);
+  --glass-surface: rgba(0, 45, 30, 0.42);
+  --glass-surface-soft: rgba(0, 45, 30, 0.30);
+  --glass-surface-strong: rgba(0, 45, 30, 0.64);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-soft: rgba(255, 255, 255, 0.04);
+  --glass-highlight: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 24px 70px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  --glass-shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.24), inset 0 1px 1px rgba(255, 255, 255, 0.06);
   --gradient-liquid-bg:
-    radial-gradient(circle at 14% 12%, rgba(139, 96, 255, 0.28), transparent 30%),
-    radial-gradient(circle at 86% 18%, rgba(87, 234, 220, 0.20), transparent 34%),
-    radial-gradient(circle at 72% 88%, rgba(255, 155, 205, 0.18), transparent 36%),
-    linear-gradient(135deg, #0f1220 0%, #121a2f 52%, #171225 100%);
-  --sidebar: rgba(28, 32, 52, 0.42);
-  --sidebar-foreground: #f7f8ff;
-  --sidebar-accent: rgba(255, 255, 255, 0.10);
-  --sidebar-accent-foreground: #f7f8ff;
-  --sidebar-border: rgba(255, 255, 255, 0.16);
+    radial-gradient(circle at 14% 12%, rgba(15, 159, 89, 0.12), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255, 205, 41, 0.08), transparent 34%),
+    radial-gradient(circle at 72% 88%, rgba(0, 75, 50, 0.12), transparent 36%),
+    linear-gradient(135deg, #001a11 0%, #002518 52%, #00120b 100%);
+  --sidebar: #001A11;
+  --sidebar-foreground: #F4F7F6;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #F4F7F6;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
 }
 
 @layer base {
@@ -1261,5 +1261,114 @@ textarea:focus {
 
 .success-backdrop-in {
   animation: backdrop-in 0.25s ease both;
+}
+
+/* ───────────────────────────────────────────────────────────
+   Nequlix Capital Color Theme Legibility and Sidebar Overrides
+   ─────────────────────────────────────────────────────────── */
+
+/* Ensure text in primary gradient elements remains readable when primary color is gold/yellow */
+.bg-primary-gradient,
+[class*="bg-primary-gradient"] {
+  color: var(--primary-foreground) !important;
+}
+
+/* Specifically target icons inside bg-primary-gradient */
+.bg-primary-gradient svg,
+.bg-primary-gradient lucide,
+.bg-primary-gradient .lucide {
+  stroke: var(--primary-foreground) !important;
+  color: var(--primary-foreground) !important;
+}
+
+/* Sidebar context variables override to make sidebar text white and links gold when active */
+.glass-sidebar {
+  --foreground: #ffffff;
+  --primary: #FFCD29;
+  --glass-surface-soft: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  background: var(--sidebar) !important;
+}
+
+/* Active sidebar item styling matching Nequlix Capital */
+.glass-sidebar a.bg-primary-gradient {
+  background: var(--gradient-primary) !important;
+  color: #003B26 !important;
+  box-shadow: 0 4px 12px rgba(255, 205, 41, 0.35) !important;
+}
+
+.glass-sidebar a.bg-primary-gradient svg {
+  stroke: #003B26 !important;
+  color: #003B26 !important;
+}
+
+/* Normal non-active link transitions in sidebar */
+.glass-sidebar a:not(.bg-primary-gradient) {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.glass-sidebar a:not(.bg-primary-gradient):hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Overriding success checkmark background */
+.checkmark-circle .background {
+  background: var(--profit) !important;
+}
+
+/* ───────────────────────────────────────────────────────────
+   Premium Volumetric Fluid Smoke Effect on All Cards
+   ─────────────────────────────────────────────────────────── */
+
+.glass-card,
+[data-slot="card"] {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  /* Soft translucent card background to allow floating color smoke to show through */
+  background: rgba(255, 255, 255, 0.76) !important;
+  border: 1px solid rgba(0, 59, 38, 0.08) !important;
+  box-shadow: 0 10px 24px rgba(0, 45, 30, 0.03) !important;
+}
+
+.glass-card::before,
+[data-slot="card"]::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -60% !important;
+  /* Combination of brand green and gold colors */
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(15, 159, 89, 0.14) 0%, transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(255, 205, 41, 0.14) 0%, transparent 45%) !important;
+  filter: blur(30px) !important;
+  /* Fluid floating animation */
+  animation: card-smoke-float 20s ease-in-out infinite alternate !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+  opacity: 0.85 !important;
+  transition: opacity 0.5s ease, filter 0.5s ease !important;
+}
+
+/* Hover interaction: make the color smoke shift focus and become slightly more vivid */
+.glass-card:hover::before,
+[data-slot="card"]:hover::before {
+  opacity: 1 !important;
+  filter: blur(22px) !important;
+}
+
+@keyframes card-smoke-float {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(8%, 12%) scale(1.06) rotate(120deg);
+  }
+  66% {
+    transform: translate(-6%, 8%) scale(0.94) rotate(240deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1) rotate(360deg);
+  }
 }
 
