@@ -21,6 +21,7 @@ export interface UserProfile {
   sponsor?: string;
   kycStatus: string;
   status?: string;
+  createdAt?: string;
   vipRank?: number;
   achievementRank?: number;
   roles?: string[];

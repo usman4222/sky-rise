@@ -77,7 +77,7 @@ function LevelsPage() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {displayLevels.map((l) => (
-          <Card key={l.level} className={`border-soft shadow-card ${l.unlocked ? "bg-white" : "bg-secondary"}`}>
+          <Card key={l.level} className={`glass-card-hover border-soft shadow-card ${l.unlocked ? "bg-white" : "bg-secondary"}`}>
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <Badge className={l.unlocked ? "bg-profit/10 text-profit border-0" : "bg-muted text-muted-foreground border-0"}>

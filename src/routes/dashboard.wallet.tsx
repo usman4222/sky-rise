@@ -132,13 +132,13 @@ function WalletPage() {
   return (
     <DashboardLayout title="Wallets & Deposits">
       <style>{`
-        /* ── WALLET PAGE DARK THEME ── */
+        /* ── WALLET PAGE LIGHT THEME (matching Dashboard) ── */
         .wp-root {
-          background: #0a1a0e;
+          background: #f3f6f5;
           min-height: 100vh;
           padding: 0 0 100px 0;
-          font-family: 'Inter', system-ui, sans-serif;
-          color: #fff;
+          font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+          color: #081a12;
         }
 
         /* Header */
@@ -151,28 +151,29 @@ function WalletPage() {
         .wp-header-title {
           font-size: 1.1rem;
           font-weight: 800;
-          color: #fff;
+          color: #081a12;
           letter-spacing: -0.02em;
         }
         .wp-avatar {
           width: 38px; height: 38px;
           border-radius: 50%;
           background: linear-gradient(135deg, #f3ba2f, #e6a800);
-          color: #0a1a0e;
+          color: #002b1c;
           font-weight: 900;
           font-size: 0.75rem;
           display: flex; align-items: center; justify-content: center;
           cursor: pointer;
           transition: transform 0.2s;
+          box-shadow: 0 3px 10px rgba(243,186,47,0.35);
         }
         .wp-avatar:hover { transform: scale(1.08); }
 
         /* Live badge */
         .wp-live-badge {
           display: inline-flex; align-items: center; gap: 5px;
-          background: rgba(34,197,94,0.12);
-          border: 1px solid rgba(34,197,94,0.3);
-          color: #22c55e;
+          background: rgba(14,159,110,0.1);
+          border: 1px solid rgba(14,159,110,0.25);
+          color: #0e9f6e;
           font-size: 0.6rem; font-weight: 800;
           text-transform: uppercase; letter-spacing: 0.1em;
           padding: 3px 9px; border-radius: 99px;
@@ -180,56 +181,61 @@ function WalletPage() {
         }
         .wp-live-dot {
           width: 5px; height: 5px;
-          background: #22c55e; border-radius: 50%;
+          background: #0e9f6e; border-radius: 50%;
           animation: wpPulse 1.4s ease-in-out infinite;
         }
         @keyframes wpPulse {
           0%,100% { opacity:1; transform:scale(1); }
-          50% { opacity:0.4; transform:scale(1.4); }
+          50% { opacity:0.4; transform:scale(1.5); }
         }
 
-        /* Hero balance */
+        /* Hero balance — golden card */
         .wp-hero {
-          padding: 14px 18px 20px;
+          margin: 14px 18px 0;
+          background: linear-gradient(135deg, #004d33 0%, #0c6a46 55%, #f3ba2f 100%);
+          border-radius: 20px;
+          padding: 20px 18px 18px;
+          box-shadow: 0 8px 28px rgba(0,77,51,0.22);
         }
         .wp-hero-label {
           font-size: 0.6rem; font-weight: 800;
           text-transform: uppercase; letter-spacing: 0.15em;
-          color: rgba(255,255,255,0.45);
+          color: rgba(255,255,255,0.6);
           margin-bottom: 6px;
         }
         .wp-hero-balance {
           font-size: 2.6rem; font-weight: 900;
           letter-spacing: -0.04em; line-height: 1;
-          color: #f3ba2f;
+          color: #ffffff;
           font-variant-numeric: tabular-nums;
         }
         .wp-hero-sub {
-          font-size: 0.62rem; color: #22c55e;
-          margin-top: 6px; font-weight: 600;
+          font-size: 0.62rem; color: #a7f3d0;
+          margin-top: 8px; font-weight: 600;
         }
 
         /* Stats row */
         .wp-stats {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
-          margin: 0 18px 18px;
+          gap: 10px;
+          margin: 14px 18px 18px;
         }
         .wp-stat-box {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 12px;
-          padding: 10px 8px;
+          background: #ffffff;
+          border: 1px solid rgba(0,77,51,0.08);
+          border-radius: 14px;
+          padding: 12px 8px;
           text-align: center;
+          box-shadow: 0 2px 10px rgba(8,26,18,0.05);
         }
         .wp-stat-val {
-          font-size: 0.8rem; font-weight: 800;
+          font-size: 0.85rem; font-weight: 800;
           color: #f3ba2f; font-variant-numeric: tabular-nums;
         }
         .wp-stat-lbl {
           font-size: 0.55rem; font-weight: 700;
-          color: rgba(255,255,255,0.4);
+          color: #4b6b5d;
           text-transform: uppercase; letter-spacing: 0.08em;
           margin-top: 3px;
         }
@@ -240,20 +246,23 @@ function WalletPage() {
           margin: 0 18px 22px;
         }
         .wp-btn {
-          flex: 1; height: 44px;
-          border-radius: 12px;
+          flex: 1; height: 46px;
+          border-radius: 13px;
           font-weight: 700; font-size: 0.85rem;
           display: flex; align-items: center; justify-content: center;
           gap: 7px; cursor: pointer;
           transition: all 0.2s ease;
-          border: 1.5px solid rgba(255,255,255,0.2);
-          background: rgba(255,255,255,0.06);
-          color: #fff;
+          border: 1.5px solid rgba(0,77,51,0.15);
+          background: #ffffff;
+          color: #004d33;
+          box-shadow: 0 2px 8px rgba(8,26,18,0.06);
         }
         .wp-btn:hover {
-          background: rgba(255,255,255,0.12);
-          border-color: rgba(255,255,255,0.35);
+          background: #f3f6f5;
+          border-color: #f3ba2f;
+          color: #002b1c;
           transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(243,186,47,0.2);
         }
         .wp-btn:active { transform: scale(0.97); }
 
@@ -261,73 +270,75 @@ function WalletPage() {
         .wp-section-label {
           font-size: 0.62rem; font-weight: 800;
           text-transform: uppercase; letter-spacing: 0.12em;
-          color: rgba(255,255,255,0.4);
+          color: #4b6b5d;
           padding: 0 18px 10px;
         }
 
         /* Wallet list items */
         .wp-wallet-list {
           padding: 0 18px;
-          display: flex; flex-direction: column; gap: 8px;
+          display: flex; flex-direction: column; gap: 10px;
           margin-bottom: 22px;
         }
         .wp-wallet-item {
-          background: #111f14;
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 14px;
-          padding: 14px 14px;
+          background: #ffffff;
+          border: 1px solid rgba(0,77,51,0.08);
+          border-radius: 16px;
+          padding: 14px;
           display: flex; align-items: center; justify-content: space-between;
           transition: all 0.2s;
           cursor: default;
+          box-shadow: 0 2px 10px rgba(8,26,18,0.04);
         }
         .wp-wallet-item:hover {
-          background: #162417;
-          border-color: rgba(243,186,47,0.2);
+          border-color: rgba(243,186,47,0.35);
+          box-shadow: 0 4px 18px rgba(243,186,47,0.12);
           transform: translateY(-1px);
         }
         .wp-wallet-left { display: flex; align-items: center; gap: 12px; }
         .wp-wallet-icon {
-          width: 40px; height: 40px;
-          border-radius: 12px;
+          width: 42px; height: 42px;
+          border-radius: 13px;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
-        .wp-icon-green { background: linear-gradient(135deg,#1a4d2e,#0d6e40); box-shadow: 0 3px 12px rgba(16,185,129,0.25); }
-        .wp-icon-gold  { background: linear-gradient(135deg,#4d3a00,#b8860b); box-shadow: 0 3px 12px rgba(243,186,47,0.25); }
-        .wp-icon-blue  { background: linear-gradient(135deg,#0c3050,#1565c0); box-shadow: 0 3px 12px rgba(33,150,243,0.25); }
-        .wp-icon-purple{ background: linear-gradient(135deg,#2d1b5e,#6d28d9); box-shadow: 0 3px 12px rgba(109,40,217,0.25); }
+        .wp-icon-green  { background: linear-gradient(135deg,#0e9f6e,#34d399); box-shadow: 0 3px 12px rgba(14,159,110,0.25); }
+        .wp-icon-gold   { background: linear-gradient(135deg,#f3ba2f,#ffe082); box-shadow: 0 3px 12px rgba(243,186,47,0.30); }
+        .wp-icon-blue   { background: linear-gradient(135deg,#3b82f6,#60a5fa); box-shadow: 0 3px 12px rgba(59,130,246,0.25); }
+        .wp-icon-purple { background: linear-gradient(135deg,#8b5cf6,#a78bfa); box-shadow: 0 3px 12px rgba(139,92,246,0.25); }
 
         .wp-wallet-name {
-          font-size: 0.78rem; font-weight: 700; color: #fff;
+          font-size: 0.8rem; font-weight: 700; color: #081a12;
           line-height: 1.2;
         }
         .wp-wallet-desc {
-          font-size: 0.6rem; color: rgba(255,255,255,0.4);
+          font-size: 0.6rem; color: #4b6b5d;
           margin-top: 2px;
         }
         .wp-wallet-right { text-align: right; }
         .wp-wallet-amount {
-          font-size: 0.85rem; font-weight: 800;
-          color: #fff; font-variant-numeric: tabular-nums;
+          font-size: 0.88rem; font-weight: 800;
+          color: #081a12; font-variant-numeric: tabular-nums;
         }
         .wp-badge {
           display: inline-block;
           font-size: 0.55rem; font-weight: 800;
           text-transform: uppercase; letter-spacing: 0.08em;
-          padding: 2px 7px; border-radius: 99px;
+          padding: 2px 8px; border-radius: 99px;
           margin-top: 4px;
         }
-        .wp-badge-locked  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); }
-        .wp-badge-active  { background: rgba(34,197,94,0.15); color: #22c55e; }
-        .wp-badge-pending { background: rgba(243,186,47,0.12); color: #f3ba2f; }
+        .wp-badge-locked  { background: rgba(75,107,93,0.1); color: #4b6b5d; }
+        .wp-badge-active  { background: rgba(14,159,110,0.12); color: #0e9f6e; }
+        .wp-badge-pending { background: rgba(243,186,47,0.15); color: #b8860b; }
 
         /* ROI target progress */
         .wp-target-card {
-          margin: 0 18px 16px;
-          background: #111f14;
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 14px;
-          padding: 14px;
+          margin: 0 18px 14px;
+          background: #ffffff;
+          border: 1px solid rgba(0,77,51,0.08);
+          border-radius: 16px;
+          padding: 16px;
+          box-shadow: 0 2px 10px rgba(8,26,18,0.04);
         }
         .wp-target-header {
           display: flex; align-items: center; justify-content: space-between;
@@ -335,37 +346,38 @@ function WalletPage() {
         }
         .wp-target-title {
           font-size: 0.7rem; font-weight: 800;
-          color: rgba(255,255,255,0.7);
+          color: #4b6b5d;
           text-transform: uppercase; letter-spacing: 0.08em;
           display: flex; align-items: center; gap: 6px;
         }
         .wp-target-pct {
-          font-size: 0.9rem; font-weight: 900;
+          font-size: 0.95rem; font-weight: 900;
           color: #f3ba2f;
         }
         .wp-progress-track {
-          height: 8px; background: rgba(255,255,255,0.08);
+          height: 8px; background: rgba(0,77,51,0.08);
           border-radius: 99px; overflow: hidden;
         }
         .wp-progress-fill {
           height: 100%;
-          background: linear-gradient(90deg, #f3ba2f, #22c55e);
+          background: linear-gradient(90deg, #f3ba2f, #0e9f6e);
           border-radius: 99px;
           transition: width 0.6s cubic-bezier(0.25,1,0.5,1);
         }
         .wp-target-sub {
           display: flex; justify-content: space-between;
           margin-top: 6px;
-          font-size: 0.6rem; color: rgba(255,255,255,0.35); font-weight: 600;
+          font-size: 0.6rem; color: #4b6b5d; font-weight: 600;
         }
 
         /* ROI Activity */
         .wp-activity-card {
-          margin: 0 18px 16px;
-          background: #111f14;
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 14px;
-          padding: 14px;
+          margin: 0 18px 14px;
+          background: #ffffff;
+          border: 1px solid rgba(0,77,51,0.08);
+          border-radius: 16px;
+          padding: 16px;
+          box-shadow: 0 2px 10px rgba(8,26,18,0.04);
         }
         .wp-activity-header {
           display: flex; align-items: center; justify-content: space-between;
@@ -373,7 +385,7 @@ function WalletPage() {
         }
         .wp-activity-title {
           font-size: 0.7rem; font-weight: 800;
-          color: rgba(255,255,255,0.7);
+          color: #4b6b5d;
           display: flex; align-items: center; gap: 6px;
           text-transform: uppercase; letter-spacing: 0.08em;
         }
@@ -386,49 +398,49 @@ function WalletPage() {
         .wp-view-all:hover { opacity: 0.75; }
         .wp-log-item {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 7px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(0,77,51,0.06);
         }
         .wp-log-item:last-child { border-bottom: none; }
         .wp-log-left { display: flex; align-items: center; gap: 8px; }
         .wp-log-icon {
-          width: 26px; height: 26px;
-          background: rgba(34,197,94,0.12);
-          border-radius: 8px;
+          width: 28px; height: 28px;
+          background: rgba(14,159,110,0.1);
+          border-radius: 9px;
           display: flex; align-items: center; justify-content: center;
-          color: #22c55e;
+          color: #0e9f6e;
         }
         .wp-log-name {
-          font-size: 0.72rem; font-weight: 700; color: #fff;
+          font-size: 0.72rem; font-weight: 700; color: #081a12;
         }
         .wp-log-time {
-          font-size: 0.58rem; color: rgba(255,255,255,0.35);
+          font-size: 0.58rem; color: #4b6b5d;
           display: flex; align-items: center; gap: 3px; margin-top: 2px;
         }
         .wp-log-amount {
           font-size: 0.78rem; font-weight: 800;
-          color: #22c55e; font-variant-numeric: tabular-nums;
+          color: #0e9f6e; font-variant-numeric: tabular-nums;
         }
 
         /* Simulate button */
         .wp-sim-btn {
           margin: 0 18px 8px;
           width: calc(100% - 36px);
-          height: 46px;
-          border-radius: 13px;
-          background: rgba(243,186,47,0.1);
-          border: 1.5px solid rgba(243,186,47,0.3);
-          color: #f3ba2f;
-          font-weight: 800; font-size: 0.85rem;
+          height: 48px;
+          border-radius: 14px;
+          background: #f3ba2f;
+          border: none;
+          color: #002b1c;
+          font-weight: 900; font-size: 0.88rem;
           display: flex; align-items: center; justify-content: center;
           gap: 8px; cursor: pointer;
           transition: all 0.2s;
+          box-shadow: 0 4px 18px rgba(243,186,47,0.35);
         }
         .wp-sim-btn:hover {
-          background: rgba(243,186,47,0.18);
-          border-color: rgba(243,186,47,0.6);
+          background: #ffe082;
           transform: translateY(-1px);
-          box-shadow: 0 4px 18px rgba(243,186,47,0.2);
+          box-shadow: 0 6px 24px rgba(243,186,47,0.45);
         }
         .wp-sim-btn:active { transform: scale(0.97); }
         .wp-sim-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
@@ -436,7 +448,7 @@ function WalletPage() {
         .wp-auto-row {
           display: flex; align-items: center; justify-content: space-between;
           margin: 0 18px;
-          font-size: 0.62rem; color: rgba(255,255,255,0.35); font-weight: 600;
+          font-size: 0.62rem; color: #4b6b5d; font-weight: 600;
         }
         .wp-auto-row input { accent-color: #f3ba2f; cursor: pointer; }
       `}</style>
