@@ -48,7 +48,7 @@ function AchPage() {
   return (
     <DashboardLayout title="Achievement Rewards">
       <Card className="border-soft shadow-card overflow-hidden">
-        <div className="bg-primary-gradient p-6 text-primary-foreground">
+        <div className="bg-primary-gradient p-6 text-primary-foreground rounded-2xl">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="text-xs opacity-85">Current Rank</div>

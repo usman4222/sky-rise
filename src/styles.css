@@ -52,110 +52,137 @@
 :root {
   --radius: 1.15rem;
 
-  /* Nequlix Capital - Forest Green & Gold palette */
-  --background: #f3f6f5;
-  --foreground: #081a12;
-  --card: #ffffff;
-  --card-foreground: #081a12;
-  --popover: #ffffff;
-  --popover-foreground: #081a12;
+  /* SkyRise - Image-matched Forest Green & Gold palette */
+  /* Colors extracted directly from: admin_banner, stock_market_growth, charging_bull, wallet_illustration */
+  --background: #eef4f1;          /* Light green-tinted off-white, matching image background aura */
+  --foreground: #051409;          /* Near-black deep forest green */
+  --card: #f8fdf9;                /* Slightly green-tinted white, crisp like image highlights */
+  --card-foreground: #051409;
+  --popover: #f8fdf9;
+  --popover-foreground: #051409;
 
-  --primary: #004d33;
+  --primary: #00693e;             /* Deep emerald — matches the shield/bar green in images */
   --primary-foreground: #ffffff;
-  --secondary: #eef5f2;
-  --secondary-foreground: #081a12;
-  --muted: #e6ece9;
-  --muted-foreground: #4b6b5d;
-  --accent: #f3ba2f;
-  --accent-foreground: #002b1c;
-  --destructive: #e02424;
+  --secondary: #e6f2ec;           /* Soft green wash */
+  --secondary-foreground: #051409;
+  --muted: #ddeee5;
+  --muted-foreground: #3d6652;    /* Muted green text */
+  --accent: #f3ba2f;              /* Gold — matching the keys, bull, zipper gold in images */
+  --accent-foreground: #001a0d;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #d1ded8;
+  --border: #c2ddd2;              /* Slightly more saturated green border */
   --input: #ffffff;
-  --ring: rgba(0, 77, 51, 0.45);
+  --ring: rgba(0, 105, 62, 0.40);
 
-  --gold: #f3ba2f;
-  --gold-foreground: #002b1c;
-  --profit: #0e9f6e;
+  --gold: #f3ba2f;                /* Image gold: keys, bull horns, zipper */
+  --gold-foreground: #001a0d;
+  --profit: #00a86b;              /* Neon-influenced emerald from stock chart bars */
   --profit-foreground: #ffffff;
-  --aqua: #34d399;
+  --aqua: #00e5a0;                /* Neon green-cyan from circuit traces */
   --violet: #004d33;
   --rose: #f3ba2f;
 
   /* Liquid glass surfaces */
-  --glass-surface: rgba(255, 255, 255, 0.96);
-  --glass-surface-soft: rgba(255, 255, 255, 0.75);
+  --glass-surface: rgba(248, 253, 249, 0.97);
+  --glass-surface-soft: rgba(248, 253, 249, 0.76);
   --glass-surface-strong: rgba(255, 255, 255, 1.0);
-  --glass-border: rgba(0, 77, 51, 0.08);
-  --glass-border-soft: rgba(0, 77, 51, 0.05);
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 10px 30px rgba(8, 26, 18, 0.04), 0 1px 3px rgba(8, 26, 18, 0.02);
-  --glass-shadow-soft: 0 4px 20px rgba(8, 26, 18, 0.03);
-  --glass-shadow-hover: 0 15px 40px rgba(8, 26, 18, 0.06);
+  --glass-border: rgba(0, 105, 62, 0.10);
+  --glass-border-soft: rgba(0, 105, 62, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.92);
+  --glass-shadow: 0 10px 30px rgba(5, 20, 9, 0.05), 0 1px 3px rgba(5, 20, 9, 0.03);
+  --glass-shadow-soft: 0 4px 20px rgba(5, 20, 9, 0.04);
+  --glass-shadow-hover: 0 15px 40px rgba(5, 20, 9, 0.08);
 
-  --gradient-sky: linear-gradient(135deg, #f3f6f5 0%, #e8eee9 100%);
+  --gradient-sky: linear-gradient(135deg, #eef4f1 0%, #e0ede7 100%);
+  /* Background gradient echoes the deep green corners in all images */
   --gradient-liquid-bg:
-    radial-gradient(circle at 12% 10%, rgba(14, 159, 110, 0.08), transparent 30%),
-    radial-gradient(circle at 86% 14%, rgba(243, 186, 47, 0.06), transparent 32%),
-    radial-gradient(circle at 70% 86%, rgba(0, 77, 51, 0.06), transparent 36%),
-    linear-gradient(135deg, #f3f6f5 0%, #edf2f0 48%, #eef3f1 100%);
-  --gradient-primary: linear-gradient(135deg, #004d33 0%, #0c6a46 45%, #f3ba2f 100%);
-  --gradient-secondary: linear-gradient(135deg, #0e9f6e 0%, #004d33 100%);
-  --gradient-gold: linear-gradient(135deg, #f3ba2f 0%, #ffe082 100%);
-  --gradient-profit: linear-gradient(135deg, #0e9f6e 0%, #51cf66 100%);
-  --gradient-rose: linear-gradient(135deg, #ffd3b6 0%, #004d33 100%);
+    radial-gradient(circle at 10% 8%,  rgba(0, 168, 107, 0.10), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(243, 186, 47, 0.08), transparent 30%),
+    radial-gradient(circle at 68% 88%, rgba(0, 105, 62, 0.08), transparent 34%),
+    radial-gradient(circle at 50% 50%, rgba(0, 229, 160, 0.04), transparent 60%),
+    linear-gradient(160deg, #eef4f1 0%, #e8f1ec 45%, #e6f0ea 100%);
+  /* Primary gradient: deep forest → emerald → gold (matches all images) */
+  --gradient-primary: linear-gradient(135deg, #003d26 0%, #00693e 50%, #f3ba2f 100%);
+  --gradient-secondary: linear-gradient(135deg, #00a86b 0%, #003d26 100%);
+  --gradient-gold: linear-gradient(135deg, #f3ba2f 0%, #ffe47a 100%);
+  --gradient-profit: linear-gradient(135deg, #00a86b 0%, #00e5a0 100%);
+  --gradient-rose: linear-gradient(135deg, #ffe5c4 0%, #003d26 100%);
 
-  --shadow-soft: 0 10px 30px rgba(8, 26, 18, 0.05);
-  --shadow-card: 0 18px 45px rgba(8, 26, 18, 0.06);
-  --shadow-elevated: 0 30px 85px rgba(8, 26, 18, 0.12);
-  --shadow-glow: 0 0 45px rgba(243, 186, 47, 0.15), 0 0 70px rgba(14, 159, 110, 0.10);
+  --shadow-soft: 0 10px 30px rgba(5, 20, 9, 0.06);
+  --shadow-card: 0 18px 45px rgba(5, 20, 9, 0.07);
+  --shadow-elevated: 0 30px 85px rgba(5, 20, 9, 0.14);
+  /* Glow: neon green + gold — the signature image glow */
+  --shadow-glow: 0 0 40px rgba(0, 229, 160, 0.20), 0 0 65px rgba(243, 186, 47, 0.14), 0 0 90px rgba(0, 105, 62, 0.10);
+  /* Neon glow for accents (matching circuit trace glow in images) */
+  --neon-green-glow: 0 0 12px rgba(0, 229, 160, 0.60), 0 0 28px rgba(0, 229, 160, 0.28);
+  --neon-gold-glow: 0 0 12px rgba(243, 186, 47, 0.55), 0 0 28px rgba(243, 186, 47, 0.25);
 
-  --sidebar: #002b1c;
-  --sidebar-foreground: #c2d6ce;
+  --sidebar: #001a0d;             /* Ultra-deep forest (image: darkest background) */
+  --sidebar-foreground: #a8c9b8;
   --sidebar-primary: #f3ba2f;
-  --sidebar-primary-foreground: #002b1c;
-  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-primary-foreground: #001a0d;
+  --sidebar-accent: rgba(0, 229, 160, 0.08);
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: rgba(243, 186, 47, 0.45);
+  --sidebar-border: rgba(0, 229, 160, 0.10);
+  --sidebar-ring: rgba(243, 186, 47, 0.50);
 }
 
 .dark {
-  --background: #08120e;
-  --foreground: #ecf3f0;
-  --card: #0c1b15;
-  --card-foreground: #ecf3f0;
-  --popover: #0c1b15;
-  --popover-foreground: #ecf3f0;
-  --primary: #10b981;
-  --primary-foreground: #08120e;
-  --secondary: rgba(255, 255, 255, 0.08);
-  --secondary-foreground: #ecf3f0;
-  --muted: rgba(255, 255, 255, 0.08);
-  --muted-foreground: #8ca99e;
-  --accent: rgba(243, 186, 47, 0.16);
-  --accent-foreground: #ecf3f0;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.06);
-  --ring: rgba(16, 185, 129, 0.5);
-  --glass-surface: rgba(12, 27, 21, 0.94);
-  --glass-surface-soft: rgba(12, 27, 21, 0.75);
-  --glass-surface-strong: rgba(12, 27, 21, 1.0);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-soft: rgba(255, 255, 255, 0.04);
-  --glass-highlight: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
-  --glass-shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.20);
+  /* Dark mode: matches the exact image backgrounds — deep forest green + neon glow */
+  --background: #030d07;          /* Image: darkest background tone (near-black forest green) */
+  --foreground: #e2f0ea;
+  --card: #081407;                /* Dark card — like the deep background in admin_banner */
+  --card-foreground: #e2f0ea;
+  --popover: #0a1a0d;
+  --popover-foreground: #e2f0ea;
+  --primary: #00e676;             /* Neon green — exactly the bright green in chart line + circuit traces */
+  --primary-foreground: #020b04;
+  --secondary: rgba(0, 230, 118, 0.08);
+  --secondary-foreground: #e2f0ea;
+  --muted: rgba(0, 230, 118, 0.06);
+  --muted-foreground: #7aab90;    /* Muted but green-tinted */
+  --accent: rgba(243, 186, 47, 0.18); /* Gold accent with glow feel */
+  --accent-foreground: #fff3cc;
+  --border: rgba(0, 230, 118, 0.12); /* Neon green borders — circuit trace vibe */
+  --input: rgba(0, 230, 118, 0.06);
+  --ring: rgba(0, 230, 118, 0.45);
+
+  --gold: #f3ba2f;
+  --gold-foreground: #020b04;
+  --profit: #00e676;              /* Neon green matches glowing chart line */
+  --profit-foreground: #020b04;
+  --aqua: #00e5a0;
+
+  /* Dark glass: very dark forest green with neon borders */
+  --glass-surface: rgba(8, 20, 7, 0.92);
+  --glass-surface-soft: rgba(8, 20, 7, 0.72);
+  --glass-surface-strong: rgba(5, 14, 5, 0.98);
+  --glass-border: rgba(0, 230, 118, 0.12);
+  --glass-border-soft: rgba(0, 230, 118, 0.06);
+  --glass-highlight: rgba(0, 230, 118, 0.08);
+  --glass-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+  --glass-shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --glass-shadow-hover: 0 18px 50px rgba(0, 0, 0, 0.55);
+
+  /* Dark gradient: mimics the image dark green atmosphere with neon orb accents */
   --gradient-liquid-bg:
-    radial-gradient(circle at 14% 12%, rgba(16, 185, 129, 0.12), transparent 30%),
-    radial-gradient(circle at 86% 18%, rgba(243, 186, 47, 0.08), transparent 34%),
-    radial-gradient(circle at 72% 88%, rgba(0, 77, 51, 0.08), transparent 36%),
-    linear-gradient(135deg, #08120e 0%, #0c1c16 52%, #0a1712 100%);
-  --sidebar: #05100c;
-  --sidebar-foreground: #8ca99e;
-  --sidebar-accent: rgba(255, 255, 255, 0.05);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.05);
+    radial-gradient(circle at 12% 10%, rgba(0, 230, 118, 0.14), transparent 28%),
+    radial-gradient(circle at 88% 15%, rgba(243, 186, 47, 0.10), transparent 32%),
+    radial-gradient(circle at 70% 85%, rgba(0, 105, 62, 0.12), transparent 34%),
+    radial-gradient(circle at 45% 50%, rgba(0, 168, 107, 0.06), transparent 55%),
+    linear-gradient(160deg, #030d07 0%, #060f08 45%, #04100a 100%);
+
+  --shadow-glow: 0 0 40px rgba(0, 230, 118, 0.28), 0 0 70px rgba(243, 186, 47, 0.16), 0 0 100px rgba(0, 105, 62, 0.12);
+  --neon-green-glow: 0 0 14px rgba(0, 230, 118, 0.80), 0 0 32px rgba(0, 230, 118, 0.40);
+  --neon-gold-glow: 0 0 14px rgba(243, 186, 47, 0.75), 0 0 32px rgba(243, 186, 47, 0.35);
+
+  --sidebar: #020a05;             /* Ultra-deep sidebar matching image edge darkness */
+  --sidebar-foreground: #7aab90;
+  --sidebar-accent: rgba(0, 230, 118, 0.07);
+  --sidebar-accent-foreground: #e2f0ea;
+  --sidebar-border: rgba(0, 230, 118, 0.10);
+  --sidebar-ring: rgba(243, 186, 47, 0.55);
 }
 
 @layer base {
@@ -188,11 +215,13 @@
     inset: -20%;
     z-index: -2;
     pointer-events: none;
+    /* Neon-green and gold ambient glows matching image lighting */
     background:
-      radial-gradient(circle at 18% 18%, rgba(14, 159, 110, 0.08), transparent 22%),
-      radial-gradient(circle at 88% 22%, rgba(243, 186, 47, 0.06), transparent 24%),
-      radial-gradient(circle at 74% 78%, rgba(0, 77, 51, 0.06), transparent 26%);
-    filter: blur(22px);
+      radial-gradient(circle at 15% 15%, rgba(0, 168, 107, 0.14), transparent 25%),
+      radial-gradient(circle at 85% 20%, rgba(243, 186, 47, 0.10), transparent 26%),
+      radial-gradient(circle at 72% 80%, rgba(0, 105, 62, 0.10), transparent 28%),
+      radial-gradient(circle at 50% 50%, rgba(0, 229, 160, 0.06), transparent 45%);
+    filter: blur(26px);
     transform: translateZ(0);
   }
 
@@ -360,7 +389,8 @@
     mask-composite: exclude;
     pointer-events: none;
     z-index: 2;
-    opacity: 0.15;
+    opacity: 0.85;
+    animation: flowBorder 4s linear infinite;
     transition: opacity 0.3s ease;
   }
 
@@ -374,7 +404,8 @@
     background-size: 200% 100%;
     z-index: -1;
     filter: blur(18px);
-    opacity: 0;
+    opacity: 0.15;
+    animation: flowBorder 4s linear infinite;
     transition: opacity 350ms ease;
     pointer-events: none;
   }
@@ -382,19 +413,18 @@
   .glass-card-hover:hover,
   .glass-hover:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(0, 77, 51, 0.08);
+    /* Neon green hover shadow matching the glow in images */
+    box-shadow: 0 12px 36px rgba(0, 105, 62, 0.14), 0 0 20px rgba(0, 229, 160, 0.08);
   }
 
   .glass-card-hover:hover::before,
   .glass-hover:hover::before {
-    opacity: 0.85;
-    animation: flowBorder 4s linear infinite;
+    opacity: 1;
   }
 
   .glass-card-hover:hover::after,
   .glass-hover:hover::after {
-    opacity: 0.22;
-    animation: flowBorder 4s linear infinite;
+    opacity: 0.35;
   }
 
   @keyframes flowBorder {
@@ -404,8 +434,13 @@
 
   .glass-navbar {
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.48);
-    box-shadow: 0 18px 48px rgba(73, 83, 130, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.72);
+    background: rgba(248, 253, 249, 0.92);
+    box-shadow: 0 8px 32px rgba(0, 105, 62, 0.10), 0 1px 2px rgba(0, 105, 62, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+  }
+
+  .dark .glass-navbar {
+    background: rgba(5, 14, 5, 0.88);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), 0 0 20px rgba(0, 230, 118, 0.08), inset 0 1px 1px rgba(0, 230, 118, 0.04);
   }
 
   .glass-sidebar {
@@ -1306,6 +1341,148 @@ textarea:focus {
 .recharts-curve.recharts-line-curve {
   stroke: var(--profit) !important;
   stroke-width: 3px !important;
+}
+
+/* Premium Animated Active Navigation Circle */
+.active-nav-circle {
+  position: absolute;
+  top: -1.5rem; /* -top-6 */
+  height: 3.5rem; /* h-14 */
+  width: 3.5rem; /* w-14 */
+  border-radius: 9999px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dark .active-nav-circle {
+  background: #0c1b15;
+}
+
+/* Rotating Gradient Border */
+.active-nav-circle::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--gold), var(--profit), var(--primary));
+  background-size: 200% 100%;
+  animation: flowBorder 3s linear infinite;
+  z-index: -1;
+  padding: 2.2px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Pulsing Shadow Glow */
+.active-nav-circle::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--gold), var(--profit), var(--primary));
+  background-size: 200% 100%;
+  filter: blur(8px);
+  z-index: -2;
+  opacity: 0.35;
+  animation: flowBorder 3s linear infinite, navRipple 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes navRipple {
+  0%, 100% {
+    transform: scale(0.96);
+    opacity: 0.3;
+    filter: blur(6px);
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.55;
+    filter: blur(10px);
+  }
+}
+
+/* Package Filter Pills & Premium Smooth Scale-In Animations */
+.filter-pill {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.filter-pill-active {
+  background: #ffffff !important;
+  color: var(--primary) !important;
+  box-shadow: 0 4px 15px rgba(14, 159, 110, 0.12) !important;
+  border-color: transparent !important;
+  overflow: visible !important;
+  z-index: 1;
+}
+
+.dark .filter-pill-active {
+  background: #0c1b15 !important;
+  color: var(--primary) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.filter-pill-active::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--gold), var(--profit), var(--primary));
+  background-size: 200% 100%;
+  animation: flowBorder 3s linear infinite;
+  z-index: -1;
+  padding: 2.2px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.filter-pill-active::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--gold), var(--profit), var(--primary));
+  background-size: 200% 100%;
+  z-index: -2;
+  filter: blur(8px);
+  opacity: 0.35;
+  animation: flowBorder 3s linear infinite, navRipple 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+.filter-pill-active:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+
+.filter-pill-active:hover::after {
+  opacity: 0.6;
+  filter: blur(10px);
+}
+
+.package-card-animate {
+  animation: filterScaleIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes filterScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.93) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 

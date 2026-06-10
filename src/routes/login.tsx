@@ -118,8 +118,9 @@ function LoginPage() {
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-4 py-10 md:px-6 lg:grid-cols-2">
         <div className="order-2 lg:order-1">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-primary-gradient shadow-soft" />
-            <span className="text-lg font-bold">Sky<span className="text-primary">Rise</span></span>
+            <div className="h-20 w-20 flex items-center justify-center rounded-full bg-primary-gradient shadow-soft" >
+              <img src="/skyrise-logo.png" alt="Logo" className="h-15" />
+            </div>
           </Link>
           <Card className="mt-8">
             <CardContent className="p-8">
@@ -183,9 +184,9 @@ function LoginPage() {
             </CardContent>
           </Card>
         </div>
-        <div className="order-1 lg:order-2">
+        <div className="order-1 lg:order-2 ">
           <Card className="overflow-hidden">
-            <div className="bg-primary-gradient p-8 mb-6 text-white">
+            <div className="bg-primary-gradient p-8 mb-6 text-white overflow-hidden rounded-2xl">
               <h2 className="text-2xl font-bold">One secure dashboard</h2>
               <p className="mt-2 text-white/85 text-sm leading-relaxed">Manage your investments, team, ROI, and rewards — all in one secure place.</p>
             </div>

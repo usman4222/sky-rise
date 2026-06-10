@@ -41,6 +41,7 @@ import { Route as DashboardAdminWeeklySalaryRouteImport } from './routes/dashboa
 import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard.admin.users'
 import { Route as DashboardAdminKycRouteImport } from './routes/dashboard.admin.kyc'
 import { Route as DashboardAdminDepositsRouteImport } from './routes/dashboard.admin.deposits'
+import { Route as DashboardAdminAnnouncementsRouteImport } from './routes/dashboard.admin.announcements'
 
 const VipRoute = VipRouteImport.update({
   id: '/vip',
@@ -204,6 +205,12 @@ const DashboardAdminDepositsRoute = DashboardAdminDepositsRouteImport.update({
   path: '/admin/deposits',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminAnnouncementsRoute =
+  DashboardAdminAnnouncementsRouteImport.update({
+    id: '/admin/announcements',
+    path: '/admin/announcements',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/withdraw': typeof DashboardWithdrawRoute
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/admin/announcements': typeof DashboardAdminAnnouncementsRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
@@ -266,6 +274,7 @@ export interface FileRoutesByTo {
   '/dashboard/withdraw': typeof DashboardWithdrawRoute
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/admin/announcements': typeof DashboardAdminAnnouncementsRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
@@ -301,6 +310,7 @@ export interface FileRoutesById {
   '/dashboard/withdraw': typeof DashboardWithdrawRoute
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/admin/announcements': typeof DashboardAdminAnnouncementsRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/dashboard/withdraw'
     | '/dashboard/withdrawals'
     | '/dashboard/'
+    | '/dashboard/admin/announcements'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/dashboard/withdraw'
     | '/dashboard/withdrawals'
     | '/dashboard'
+    | '/dashboard/admin/announcements'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/dashboard/withdraw'
     | '/dashboard/withdrawals'
     | '/dashboard/'
+    | '/dashboard/admin/announcements'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
@@ -650,6 +663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminDepositsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/admin/announcements': {
+      id: '/dashboard/admin/announcements'
+      path: '/admin/announcements'
+      fullPath: '/dashboard/admin/announcements'
+      preLoaderRoute: typeof DashboardAdminAnnouncementsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -671,6 +691,7 @@ interface DashboardRouteChildren {
   DashboardWithdrawRoute: typeof DashboardWithdrawRoute
   DashboardWithdrawalsRoute: typeof DashboardWithdrawalsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardAdminAnnouncementsRoute: typeof DashboardAdminAnnouncementsRoute
   DashboardAdminDepositsRoute: typeof DashboardAdminDepositsRoute
   DashboardAdminKycRoute: typeof DashboardAdminKycRoute
   DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
@@ -696,6 +717,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardWithdrawRoute: DashboardWithdrawRoute,
   DashboardWithdrawalsRoute: DashboardWithdrawalsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAdminAnnouncementsRoute: DashboardAdminAnnouncementsRoute,
   DashboardAdminDepositsRoute: DashboardAdminDepositsRoute,
   DashboardAdminKycRoute: DashboardAdminKycRoute,
   DashboardAdminUsersRoute: DashboardAdminUsersRoute,

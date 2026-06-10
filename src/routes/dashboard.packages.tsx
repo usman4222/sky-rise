@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -10,12 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { CheckCircle2, Plus, Edit, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Plus, Edit, ShieldAlert, TrendingUp, Rocket } from "lucide-react";
 import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
-
 import { packagesApi, type PackageData } from "@/lib/api-packages";
 import { useAuthStore } from "@/store/authStore";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
+import { playSound } from "@/lib/sounds";
 
 export const Route = createFileRoute("/dashboard/packages")({ component: PackagesDash });
 
@@ -23,8 +23,44 @@ function PackagesDash() {
   const { user } = useAuthStore();
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<"All" | "Starter" | "Standard" | "Pro" | "VIP">("All");
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [lastPurchase, setLastPurchase] = useState<{ pkgName: string; amount: number; totalActive: number; roi: number } | null>(null);
+  const confettiRef = useRef<HTMLDivElement>(null);
+
+  // Confetti animation — mirrors the registration success animation
+  useEffect(() => {
+    if (showCelebration && confettiRef.current) {
+      const container = confettiRef.current;
+      const colors = ['#f3ba2f', '#0e9f6e', '#00e676', '#ffe082', '#ff6f61', '#00C09D', '#2D87B0'];
+      const speeds = ['slow', 'medium', 'fast'];
+      const inner = document.createElement('div');
+      inner.classList.add('confetti-container');
+      container.appendChild(inner);
+
+      const interval = setInterval(() => {
+        const el = document.createElement('div');
+        const size = (Math.floor(Math.random() * 4) + 6) + 'px';
+        el.classList.add('confetti', 'confetti--animation-' + speeds[Math.floor(Math.random() * speeds.length)]);
+        el.style.left = Math.floor(Math.random() * container.offsetWidth) + 'px';
+        el.style.width = size;
+        el.style.height = size;
+        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        setTimeout(() => el.parentNode && el.parentNode.removeChild(el), 3000);
+        inner.appendChild(el);
+      }, 20);
+
+      return () => {
+        clearInterval(interval);
+        if (inner.parentNode) inner.parentNode.removeChild(inner);
+      };
+    }
+  }, [showCelebration]);
+
+
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ["packages", isAdmin],
@@ -34,11 +70,31 @@ function PackagesDash() {
     }
   });
 
+  // Read real bonusReceived directly from auth store (already synced via fetchProfile on every page)
+  const bonusReceivedBalance = (user?.wallets as any)?.bonusReceived || 0;
+
+
+  const getPackageTag = (pkg: PackageData) => {
+    if (pkg.minAmount >= 5000) return "VIP";
+    if (pkg.minAmount >= 1000) return "Pro";
+    if (pkg.minAmount >= 100) return "Standard";
+    return "Starter";
+  };
+
+  const filteredPackages = packages.filter((p) => {
+    if (selectedFilter === "All") return true;
+    return getPackageTag(p) === selectedFilter;
+  });
+
   const purchaseMutation = useMutation({
-    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual' }) =>
+    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual'; pkgName: string; roi: number; regBonusApplied: boolean }) =>
       packagesApi.purchasePackage(vars.id, vars.amount, true, vars.roiClaimMode),
-    onSuccess: () => {
-      toast.success("Investment confirmed! It will automatically activate at the end of the day.");
+    onSuccess: (_, vars) => {
+      playSound.playSuccess();
+      // Show celebration dialog with purchase summary
+      const totalActive = vars.regBonusApplied ? vars.amount + 5 : vars.amount;
+      setLastPurchase({ pkgName: vars.pkgName, amount: vars.amount, totalActive, roi: vars.roi });
+      setShowCelebration(true);
       queryClient.invalidateQueries({ queryKey: ["packages"] });
       queryClient.invalidateQueries({ queryKey: ["myInvestments"] });
     },
@@ -74,68 +130,187 @@ function PackagesDash() {
   });
 
   return (
-    <DashboardLayout title="Investment Packages">
+    <>
+      {/* ===== Confetti + Congratulations Modal ===== */}
+      {showCelebration && lastPurchase && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          {/* Confetti canvas */}
+          <div ref={confettiRef} className="absolute inset-0 pointer-events-none overflow-hidden z-0" />
 
-      {isAdmin && (
-        <div className="mb-6 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-4">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="h-5 w-5 text-primary" />
-            <div>
-              <h4 className="font-semibold text-sm">Admin Controls</h4>
-              <p className="text-xs text-muted-foreground">You are viewing all packages, including hidden ones.</p>
+          {/* Modal card */}
+          <div className="relative z-10 bg-[#001e14] border border-emerald-500/30 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_20px_60px_rgba(0,230,118,0.15)] animate-in zoom-in-95 duration-500">
+            {/* Glow ring */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
+
+            {/* Animated checkmark */}
+            {/* <div className="flex justify-center mb-5">
+              <div className="checkmark-circle">
+                <div className="background" />
+                <div className="checkmark draw" />
+              </div>
+            </div> */}
+
+            {/* Logo pulse */}
+            <img src="/skyrise-logo.png" alt="SkyRise" className="h-20 w-auto mb-3 mx-auto   animate-bounce" />
+
+            <h2 className="text-2xl font-black text-white mb-1 tracking-tight">Congratulations!</h2>
+            <p className="text-emerald-300/80 text-sm mb-6 leading-relaxed">
+              Your investment in <span className="text-[#f3ba2f] font-bold">{lastPurchase.pkgName}</span> has been confirmed!
+            </p>
+
+            {/* Investment summary */}
+            <div className="bg-white/5 border border-emerald-500/20 rounded-2xl p-4 mb-6 text-left space-y-2.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-emerald-300/70">Amount Invested</span>
+                <span className="font-bold text-white">${lastPurchase.amount.toFixed(2)}</span>
+              </div>
+              {lastPurchase.totalActive > lastPurchase.amount && (
+                <div className="flex justify-between text-emerald-400">
+                  <span>Registration Bonus Added</span>
+                  <span className="font-bold">+$5.00 🎁</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-emerald-500/20 pt-2">
+                <span className="text-white font-semibold">Total Active Investment</span>
+                <span className="font-black text-[#f3ba2f] text-base">${lastPurchase.totalActive.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-emerald-300/70">Daily ROI</span>
+                <span className="font-bold text-emerald-400">{lastPurchase.roi}% / day</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-emerald-300/70">Activates</span>
+                <span className="font-bold text-white">Tonight at Midnight</span>
+              </div>
             </div>
-          </div>
 
-          <PackageFormDialog
-            isOpen={isCreateModalOpen}
-            onOpenChange={setIsCreateModalOpen}
-            onSubmit={(data) => createMutation.mutate(data)}
-            isPending={createMutation.isPending}
-            trigger={
-              <Button size="sm" className="glass-button-primary gap-2"><Plus size={16} /> Create Package</Button>
-            }
-          />
+            <Button
+              onClick={() => {
+                setShowCelebration(false);
+                setLastPurchase(null);
+                window.location.href = "/dashboard/investments";
+              }}
+              className="w-full bg-gradient-to-r from-[#004d33] to-[#0e9f6e] hover:from-[#0c6a46] hover:to-[#10b981] text-white font-black h-12 rounded-2xl shadow-[0_4px_20px_rgba(14,159,110,0.3)] text-sm transition-all hover:scale-[1.02] active:scale-95"
+            >
+              View My Investments
+            </Button>
+          </div>
         </div>
       )}
 
-      {isLoading ? (
-        <GearSectionLoader text="Loading Investment Packages..." />
-      ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {packages.map((p) => (
-            <PackageCard
-              key={p._id}
-              pkg={p}
-              isAdmin={isAdmin}
-              isPurchasing={purchaseMutation.isPending}
-              isToggling={toggleMutation.isPending}
-              onPurchase={(amount, roiClaimMode) => purchaseMutation.mutate({ id: p._id, amount, roiClaimMode })}
-              onToggle={(isActive) => toggleMutation.mutate({ id: p._id, isActive })}
-              onUpdate={(data) => updateMutation.mutate({ id: p._id, data })}
-              isUpdating={updateMutation.isPending && updateMutation.variables?.id === p._id}
+      <DashboardLayout title="Investment Packages">
+
+        {isAdmin && (
+          <div className="mb-6 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-4">
+            <div className="flex items-center gap-3">
+              <ShieldAlert className="h-5 w-5 text-primary" />
+              <div>
+                <h4 className="font-semibold text-sm">Admin Controls</h4>
+                <p className="text-xs text-muted-foreground">You are viewing all packages, including hidden ones.</p>
+              </div>
+            </div>
+
+            <PackageFormDialog
+              isOpen={isCreateModalOpen}
+              onOpenChange={setIsCreateModalOpen}
+              onSubmit={(data) => createMutation.mutate(data)}
+              isPending={createMutation.isPending}
+              trigger={
+                <Button size="sm" className="glass-button-primary gap-2"><Plus size={16} /> Create Package</Button>
+              }
             />
+          </div>
+        )}
+
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto no-scrollbar py-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {(["All", "Starter", "Standard", "Pro", "VIP"] as const).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => {
+                playSound.playClick();
+                setSelectedFilter(filter);
+              }}
+              className={`filter-pill px-5 py-2 rounded-full text-[10px] font-black tracking-wider uppercase border select-none cursor-pointer transition-all ${selectedFilter === filter
+                ? "filter-pill-active text-white border-transparent"
+                : "bg-white/80 dark:bg-card/85 border-glass-border text-foreground/75 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-foreground"
+                }`}
+            >
+              {filter}
+            </button>
           ))}
         </div>
-      )}
-    </DashboardLayout>
+
+        {isLoading ? (
+          <GearSectionLoader text="Loading Investment Packages..." />
+        ) : filteredPackages.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground border border-dashed border-glass-border rounded-3xl bg-white/40 dark:bg-card/40">
+            No investment packages found under "{selectedFilter}" tier.
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {filteredPackages.map((p) => (
+              <div key={`${p._id}-${selectedFilter}`} className="package-card-animate">
+                <PackageCard
+                  pkg={p}
+                  isAdmin={isAdmin}
+                  isPurchasing={purchaseMutation.isPending}
+                  isToggling={toggleMutation.isPending}
+                  walletBonusReceived={bonusReceivedBalance}
+                  registrationBonusActive={user?.registrationBonusActive !== false}
+                  hasFreeRegBonus={(user?.freeRegBonus || 0) >= 5}
+                  onPurchase={(amount, roiClaimMode, regBonusApplied, onSuccess) => purchaseMutation.mutate({
+                    id: p._id,
+                    amount,
+                    roiClaimMode,
+                    pkgName: p.name,
+                    roi: p.startRoi,
+                    regBonusApplied: regBonusApplied || false
+                  }, {
+                    onSuccess: () => {
+                      if (onSuccess) onSuccess();
+                    }
+                  })}
+                  onToggle={(isActive) => toggleMutation.mutate({ id: p._id, isActive })}
+                  onUpdate={(data) => updateMutation.mutate({ id: p._id, data })}
+                  isUpdating={updateMutation.isPending && updateMutation.variables?.id === p._id}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </DashboardLayout>
+    </>
   );
 }
 
-function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggling, onUpdate, isUpdating }: {
+function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggling, onUpdate, isUpdating, walletBonusReceived, registrationBonusActive, hasFreeRegBonus }: {
   pkg: PackageData;
   isAdmin?: boolean;
   isPurchasing: boolean;
   isToggling: boolean;
   isUpdating: boolean;
-  onPurchase: (amt: number, mode: 'auto' | 'manual') => void;
+  walletBonusReceived: number;
+  registrationBonusActive: boolean;
+  hasFreeRegBonus: boolean;
+  onPurchase: (amt: number, mode: 'auto' | 'manual', regBonusApplied: boolean, onSuccess: () => void) => void;
   onToggle: (active: boolean) => void;
   onUpdate: (data: Partial<PackageData>) => void;
 }) {
   const [amount, setAmount] = useState(pkg.minAmount);
   const [roiClaimMode, setRoiClaimMode] = useState<'auto' | 'manual'>('auto');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const bonus = Math.min(amount * 0.1, 45); // Mock logic for display
-  const real = amount - bonus;
+  const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
+
+  // Team bonus (10% of investment from bonusReceived wallet)
+  const maxBonusAllowed = amount * 0.1;
+  const teamBonus = Math.min(maxBonusAllowed, walletBonusReceived);
+  const real = amount - teamBonus;
+
+  // Registration bonus state
+  const regBonusEligible = registrationBonusActive && hasFreeRegBonus && amount >= 50;
+  const regBonusLocked = registrationBonusActive && hasFreeRegBonus && amount < 50;
+  const totalWithRegBonus = regBonusEligible ? real + 5 : real;
 
   let tag = "Starter";
   if (pkg.minAmount >= 5000) tag = "VIP";
@@ -195,9 +370,12 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
             }
           />
         ) : (
-          <Dialog>
+          <Dialog open={isInvestDialogOpen} onOpenChange={setIsInvestDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="mt-auto w-full bg-gradient-to-r from-[#004d33] to-[#0e9f6e] hover:from-[#0c6a46] hover:to-[#10b981] text-white font-extrabold shadow-md hover:scale-[1.02] active:scale-95 transition-all h-10 rounded-xl cursor-pointer">
+              <Button
+                onClick={() => playSound.playClick()}
+                className="mt-auto w-full bg-gradient-to-r from-[#004d33] to-[#0e9f6e] hover:from-[#0c6a46] hover:to-[#10b981] text-white font-extrabold shadow-md hover:scale-[1.02] active:scale-95 transition-all h-10 rounded-xl cursor-pointer"
+              >
                 Invest Now
               </Button>
             </DialogTrigger>
@@ -253,15 +431,67 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                   </div>
                 </div>
 
+                {/* Registration Bonus — unlock nudge (amount < $50) */}
+                {regBonusLocked && (
+                  <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/50 dark:border-amber-500/30 p-3">
+                    <span className="text-amber-500 text-base mt-0.5 flex-shrink-0">🎁</span>
+                    <p className="text-xs text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
+                      Invest <strong>$50 or more</strong> to unlock and use your <strong>$5 Registration Bonus</strong>.
+                    </p>
+                  </div>
+                )}
+
+                {/* Registration Bonus — eligible (amount ≥ $50) */}
+                {regBonusEligible && (
+                  <div className="flex items-start gap-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-400/50 dark:border-emerald-500/30 p-3">
+                    <span className="text-emerald-500 text-base mt-0.5 flex-shrink-0">🎁</span>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300 font-medium leading-relaxed">
+                      Your <strong>$5 Registration Bonus</strong> will be automatically added to this investment!
+                    </p>
+                  </div>
+                )}
+
+                {/* Investment Summary Panel */}
                 <div className="rounded-xl glass-panel p-4 space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">10% Bonus Applicable</span><span className="font-semibold">${bonus.toFixed(2)}</span></div>
-                  <div className="flex justify-between border-t border-soft pt-2"><span>Real Payment Required</span><span className="font-bold text-primary">${real.toFixed(2)}</span></div>
+                  {/* Team bonus row */}
+                  {teamBonus > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">10% Team Bonus Applied</span>
+                      <span className="font-semibold text-emerald-600">−${teamBonus.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {/* Registration bonus breakdown rows */}
+                  {regBonusEligible && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Your Investment</span>
+                        <span className="font-semibold">${real.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                        <span className="font-medium">Registration Bonus</span>
+                        <span className="font-bold">+$5.00</span>
+                      </div>
+                      <div className="flex justify-between border-t border-soft pt-2">
+                        <span className="font-bold">Total Active Investment</span>
+                        <span className="font-black text-primary text-base">${totalWithRegBonus.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Standard row (no reg bonus eligible) */}
+                  {!regBonusEligible && (
+                    <div className={`flex justify-between ${teamBonus > 0 ? "border-t border-soft pt-2" : ""}`}>
+                      <span className="font-semibold">Total Payment Required</span>
+                      <span className="font-bold text-primary">${real.toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <DialogFooter>
                 <Button
                   className="w-full glass-button-primary h-14 text-base rounded-full"
-                  onClick={() => onPurchase(amount, roiClaimMode)}
+                  onClick={() => onPurchase(amount, roiClaimMode, regBonusEligible, () => setIsInvestDialogOpen(false))}
                   disabled={isPurchasing}
                 >
                   {isPurchasing ? <GearSpinner className="mr-2 h-5 w-5" /> : null}

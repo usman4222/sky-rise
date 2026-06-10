@@ -86,7 +86,7 @@ function WeeklySalaryPage() {
         {/* Top Header Card */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 border-soft shadow-card overflow-hidden">
-            <div className="bg-primary-gradient p-6 text-white flex items-center justify-between">
+            <div className="bg-primary-gradient p-6 text-white flex items-center justify-between rounded-2xl mb-3">
               <div>
                 <span className="text-[10px] bg-white/20 uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">Leadership Reward Program</span>
                 <h2 className="text-2xl font-black mt-1.5 flex items-center gap-1.5">
@@ -140,7 +140,7 @@ function WeeklySalaryPage() {
 
                     <Dialog open={isClaimOpen} onOpenChange={setIsClaimOpen}>
                       <DialogTrigger asChild>
-                        <Button 
+                        <Button
                           className="w-full glass-button-primary h-10 text-xs font-bold"
                           disabled={!eligibility?.canRequest}
                         >
@@ -166,17 +166,17 @@ function WeeklySalaryPage() {
 
                           <div className="space-y-1.5">
                             <Label htmlFor="claim-notes">Claim Remarks / Notes (Optional)</Label>
-                            <Input 
-                              id="claim-notes" 
-                              placeholder="Add any processing reference notes..." 
-                              value={claimNotes} 
-                              onChange={(e) => setClaimNotes(e.target.value)} 
+                            <Input
+                              id="claim-notes"
+                              placeholder="Add any processing reference notes..."
+                              value={claimNotes}
+                              onChange={(e) => setClaimNotes(e.target.value)}
                             />
                           </div>
 
                           <DialogFooter className="pt-2">
                             <Button type="button" variant="outline" onClick={() => setIsClaimOpen(false)}>Cancel</Button>
-                             <Button type="submit" className="glass-button-primary" disabled={claimMutation.isPending}>
+                            <Button type="submit" className="glass-button-primary" disabled={claimMutation.isPending}>
                               {claimMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
                               Submit Request
                             </Button>
@@ -237,7 +237,7 @@ function WeeklySalaryPage() {
                   return (
                     <div key={leg._id || i} className="p-4 border border-glass-border bg-glass-surface rounded-2xl text-center space-y-2">
                       <Badge className="bg-primary/10 text-primary border-0 text-[10px]">Leg #{i + 1}</Badge>
-                      <div className="text-xs text-muted-foreground block truncate">Member: {leg.legUser?.name || `User ${i+1}`}</div>
+                      <div className="text-xs text-muted-foreground block truncate">Member: {leg.legUser?.name || `User ${i + 1}`}</div>
                       <div className="text-lg font-black text-foreground">${volume.toLocaleString()}</div>
                       <span className="text-[10px] block text-muted-foreground">Volume generated</span>
                     </div>

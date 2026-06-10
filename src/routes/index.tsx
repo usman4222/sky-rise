@@ -131,7 +131,7 @@ function HomePage() {
           <div className="relative">
             <div className="absolute inset-0 -z-10 bg-primary/5 blur-2xl rounded-3xl" />
             <Card className="overflow-hidden glass-hero">
-              <div className="bg-primary-gradient p-5 text-primary-foreground">
+              <div className="bg-primary-gradient p-5 text-primary-foreground rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-xs opacity-80">Total Investment</div>
@@ -318,12 +318,12 @@ function HomePage() {
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
         <Card className="border-0 overflow-hidden shadow-elevated">
-          <div className="bg-primary-gradient p-10 md:p-16 text-center text-primary-foreground">
+          <div className="bg-primary-gradient p-10 md:p-16 text-center text-primary-foreground rounded-2xl">
             <h2 className="text-3xl md:text-5xl text-white">Ready to Start with SkyRise Future?</h2>
             <p className="mx-auto mt-4 max-w-2xl text-white/85">Create your free account, explore packages, and manage your growth from one smart dashboard.</p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               {isAuthenticated ? (
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 always-glow"><Link to="/dashboard">Go to Dashboard</Link></Button>
+                <Button asChild size="lg" className="bg-white text-white hover:bg-white/90 always-glow"><Link to="/dashboard">Go to Dashboard</Link></Button>
               ) : (
                 <>
                   <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 always-glow"><Link to="/register">Create Free Account</Link></Button>

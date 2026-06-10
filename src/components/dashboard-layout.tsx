@@ -2,7 +2,8 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
-  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Megaphone
+  User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Megaphone,
+  Home, Clock
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -111,17 +112,17 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         )}
 
         {!isAdmin && (
-          <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-[#002b1c]/95 to-[#001e14]/95 border border-[#f3ba2f]/20 relative overflow-hidden group shadow-lg text-left transition-all duration-300 hover:border-[#f3ba2f]/45">
+          <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-[#001a0d]/98 to-[#000d07]/98 border border-[#f3ba2f]/22 relative overflow-hidden group shadow-[0_8px_24px_rgba(0,0,0,0.4)] text-left transition-all duration-300 hover:border-[#f3ba2f]/50 hover:shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_20px_rgba(0,230,118,0.08)]">
             <div className="relative z-10 space-y-3">
               <h3 className="text-xs font-black text-white tracking-wider uppercase flex items-center gap-1.5">
                 <Crown size={12} className="text-[#f3ba2f] animate-pulse" /> Grow With SkyRise
               </h3>
-              <p className="text-[10px] text-zinc-300 leading-relaxed">
+              <p className="text-[10px] text-emerald-200/70 leading-relaxed">
                 Smart investments in Stock Market for Stable Daily Returns
               </p>
-              
-              {/* Structured Framed bull image container */}
-              <div className="overflow-hidden rounded-xl border border-[#004d33] bg-[#000f0a]/60 p-1 flex items-center justify-center shadow-inner relative group-hover:border-[#0e9f6e]/45 transition-colors">
+
+              {/* Structured Framed bull image container with neon green glow */}
+              <div className="overflow-hidden rounded-xl border border-[#00693e]/40 bg-[#000a05]/70 p-1 flex items-center justify-center shadow-inner relative group-hover:border-[#00e676]/30 group-hover:shadow-[0_0_12px_rgba(0,230,118,0.12)] transition-all duration-300">
                 <img
                   src={chargingBull}
                   alt="Charging Bull"
@@ -130,13 +131,14 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
               </div>
 
               <Link to="/dashboard/packages" className="block w-full" onClick={() => playSound.playClick()}>
-                <Button className="w-full bg-gradient-to-r from-[#f3ba2f] to-[#ffe082] hover:from-[#ffe082] hover:to-[#f3ba2f] text-[#002b1c] font-black text-[10px] uppercase tracking-wider h-8.5 rounded-xl shadow-[0_4px_12px_rgba(243,186,47,0.18)] cursor-pointer hover:scale-[1.02] active:scale-98 transition-all duration-200">
+                <Button className="w-full bg-gradient-to-r from-[#f3ba2f] to-[#ffe47a] hover:from-[#ffe47a] hover:to-[#f3ba2f] text-[#001a0d] font-black text-[10px] uppercase tracking-wider h-8.5 rounded-xl shadow-[0_4px_14px_rgba(243,186,47,0.30)] cursor-pointer hover:scale-[1.02] active:scale-98 transition-all duration-200">
                   Invest Now
                 </Button>
               </Link>
             </div>
-            {/* Subtle glow/orb in card background */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#0e9f6e]/10 via-transparent to-[#f3ba2f]/5 opacity-60 pointer-events-none" />
+            {/* Neon glow orb matching image circuit node glow */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#00693e]/12 via-transparent to-[#f3ba2f]/6 opacity-70 pointer-events-none" />
+            <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-[#00e676]/8 rounded-full blur-xl pointer-events-none" />
           </div>
         )}
 
@@ -172,6 +174,31 @@ export function DashboardLayout({ title, children }: { title: string; children: 
     ? (w.deposit || 0) + (w.roi || 0) + (w.referral || 0) + (w.bonusReceived || 0) + (w.salary || 0) + (w.achievement || 0) - (w.withdrawal || 0)
     : 0;
 
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const currentNav = nav.find(n => n.exact ? pathname === n.to : pathname.startsWith(n.to)) ||
+    (pathname.startsWith("/dashboard/admin") ? { label: "Admin", icon: Users } : null);
+  const IconComponent = currentNav?.icon;
+
+  let iconBgClass = "bg-[#0e9f6e] shadow-[0_4px_12px_rgba(14,159,110,0.25)]";
+  if (currentNav) {
+    const label = currentNav.label.toLowerCase();
+    if (label.includes("withdraw") || label.includes("salary") || label.includes("achievement") || label.includes("saved") || label.includes("profile")) {
+      iconBgClass = "bg-[#f3ba2f] shadow-[0_4px_12px_rgba(243,186,47,0.25)]";
+    } else if (label.includes("support")) {
+      iconBgClass = "bg-blue-500 shadow-[0_4px_12px_rgba(59,130,246,0.25)]";
+    } else if (label.includes("package") || label.includes("investment") || label.includes("roi")) {
+      iconBgClass = "bg-indigo-600 shadow-[0_4px_12px_rgba(79,70,229,0.25)]";
+    }
+  }
+
+  const bottomNavItems = [
+    { to: "/dashboard", label: "Home", icon: Home, exact: true },
+    { to: "/dashboard/packages", label: "Plans", icon: Package },
+    { to: "/dashboard/wallet", label: "Wallet", icon: Wallet },
+    { to: "/dashboard/transactions", label: "History", icon: Clock },
+  ];
+
   return (
     <div className="flex min-h-screen bg-background">
       <div className="hidden lg:flex"><Sidebar /></div>
@@ -182,39 +209,93 @@ export function DashboardLayout({ title, children }: { title: string; children: 
         </div>
       )}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex items-center gap-4 glass-navbar glass-blur-md px-5 py-3 md:px-7">
-          <button className="lg:hidden hover:opacity-70 transition" onClick={() => setOpen(true)}><Menu /></button>
-          <h1 className="text-base font-bold md:text-lg flex-1 truncate text-foreground tracking-tight">{title}</h1>
-          {/* <div className="relative hidden md:block">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search…" className="w-64 pl-10" />
-          </div> */}
-          {/* <Button variant="ghost" size="icon" className="relative rounded-full">
-            <Bell size={18} />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-gold animate-pulse" />
-          </Button> */}
-          {!isAdmin && (
-            <div className="hidden sm:flex flex-col text-right justify-center h-10 self-start">
-              <span className="text-[20px] text-muted-foreground font-semibold uppercase tracking-wider">Wallet</span>
-              <span className="text-lr font-black text-primary">${walletBalance.toFixed(2)}</span>
-            </div>
-          )}
-          <div className="flex flex-col items-center gap-1 min-w-[64px]">
-            <Avatar className="h-10 w-10 ring-2 ring-primary-gradient/30 shadow-sm transition-transform hover:scale-105 duration-200">
-              <AvatarImage 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" 
-                alt={user?.name || "User avatar"} 
-              />
-              <AvatarFallback className="bg-primary-gradient text-white font-bold text-xs">
-                {getInitials(user?.name)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-[9px] sm:text-[10px] font-bold text-foreground/80 leading-none tracking-tight text-center max-w-[80px] truncate">
-              {user?.name || "Zubair"}
-            </span>
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-[#f8fdf9]/96 dark:bg-[#060f08]/96 border border-[#c2ddd2] dark:border-[#00e676]/12 rounded-[24px] sm:rounded-[28px] shadow-[0_8px_24px_rgba(0,105,62,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4),0_0_20px_rgba(0,230,118,0.06)] px-4 py-2 sm:px-6 sm:py-2.5 my-3 mx-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <button className="lg:hidden hover:opacity-70 transition text-foreground" onClick={() => setOpen(true)}>
+              <Menu size={20} />
+            </button>
+            {IconComponent && (
+              <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center text-white ${iconBgClass} flex-shrink-0 transition-transform duration-300 hover:scale-105`}>
+                <IconComponent size={16} className="stroke-[2.5]" />
+              </div>
+            )}
+            <h1 className="text-sm sm:text-base font-black text-[#0e1b15] dark:text-[#E8F5E9] truncate tracking-tight">{title}</h1>
+          </div>
+
+          <div className="flex items-center gap-4 sm:gap-6">
+            {!isAdmin && (
+              <div className="flex flex-col text-right justify-center">
+                <span className="text-[9px] font-extrabold text-[#2E6F52] dark:text-emerald-400/80 uppercase tracking-widest leading-none">Wallet</span>
+                <span className="text-sm sm:text-base font-black text-[#0e9f6e] dark:text-[#10b981] font-sans mt-1 leading-none">${walletBalance.toFixed(2)}</span>
+              </div>
+            )}
+            <Link to="/dashboard/profile" className="flex flex-col items-center min-w-[56px] group cursor-pointer focus:outline-none">
+              <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-[#00693e]/20 shadow-sm transition-transform hover:scale-105 group-hover:scale-105 duration-200">
+                {(user?.imageUrl || user?.avatarUrl || user?.photoUrl) ? (
+                  <AvatarImage
+                    src={user.imageUrl || user.avatarUrl || user.photoUrl}
+                    alt={user?.name || "User avatar"}
+                  />
+                ) : null}
+                <AvatarFallback className="bg-primary-gradient text-white font-bold text-xs uppercase">
+                  {getInitials(user?.name)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[9px] font-semibold text-[#668C7A] dark:text-[#8ca99e] mt-1 leading-none tracking-tight text-center max-w-[70px] truncate group-hover:text-[#0e9f6e] transition-colors">
+                {user?.name || "Zubair"}
+              </span>
+            </Link>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-liquid-bg">{children}</main>
+        <main className="flex-1 p-4 pb-24 md:p-6 lg:p-8 bg-gradient-liquid-bg">{children}</main>
+
+        {/* Mobile Bottom Navigation Bar (Floating Pill Layout) */}
+        {!isAdmin && (
+          <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 bg-white/95 dark:bg-[#0c1b15]/95 backdrop-blur-md border border-glass-border/40 h-16 rounded-[28px] flex justify-between items-center shadow-[0_12px_35px_rgba(8,26,18,0.12)] px-2">
+            {bottomNavItems.map((item) => {
+              const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="relative flex flex-col items-center justify-center flex-1 h-full select-none"
+                >
+                  {active ? (
+                    <>
+                      <div className="active-nav-circle text-primary">
+                        <Icon size={24} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-[10px] font-extrabold text-primary mt-8 transition-all duration-300">
+                        {item.label}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-muted-foreground/80 hover:text-muted-foreground transition-colors">
+                        <Icon size={20} className="stroke-[1.8]" />
+                      </div>
+                      <span className="text-[10px] font-semibold text-muted-foreground/80 mt-1 transition-all duration-300">
+                        {item.label}
+                      </span>
+                    </>
+                  )}
+                </Link>
+              );
+            })}
+            <button
+              onClick={() => setOpen(true)}
+              className="relative flex flex-col items-center justify-center flex-1 h-full cursor-pointer select-none"
+            >
+              <div className="text-muted-foreground/80 hover:text-muted-foreground transition-colors">
+                <Menu size={20} className="stroke-[1.8]" />
+              </div>
+              <span className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
+                More
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

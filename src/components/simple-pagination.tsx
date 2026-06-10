@@ -23,7 +23,7 @@ export function SimplePagination({
 
   // Generate page numbers to display
   const pageNumbers = [];
-  const maxPageLinks = 5; // Show max 5 page links around current page
+  const maxPageLinks = 2; // Reduced to 2 to prevent breaking on mobile screens
   
   let startPage = Math.max(1, currentPage - Math.floor(maxPageLinks / 2));
   let endPage = Math.min(totalPages, startPage + maxPageLinks - 1);

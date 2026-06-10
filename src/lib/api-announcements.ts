@@ -5,100 +5,130 @@ export interface Announcement {
   imageUrl: string;
   title?: string;
   link?: string;
+  isActive?: boolean;
+  order?: number;
   createdAt: string;
 }
-
-const LOCAL_STORAGE_KEY = "sky-rise-announcements";
-
-// Highly professional default slides matching the Forest Green/Gold dashboard theme
-const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: "default-1",
-    imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80",
-    title: "Invest in Stock Markets & Earn Daily stable yields",
-    link: "/dashboard/packages",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "default-2",
-    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80",
-    title: "Referral Rewards: Invite downlines for 10% direct commission",
-    link: "/dashboard/team",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "default-3",
-    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-    title: "VIP Leaderboard Rankings: Claim weekly salaries and bonuses",
-    link: "/dashboard/weekly-salary",
-    createdAt: new Date().toISOString()
-  }
-];
 
 export const announcementsApi = {
   getAnnouncements: async (): Promise<Announcement[]> => {
     try {
-      const res = await api.get<{ announcements: Announcement[] }>("/announcements");
-      return res.announcements && res.announcements.length > 0 
-        ? res.announcements 
-        : announcementsApi.getLocalAnnouncements();
+      const res = await api.get<{ banners: any[] }>("/banners");
+      if (res.banners) {
+        return res.banners.map((b: any) => ({
+          id: b._id,
+          imageUrl: b.imageUrl,
+          title: b.title,
+          link: b.link,
+          isActive: b.isActive,
+          order: b.order,
+          createdAt: b.createdAt
+        }));
+      }
+      return [];
     } catch (e) {
-      return announcementsApi.getLocalAnnouncements();
+      console.error("Failed to fetch banners from backend:", e);
+      return [];
     }
   },
 
-  getLocalAnnouncements: (): Announcement[] => {
-    if (typeof window === "undefined") return DEFAULT_ANNOUNCEMENTS;
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (e) {}
-    return DEFAULT_ANNOUNCEMENTS;
-  },
+  createAnnouncement: async (data: {
+    imageUrl?: string;
+    title?: string;
+    link?: string;
+    order?: number;
+    isActive?: boolean;
+    imageFile?: File | null;
+  }): Promise<Announcement> => {
+    if (data.imageFile) {
+      const formData = new FormData();
+      formData.append("image", data.imageFile);
+      if (data.title) formData.append("title", data.title);
+      if (data.link) formData.append("link", data.link);
+      if (data.order !== undefined) formData.append("order", String(data.order));
+      if (data.isActive !== undefined) formData.append("isActive", String(data.isActive));
 
-  saveLocalAnnouncements: (announcements: Announcement[]) => {
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(announcements));
-    } catch (e) {}
-  },
-
-  createAnnouncement: async (data: { imageUrl: string; title?: string; link?: string }): Promise<Announcement> => {
-    const newAnnouncement: Announcement = {
-      id: "ann-" + Date.now(),
-      imageUrl: data.imageUrl,
-      title: data.title,
-      link: data.link,
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      const res = await api.post<{ announcement: Announcement }>("/announcements", data);
-      if (res.announcement) {
-        return res.announcement;
-      }
-    } catch (e) {
-      // Fallback
+      const res = await api.post<{ banner: any }>("/banners", formData);
+      return {
+        id: res.banner._id,
+        imageUrl: res.banner.imageUrl,
+        title: res.banner.title,
+        link: res.banner.link,
+        isActive: res.banner.isActive,
+        order: res.banner.order,
+        createdAt: res.banner.createdAt
+      };
+    } else {
+      const res = await api.post<{ banner: any }>("/banners", {
+        imageUrl: data.imageUrl,
+        title: data.title,
+        link: data.link,
+        order: data.order,
+        isActive: data.isActive
+      });
+      return {
+        id: res.banner._id,
+        imageUrl: res.banner.imageUrl,
+        title: res.banner.title,
+        link: res.banner.link,
+        isActive: res.banner.isActive,
+        order: res.banner.order,
+        createdAt: res.banner.createdAt
+      };
     }
+  },
 
-    const current = announcementsApi.getLocalAnnouncements();
-    const updated = [...current, newAnnouncement];
-    announcementsApi.saveLocalAnnouncements(updated);
-    return newAnnouncement;
+  updateAnnouncement: async (
+    id: string,
+    data: {
+      imageUrl?: string;
+      title?: string;
+      link?: string;
+      order?: number;
+      isActive?: boolean;
+      imageFile?: File | null;
+    }
+  ): Promise<Announcement> => {
+    if (data.imageFile) {
+      const formData = new FormData();
+      formData.append("image", data.imageFile);
+      if (data.title !== undefined) formData.append("title", data.title);
+      if (data.link !== undefined) formData.append("link", data.link);
+      if (data.order !== undefined) formData.append("order", String(data.order));
+      if (data.isActive !== undefined) formData.append("isActive", String(data.isActive));
+
+      const res = await api.put<{ banner: any }>(`/banners/${id}`, formData);
+      return {
+        id: res.banner._id,
+        imageUrl: res.banner.imageUrl,
+        title: res.banner.title,
+        link: res.banner.link,
+        isActive: res.banner.isActive,
+        order: res.banner.order,
+        createdAt: res.banner.createdAt
+      };
+    } else {
+      const res = await api.put<{ banner: any }>(`/banners/${id}`, {
+        imageUrl: data.imageUrl,
+        title: data.title,
+        link: data.link,
+        order: data.order,
+        isActive: data.isActive
+      });
+      return {
+        id: res.banner._id,
+        imageUrl: res.banner.imageUrl,
+        title: res.banner.title,
+        link: res.banner.link,
+        isActive: res.banner.isActive,
+        order: res.banner.order,
+        createdAt: res.banner.createdAt
+      };
+    }
   },
 
   deleteAnnouncement: async (id: string): Promise<boolean> => {
-    try {
-      await api.delete(`/announcements/${id}`);
-    } catch (e) {
-      // Fallback
-    }
-
-    const current = announcementsApi.getLocalAnnouncements();
-    const updated = current.filter(a => a.id !== id);
-    announcementsApi.saveLocalAnnouncements(updated);
+    await api.delete(`/banners/${id}`);
     return true;
   }
 };

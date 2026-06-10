@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Wallet, TrendingUp, ArrowDownToLine, Users, Gift, Crown,
-  Copy, Trophy, Timer, ShieldAlert, FileText, CheckCircle2, DollarSign, Activity, Clock, Percent, ArrowUpRight, ChevronRight, TrendingDown
+  Copy, Trophy, Timer, ShieldAlert, FileText, CheckCircle2, DollarSign, Activity, Clock, Percent, ArrowUpRight, ChevronRight, TrendingDown,
+  Pencil, Download, Upload, ArrowLeftRight
 } from "lucide-react";
 import { GearSpinner } from "@/components/gear-loader";
 import { useAuthStore } from "@/store/authStore";
@@ -19,12 +21,13 @@ import { financeApi } from "@/lib/api-finance";
 import { investmentsApi } from "@/lib/api-investments";
 import { rewardsApi } from "@/lib/api-rewards";
 import { announcementsApi } from "@/lib/api-announcements";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
   PieChart, Pie, Cell
 } from "recharts";
 import stockMarketGrowth from "@/assets/stock_market_growth.png";
+import adminBanner from "@/assets/admin_banner.png";
 import { playSound } from "@/lib/sounds";
 
 // Define RoiCountdown component for real-time ROI tracking & auto-refresh
@@ -36,7 +39,7 @@ function RoiCountdown({ targetDate }: { targetDate: string }) {
     let timer: NodeJS.Timeout;
     const calculateTimeLeft = () => {
       const difference = new Date(targetDate).getTime() - Date.now();
-      
+
       if (difference <= 0) {
         setTimeLeft("Payout due");
         // Auto-refresh stats when timer expires to show newly distributed ROI immediately
@@ -80,6 +83,78 @@ function DashboardHome() {
   const queryClient = useQueryClient();
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
   const referralLink = `${window.location.origin}/register?ref=${user?.referralCode}`;
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slideContainerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  // Fetch announcements/slides
+  const { data: rawAnnouncements = [] } = useQuery({
+    queryKey: ["announcements"],
+    queryFn: () => announcementsApi.getAnnouncements(),
+  });
+
+  const announcements = rawAnnouncements.filter((slide) => slide.isActive !== false);
+
+  // Auto-scroll logic
+  useEffect(() => {
+    if (announcements.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const next = (prev + 1) % announcements.length;
+        if (slideContainerRef.current) {
+          const width = slideContainerRef.current.clientWidth;
+          slideContainerRef.current.scrollTo({
+            left: next * width,
+            behavior: "smooth",
+          });
+        }
+        return next;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [announcements.length]);
+
+  const handleScroll = () => {
+    if (slideContainerRef.current && !isDragging.current) {
+      const scrollLeftVal = slideContainerRef.current.scrollLeft;
+      const width = slideContainerRef.current.clientWidth;
+      const index = Math.round(scrollLeftVal / width);
+      setCurrentSlide(index);
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!slideContainerRef.current) return;
+    isDragging.current = true;
+    startX.current = e.pageX - slideContainerRef.current.offsetLeft;
+    scrollLeft.current = slideContainerRef.current.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !slideContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - slideContainerRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    slideContainerRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (!isDragging.current || !slideContainerRef.current) return;
+    isDragging.current = false;
+
+    const scrollLeftVal = slideContainerRef.current.scrollLeft;
+    const width = slideContainerRef.current.clientWidth;
+    const index = Math.round(scrollLeftVal / width);
+    setCurrentSlide(index);
+    slideContainerRef.current.scrollTo({
+      left: index * width,
+      behavior: "smooth"
+    });
+  };
 
   // Fetch admin dashboard stats if user is admin
   const { data: adminStats } = useQuery({
@@ -183,15 +258,6 @@ function DashboardHome() {
   const hasPendingClaims = activeInvestments.some((inv: any) => inv.pendingRoiClaim > 0);
   const pendingClaimsTotal = activeInvestments.reduce((sum: number, inv: any) => sum + (inv.pendingRoiClaim || 0), 0);
 
-  // Dynamic tickers mock data with sparkline points
-  const tickers = [
-    { name: "KSE 100", value: "76,298.50", change: "+1.35%", positive: true, sparkline: [10, 14, 8, 12, 18, 15, 19] },
-    { name: "S&P 500", value: "5,321.41", change: "+0.85%", positive: true, sparkline: [5, 9, 7, 11, 14, 13, 16] },
-    { name: "NASDAQ", value: "16,801.54", change: "+1.27%", positive: true, sparkline: [12, 10, 14, 13, 19, 16, 21] },
-    { name: "GOLD", value: "2,427.90", change: "+0.45%", positive: true, sparkline: [8, 10, 9, 11, 10, 12, 13] },
-    { name: "USD/PKR", value: "278.42", change: "-0.10%", positive: false, sparkline: [15, 14, 14.5, 13.8, 13.5, 14.2, 13] }
-  ];
-
   // Dynamic wallet balance for stat card
   const w = walletsData;
   const walletBalance = w
@@ -267,11 +333,22 @@ function DashboardHome() {
       {isAdmin ? (
         <div className="space-y-6">
           {/* Welcome Banner */}
-          <div className="rounded-2xl p-6 bg-gradient-to-r from-primary-gradient/10 via-primary-gradient/5 to-transparent border border-soft shadow-card backdrop-blur-md">
-            <h2 className="text-xl font-bold text-foreground">Welcome to the Administration Portal</h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              You are logged in with Administrative permissions. Use the shortcuts below or the sidebar links to review compliance files, track financial queues, and manage platform members.
-            </p>
+          <div
+            style={{ backgroundImage: `url(${adminBanner})` }}
+            className="relative overflow-hidden rounded-[24px] bg-[#001e14] bg-contain bg-no-repeat bg-right border border-emerald-500/20 shadow-card p-6 sm:p-7 text-white flex flex-col justify-center min-h-[140px] sm:min-h-[160px]"
+          >
+            {/* Overlay gradient to fade the image on the left for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#001e14] via-[#001e14]/85 to-transparent pointer-events-none z-0" />
+
+            {/* Overlay grid lines */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(14,159,110,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(14,159,110,0.04)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none z-0" />
+
+            <div className="relative z-10 space-y-1.5 max-w-[75%]">
+              <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight">Welcome to the Administration Portal</h2>
+              <p className="text-xs text-emerald-100/70 leading-relaxed max-w-[550px]">
+                You are logged in with Administrative permissions. Use the shortcuts below or the sidebar links to review compliance files, track financial queues, and manage platform members.
+              </p>
+            </div>
           </div>
 
           {/* Admin Metrics */}
@@ -300,7 +377,7 @@ function DashboardHome() {
           {/* Quick Tasks */}
           <div className="grid gap-6 md:grid-cols-2">
 
-            <Card className="border-soft shadow-card flex flex-col h-full">
+            <Card className="glass-card-hover border-soft shadow-card flex flex-col h-full">
               <CardHeader><CardTitle className="text-sm font-semibold">Financial Approvals</CardTitle></CardHeader>
               <CardContent className="flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-3">
@@ -318,7 +395,7 @@ function DashboardHome() {
               </CardContent>
             </Card>
 
-            <Card className="border-soft shadow-card flex flex-col h-full">
+            <Card className="glass-card-hover border-soft shadow-card flex flex-col h-full">
               <CardHeader><CardTitle className="text-sm font-semibold">Investment Packages</CardTitle></CardHeader>
               <CardContent className="flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-3">
@@ -338,7 +415,7 @@ function DashboardHome() {
           </div>
 
           {/* User Management Hub Card */}
-          <Card className="border-soft shadow-card">
+          <Card className="glass-card-hover border-soft shadow-card">
             <CardHeader><CardTitle className="text-sm font-semibold">Member Management & Network Reports</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <p className="text-xs text-muted-foreground">
@@ -352,6 +429,220 @@ function DashboardHome() {
         </div>
       ) : (
         <>
+          {/* Profile Detail Banner Card (Mobile Only) */}
+          <div className="lg:hidden mb-4 rounded-2xl p-3.5 bg-white/80 dark:bg-card/80 border border-glass-border shadow-card flex items-center justify-between gap-3 glass-card-hover">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Outer ring */}
+              <div className="h-12 w-12 rounded-full border-2 border-dashed border-[#0e9f6e] p-0.5 flex items-center justify-center flex-shrink-0 animate-[spin_8s_linear_infinite]">
+                {/* Inner solid avatar */}
+                <Avatar className="h-full w-full ring-0 animate-[spin_8s_linear_infinite_reverse]">
+                  {(user?.imageUrl || user?.avatarUrl || user?.photoUrl) && (
+                    <AvatarImage
+                      src={user.imageUrl || user.avatarUrl || user.photoUrl}
+                      alt={user?.name || "User avatar"}
+                    />
+                  )}
+                  <AvatarFallback className="bg-[#0e9f6e] text-white font-bold text-sm">
+                    {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              <div className="min-w-0">
+                <h2 className="text-xs font-black text-foreground uppercase tracking-tight truncate leading-none">
+                  {user?.name || "USER"}
+                </h2>
+                <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-1.5 space-y-1 leading-none">
+                  <div>Sponsored By • <span className="text-foreground">{user?.sponsor || "None"}</span></div>
+                  {user?.referralCode && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span>Code: <span className="text-foreground font-mono">{user.referralCode}</span></span>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          playSound.playChime();
+                          navigator.clipboard.writeText(user.referralCode);
+                          toast.success("Referral code copied!");
+                        }}
+                        className="p-0.5 hover:text-[#0e9f6e] text-muted-foreground transition-colors cursor-pointer animate-pulse"
+                        title="Copy Referral Code"
+                      >
+                        <Copy size={9} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Link
+              to="/dashboard/profile"
+              onClick={() => playSound.playClick()}
+              className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#f3ba2f] to-[#ffe082] hover:from-[#ffe082] hover:to-[#f3ba2f] text-[#002b1c] flex items-center justify-center shadow-md flex-shrink-0 transition-transform active:scale-95 hover:scale-105"
+            >
+              <Pencil size={12} />
+            </Link>
+          </div>
+
+          {/* Announcement/Banner Slider */}
+          {announcements.length > 0 && (
+            <div className="mb-4 relative group overflow-hidden rounded-3xl border border-glass-border shadow-card bg-white/40 dark:bg-card/40 backdrop-blur-sm">
+              <div
+                ref={slideContainerRef}
+                onScroll={handleScroll}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUpOrLeave}
+                onMouseLeave={handleMouseUpOrLeave}
+                className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar cursor-grab active:cursor-grabbing select-none"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {announcements.map((slide, idx) => (
+                  <div
+                    key={slide.id}
+                    className="w-full flex-shrink-0 snap-start relative aspect-[21/9] sm:aspect-[16/5] md:h-[220px] lg:h-[300px] xl:h-[350px]"
+                  >
+                    {slide.link ? (
+                      <Link to={slide.link} className="block w-full h-full relative cursor-pointer select-none">
+                        <img
+                          src={slide.imageUrl}
+                          alt={slide.title}
+                          className="w-full h-full object-cover select-none"
+                          draggable="false"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-5 sm:p-7 md:p-9 lg:p-12">
+                          {slide.title && (
+                            <h3 className="text-white text-xs sm:text-sm md:text-lg lg:text-2xl font-black tracking-tight leading-tight max-w-[85%] drop-shadow-md">
+                              {slide.title}
+                            </h3>
+                          )}
+                          <span className="text-[#f3ba2f] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mt-1.5 flex items-center gap-1">
+                            Learn More <ChevronRight size={10} className="mt-[1px]" />
+                          </span>
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="w-full h-full relative select-none">
+                        <img
+                          src={slide.imageUrl}
+                          alt={slide.title}
+                          className="w-full h-full object-cover select-none"
+                          draggable="false"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-5 sm:p-7 md:p-9 lg:p-12">
+                          {slide.title && (
+                            <h3 className="text-white text-xs sm:text-sm md:text-lg lg:text-2xl font-black tracking-tight leading-tight max-w-[85%] drop-shadow-md">
+                              {slide.title}
+                            </h3>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Overlay Navigation Dots */}
+              {announcements.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 bg-black/35 px-2.5 py-1.5 rounded-full backdrop-blur-md">
+                  {announcements.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setCurrentSlide(idx);
+                        if (slideContainerRef.current) {
+                          const width = slideContainerRef.current.clientWidth;
+                          slideContainerRef.current.scrollTo({
+                            left: idx * width,
+                            behavior: "smooth"
+                          });
+                        }
+                      }}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-4 bg-[#f3ba2f]" : "w-1.5 bg-white/60"}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quick Actions Card */}
+          <Card className="glass-card-hover mb-4 border-glass-border shadow-card bg-white/80 dark:bg-card/80">
+            <CardContent className="p-3">
+              <div className="text-center mb-2.5">
+                <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground/80">Quick Actions</span>
+              </div>
+
+              <div className="flex justify-around items-center">
+                {/* Deposit action links to /dashboard/wallet */}
+                <Link
+                  to="/dashboard/wallet"
+                  onClick={() => playSound.playClick()}
+                  className="flex flex-col items-center group"
+                >
+                  <div className="h-11 w-11 rounded-full flex items-center justify-center bg-[#0e9f6e] text-white shadow-[0_4px_12px_rgba(14,159,110,0.25)] transition-all active:scale-95 hover:scale-105 group-hover:-translate-y-0.5">
+                    <Download size={18} className="stroke-[2.5]" />
+                  </div>
+                  <span className="text-[10px] font-bold mt-1.5 text-foreground group-hover:text-[#0e9f6e] transition-colors">
+                    Deposit
+                  </span>
+                </Link>
+
+                {/* Withdrawal action links to /dashboard/withdraw */}
+                <Link
+                  to="/dashboard/withdraw"
+                  onClick={() => playSound.playClick()}
+                  className="flex flex-col items-center group"
+                >
+                  <div className="h-11 w-11 rounded-full flex items-center justify-center bg-[#f3ba2f] text-white shadow-[0_4px_12px_rgba(243,186,47,0.25)] transition-all active:scale-95 hover:scale-105 group-hover:-translate-y-0.5">
+                    <Upload size={18} className="stroke-[2.5]" />
+                  </div>
+                  <span className="text-[10px] font-bold mt-1.5 text-foreground group-hover:text-[#f3ba2f] transition-colors">
+                    Withdrawal
+                  </span>
+                </Link>
+
+                {/* Transfer action links to /dashboard/transfer */}
+                <Link
+                  to="/dashboard/transfer"
+                  onClick={() => playSound.playClick()}
+                  className="flex flex-col items-center group"
+                >
+                  <div className="h-11 w-11 rounded-full flex items-center justify-center bg-[#0e9f6e] text-white shadow-[0_4px_12px_rgba(14,159,110,0.25)] transition-all active:scale-95 hover:scale-105 group-hover:-translate-y-0.5">
+                    <ArrowLeftRight size={18} className="stroke-[2.5]" />
+                  </div>
+                  <span className="text-[10px] font-bold mt-1.5 text-foreground group-hover:text-[#0e9f6e] transition-colors">
+                    Transfer
+                  </span>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Registration Bonus Banner — only show when bonus is unused */}
+          {user?.registrationBonusActive && (user?.freeRegBonus || 0) >= 5 && (
+            <div className="mb-4 rounded-2xl p-4 bg-gradient-to-r from-[#004d33] via-[#003d28] to-[#002b1c] border border-emerald-500/30 shadow-[0_4px_20px_rgba(0,230,118,0.10)] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-[#f3ba2f]/15 flex items-center justify-center flex-shrink-0 text-xl">
+                  🎁
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-black text-white leading-tight">
+                    $5 Registration Bonus Available!
+                  </div>
+                  <div className="text-[11px] text-emerald-300/80 mt-0.5 leading-snug">
+                    Automatically added to your first investment of <strong className="text-[#f3ba2f]">$50 or more</strong>. Non-withdrawable.
+                  </div>
+                </div>
+              </div>
+              <Link to="/dashboard/packages" onClick={() => playSound.playClick()} className="flex-shrink-0">
+                <Button size="sm" className="bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[10px] px-3 h-8 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap">
+                  Invest Now
+                </Button>
+              </Link>
+            </div>
+          )}
+
           {hasPendingClaims && (
             <div className="mb-6 rounded-xl p-4 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/20 flex items-center justify-between shadow-sm animate-pulse">
               <div className="flex items-center gap-3">
@@ -397,39 +688,6 @@ function DashboardHome() {
             </div>
           )}
 
-          {/* Premium Market Ticker Row */}
-          <div className="overflow-x-auto no-scrollbar mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex gap-3 min-w-max pb-1">
-              {tickers.map((t) => (
-                <Card 
-                  key={t.name} 
-                  className="flex items-center gap-3 p-3 bg-white/80 dark:bg-card/80 border-glass-border shadow-soft rounded-2xl min-w-[190px] cursor-pointer hover:bg-white dark:hover:bg-card transition-all active:scale-98"
-                  onClick={() => playSound.playClick()}
-                >
-                  <div className="flex-1">
-                    <div className="text-[10px] font-bold text-muted-foreground uppercase">{t.name}</div>
-                    <div className="text-sm font-extrabold text-foreground mt-0.5">{t.value}</div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${t.positive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                      {t.change}
-                    </span>
-                    <div className="mt-1 flex justify-end">
-                      <svg className="w-12 h-6" viewBox="0 0 50 20">
-                        <polyline
-                          fill="none"
-                          stroke={t.positive ? "#0e9f6e" : "#e02424"}
-                          strokeWidth="1.5"
-                          points={t.sparkline.map((val, idx) => `${(idx * 50) / 6},${20 - val}`).join(" ")}
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
           {/* Top Stat Cards Grid */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <StatCard icon={Wallet} label="Total Balance" value={`$${walletBalance.toFixed(2)}`} accent="green" />
@@ -442,7 +700,7 @@ function DashboardHome() {
           {/* Middle Charts & Promo Row */}
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             {/* Earnings Overview Area Chart */}
-            <Card className="shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
+            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
                   <CardTitle className="text-sm font-extrabold text-foreground uppercase tracking-wider">Earnings Overview</CardTitle>
@@ -461,8 +719,8 @@ function DashboardHome() {
                   <AreaChart data={earningsHistory} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0e9f6e" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#0e9f6e" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#0e9f6e" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#0e9f6e" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
@@ -476,7 +734,7 @@ function DashboardHome() {
             </Card>
 
             {/* Investment Distribution Donut Chart */}
-            <Card className="shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
+            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
               <CardHeader className="pb-1">
                 <CardTitle className="text-sm font-extrabold text-foreground uppercase tracking-wider">Investment Distribution</CardTitle>
               </CardHeader>
@@ -522,7 +780,7 @@ function DashboardHome() {
             </Card>
 
             {/* Invest in Stock Market Promo Banner */}
-            <Card className="shadow-card border-soft bg-[#002b1c] text-white relative group min-h-[280px] flex flex-col justify-between !overflow-hidden">
+            <Card className="glass-card-hover shadow-card border-soft bg-[#002b1c] text-white relative group min-h-[280px] flex flex-col justify-between">
               {/* Background Image & Overlay */}
               <img
                 src={stockMarketGrowth}
@@ -555,11 +813,11 @@ function DashboardHome() {
           {/* Bottom Data Grid */}
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             {/* Recent Transactions List */}
-            <Card className="shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
+            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">Recent Transactions</CardTitle>
-                <Link 
-                  to="/dashboard/transactions" 
+                <Link
+                  to="/dashboard/transactions"
                   className="text-[11px] text-[#f3ba2f] hover:underline font-bold flex items-center gap-0.5"
                   onClick={() => playSound.playClick()}
                 >
@@ -589,11 +847,11 @@ function DashboardHome() {
             </Card>
 
             {/* My Investment Plan Details */}
-            <Card className="shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
+            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">My Investment Plan</CardTitle>
-                <Link 
-                  to="/dashboard/investments" 
+                <Link
+                  to="/dashboard/investments"
                   className="text-[11px] text-[#f3ba2f] hover:underline font-bold flex items-center gap-0.5"
                   onClick={() => playSound.playClick()}
                 >
@@ -619,7 +877,7 @@ function DashboardHome() {
                     <span className="font-extrabold text-foreground mt-0.5 block">Lifetime</span>
                   </div>
                 </div>
-                
+
                 {latestInvestment && latestInvestment.pendingRoiClaim > 0 && (
                   <div className="pt-2">
                     <Button
@@ -647,11 +905,11 @@ function DashboardHome() {
             </Card>
 
             {/* Referral Program Info */}
-            <Card className="shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
+            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
               <CardHeader className="flex flex-row items-center justify-between pb-1">
                 <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">Referral Program</CardTitle>
-                <Link 
-                  to="/dashboard/team" 
+                <Link
+                  to="/dashboard/team"
                   className="text-[11px] text-[#f3ba2f] hover:underline font-bold flex items-center gap-0.5"
                   onClick={() => playSound.playClick()}
                 >
@@ -683,10 +941,10 @@ function DashboardHome() {
                   <div className="text-[9px] text-muted-foreground font-bold uppercase">Your Referral Link</div>
                   <div className="flex items-center gap-2 rounded-xl bg-secondary/40 border border-glass-border p-2">
                     <input readOnly value={referralLink} className="flex-1 bg-transparent text-[10px] outline-none text-foreground truncate" />
-                    <Button 
-                      size="icon" 
-                      variant="ghost" 
-                      className="h-6 w-6 hover:bg-secondary cursor-pointer flex-shrink-0" 
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 hover:bg-secondary cursor-pointer flex-shrink-0"
                       onClick={() => {
                         playSound.playChime();
                         navigator.clipboard.writeText(referralLink);
@@ -697,7 +955,7 @@ function DashboardHome() {
                     </Button>
                   </div>
                 </div>
-                <Button 
+                <Button
                   onClick={() => {
                     playSound.playChime();
                     navigator.clipboard.writeText(referralLink);

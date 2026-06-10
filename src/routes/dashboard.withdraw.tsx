@@ -17,6 +17,7 @@ import { newFlowsApi } from "@/lib/api-new-flows";
 import { financeApi } from "@/lib/api-finance";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { SimplePagination } from "@/components/simple-pagination";
+import { playSound } from "@/lib/sounds";
 
 export const Route = createFileRoute("/dashboard/withdraw")({
   component: WithdrawPage,
@@ -73,6 +74,7 @@ function WithdrawPage() {
   const requestMutation = useMutation({
     mutationFn: newFlowsApi.requestWithdrawal,
     onSuccess: () => {
+      playSound.playSuccess();
       toast.success("Withdrawal request submitted successfully!");
       setAmount("");
       queryClient.invalidateQueries({ queryKey: ["wallets"] });
@@ -86,6 +88,7 @@ function WithdrawPage() {
   const cancelMutation = useMutation({
     mutationFn: newFlowsApi.cancelWithdrawal,
     onSuccess: () => {
+      playSound.playChime();
       toast.success("Withdrawal request cancelled and refunded.");
       queryClient.invalidateQueries({ queryKey: ["wallets"] });
       queryClient.invalidateQueries({ queryKey: ["withdrawals"] });

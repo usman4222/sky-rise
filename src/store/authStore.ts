@@ -26,6 +26,13 @@ export interface UserProfile {
   wallets?: any;
   signupBonus?: any;
   unlockedLevels?: number[];
+  createdAt?: string;
+  avatarUrl?: string;
+  imageUrl?: string;
+  photoUrl?: string;
+  // Registration bonus state
+  registrationBonusActive?: boolean; // true = bonus still available
+  freeRegBonus?: number;             // Should be 5 until consumed
 }
 
 interface AuthState {
@@ -40,7 +47,7 @@ interface AuthState {
   setAuth: (token: string, user: UserProfile, roles?: string[]) => void;
   clearAuth: () => void;
   login: (credentials: LoginInput) => Promise<void>;
-  register: (data: RegisterInput) => Promise<void>;
+  register: (data: RegisterInput, phoneVerificationToken: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
   setHydrated: () => void;
@@ -102,7 +109,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (data) => {
+      register: async (data, phoneVerificationToken) => {
         set({ isLoading: true });
         try {
           const { confirmPassword, password, email, ...payload } = data;
@@ -114,7 +121,7 @@ export const useAuthStore = create<AuthState>()(
           // 2. Sync profile details to MongoDB backend
           const response = await api.post<{ user: UserProfile }>(
             "/firebase-auth/sync",
-            { idToken, ...payload },
+            { idToken, phoneVerificationToken, ...payload },
             { headers: { Authorization: `Bearer ${idToken}` } }
           );
           
