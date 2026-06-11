@@ -49,14 +49,14 @@ function TransferPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Receiver Referral Code or User ID</Label>
+                <Label className="block mb-2">Receiver Referral Code or User ID</Label>
                 <Input placeholder="SKY-XXXXX" value={recipient} onChange={(e) => setRecipient(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label>Amount (USD)</Label>
+                <Label className="block mb-2">Amount (USD)</Label>
                 <Input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
               </div>
-              <Button 
+              <Button
                 className="w-full bg-primary-gradient text-primary-foreground h-14 rounded-full text-base font-semibold"
                 onClick={() => transferMutation.mutate()}
                 disabled={transferMutation.isPending || !recipient || !amount}

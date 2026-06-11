@@ -6,6 +6,10 @@ interface LogoProps {
 }
 
 export function SkyRiseLogo({ className = "h-8 w-auto", variant = "light" }: LogoProps) {
+  const isDarkBg = variant === "dark" || variant === "sidebar";
+  const barColor = isDarkBg ? "#ffffff" : "#00693e";
+  const textColorClass = isDarkBg ? "text-white" : "text-[#001a0d] dark:text-white";
+
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       {/* SVG Icon */}
@@ -41,11 +45,11 @@ export function SkyRiseLogo({ className = "h-8 w-auto", variant = "light" }: Log
         />
 
         {/* Vertical Skyscraper Bars - White/Muted */}
-        <rect x="36" y="44" width="4" height="24" rx="2" fill="#ffffff" opacity="0.95" />
-        <rect x="43" y="36" width="4" height="32" rx="2" fill="#ffffff" opacity="0.95" />
-        <rect x="50" y="28" width="4" height="40" rx="2" fill="#ffffff" opacity="0.95" />
-        <rect x="57" y="20" width="4" height="48" rx="2" fill="#ffffff" opacity="0.95" />
-        <rect x="64" y="12" width="4" height="56" rx="2" fill="#ffffff" opacity="0.95" />
+        <rect x="36" y="44" width="4" height="24" rx="2" fill={barColor} opacity="0.95" />
+        <rect x="43" y="36" width="4" height="32" rx="2" fill={barColor} opacity="0.95" />
+        <rect x="50" y="28" width="4" height="40" rx="2" fill={barColor} opacity="0.95" />
+        <rect x="57" y="20" width="4" height="48" rx="2" fill={barColor} opacity="0.95" />
+        <rect x="64" y="12" width="4" height="56" rx="2" fill={barColor} opacity="0.95" />
 
         {/* Trendline Arrow Cutting Upwards */}
         <path
@@ -69,7 +73,7 @@ export function SkyRiseLogo({ className = "h-8 w-auto", variant = "light" }: Log
       {/* Brand Text */}
       <div className="flex flex-col justify-center select-none">
         <div className="flex items-center gap-1.5 leading-none">
-          <span className="font-extrabold text-lg tracking-wider text-white uppercase">
+          <span className={`font-extrabold text-lg tracking-wider ${textColorClass} uppercase`}>
             Sky<span className="text-[#f3ba2f]">Rise</span>
           </span>
           {/* Animated small rotating cube for the dot of 'i' or visual accent */}

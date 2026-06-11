@@ -241,19 +241,19 @@ function ProfilePage() {
             {/* Info fields */}
             <div className="mt-2 grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">User Referral Code</Label>
+                <Label className="text-sm font-semibold block mb-2">User Referral Code</Label>
                 <Input value={user?.referralCode || ""} readOnly />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Sponsor</Label>
+                <Label className="text-sm font-semibold block mb-2">Sponsor</Label>
                 <Input value={user?.sponsor || "None"} readOnly />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Email</Label>
+                <Label className="text-sm font-semibold block mb-2">Email</Label>
                 <Input defaultValue={user?.email || ""} readOnly className="bg-muted" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Phone</Label>
+                <Label className="text-sm font-semibold block mb-2">Phone</Label>
                 <Input defaultValue={user?.phone || ""} />
               </div>
             </div>
@@ -267,7 +267,7 @@ function ProfilePage() {
             <CardHeader><CardTitle>Security</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">New Password</Label>
+                <Label className="text-sm font-semibold block mb-2">New Password</Label>
                 <Input
                   type="password"
                   placeholder="Minimum 6 characters"

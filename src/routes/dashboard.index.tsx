@@ -21,6 +21,7 @@ import { financeApi } from "@/lib/api-finance";
 import { investmentsApi } from "@/lib/api-investments";
 import { rewardsApi } from "@/lib/api-rewards";
 import { announcementsApi } from "@/lib/api-announcements";
+import { networkApi } from "@/lib/api-network";
 import { useEffect, useState, useRef } from "react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -212,6 +213,13 @@ function DashboardHome() {
     enabled: !isAdmin,
   });
 
+  const { data: downlineData } = useQuery({
+    queryKey: ["downline"],
+    queryFn: () => networkApi.getDownline(),
+    refetchOnWindowFocus: false,
+    enabled: !isAdmin,
+  });
+
   const activeInvestments = investments.filter((i: any) => i.status === "active");
   const totalInvestmentAmount = activeInvestments.reduce((acc: number, cur: any) => acc + cur.amount, 0);
 
@@ -271,6 +279,17 @@ function DashboardHome() {
 
   // Dynamic estimation of today's ROI profit
   const todayProfit = activeInvestments.reduce((sum: number, inv: any) => sum + (inv.amount * (inv.currentRoi || 1.2) / 100), 0);
+
+  // Calculate direct referral stats
+  const directsList = downlineData?.directReferralsList || [];
+  const totalDirectsInvestment = directsList.reduce((sum: number, r: any) => sum + (r.totalInvestments || 0), 0);
+
+  // Calculate total team stats
+  const levelTeamDataMap = downlineData?.levelTeamData || {};
+  const totalTeamInvestment = Object.values(levelTeamDataMap).reduce((acc: number, levelMembers: any) => {
+    if (!Array.isArray(levelMembers)) return acc;
+    return acc + levelMembers.reduce((sum: number, m: any) => sum + (m.totalInvestments || 0), 0);
+  }, 0);
 
   // Growth graph values matching the total balance scale
   const baseChartVal = totalEarnings > 0 ? totalEarnings : 2680.50;
@@ -621,46 +640,48 @@ function DashboardHome() {
 
           {/* Registration Bonus Banner — only show when bonus is unused */}
           {user?.registrationBonusActive && (user?.freeRegBonus || 0) >= 5 && (
-            <div className="mb-4 rounded-2xl p-4 bg-gradient-to-r from-[#004d33] via-[#003d28] to-[#002b1c] border border-emerald-500/30 shadow-[0_4px_20px_rgba(0,230,118,0.10)] flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="h-10 w-10 rounded-xl bg-[#f3ba2f]/15 flex items-center justify-center flex-shrink-0 text-xl">
+            <div className="mb-4 rounded-2xl p-4 bg-gradient-to-r from-[#004d33] via-[#003d28] to-[#002b1c] border border-emerald-500/30 shadow-[0_4px_20px_rgba(0,230,118,0.10)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-[#f3ba2f]/15 flex items-center justify-center flex-shrink-0 text-xl mt-0.5">
                   🎁
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1">
                   <div className="text-sm font-black text-white leading-tight">
                     $5 Registration Bonus Available!
                   </div>
-                  <div className="text-[11px] text-emerald-300/80 mt-0.5 leading-snug">
+                  <div className="text-[11px] text-emerald-300/80 leading-snug">
                     Automatically added to your first investment of <strong className="text-[#f3ba2f]">$50 or more</strong>. Non-withdrawable.
                   </div>
                 </div>
               </div>
-              <Link to="/dashboard/packages" onClick={() => playSound.playClick()} className="flex-shrink-0">
-                <Button size="sm" className="bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[10px] px-3 h-8 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap">
-                  Invest Now
-                </Button>
-              </Link>
+              <div className="flex justify-end pl-13 sm:pl-0">
+                <Link to="/dashboard/packages" onClick={() => playSound.playClick()} className="w-full sm:w-auto flex-shrink-0">
+                  <Button size="sm" className="w-full sm:w-auto bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[10px] px-4 h-8 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap">
+                    Invest Now
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
 
           {hasPendingClaims && (
-            <div className="mb-6 rounded-xl p-4 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/20 flex items-center justify-between shadow-sm animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/15 rounded-lg text-amber-500">
+            <div className="mb-6 rounded-2xl p-4 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-pulse">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-500/15 rounded-xl text-amber-500 flex-shrink-0 mt-0.5">
                   <Gift className="h-5 w-5" />
                 </div>
-                <div>
-                  <div className="text-sm font-semibold text-foreground">You Have Unclaimed ROI Earnings!</div>
-                  <div className="text-xs text-muted-foreground">You must claim your daily ROI manually before they expire within the required window.</div>
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-foreground">You Have Unclaimed ROI Earnings!</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">You must claim your daily ROI manually before they expire within the required window.</div>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-xs text-muted-foreground uppercase font-medium">Unclaimed Total</div>
-                  <div className="text-lg font-bold text-amber-500 font-mono mt-0.5">${pendingClaimsTotal.toFixed(2)}</div>
+              <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-4 border-t sm:border-t-0 border-amber-500/10 pt-3 sm:pt-0 pl-11 sm:pl-0">
+                <div className="text-left sm:text-right flex items-center sm:block gap-2">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase font-bold tracking-wider">Unclaimed Total</span>
+                  <span className="text-base sm:text-lg font-black text-amber-500 font-mono sm:mt-0.5 block">${pendingClaimsTotal.toFixed(2)}</span>
                 </div>
-                <Link to="/dashboard/investments">
-                  <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-amber-foreground font-semibold">
+                <Link to="/dashboard/investments" className="flex-shrink-0">
+                  <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[11px] h-8.5 px-4 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer">
                     Go to Claims
                   </Button>
                 </Link>
@@ -669,36 +690,129 @@ function DashboardHome() {
           )}
 
           {latestInvestment?.nextRoiPayoutAt && (
-            <div className="mb-6 rounded-xl p-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/20 flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/15 rounded-lg text-emerald-500">
+            <div className="mb-6 rounded-2xl p-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-emerald-500/15 rounded-xl text-emerald-500 flex-shrink-0 mt-0.5">
                   <Timer className="h-5 w-5" />
                 </div>
-                <div>
-                  <div className="text-sm font-semibold text-foreground">Active Investment Earning ROI</div>
-                  <div className="text-xs text-muted-foreground">Your ROI payout is automated. Keep this page open to watch it grow.</div>
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-foreground">Active Investment Earning ROI</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">Your ROI payout is automated. Keep this page open to watch it grow.</div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-xs text-muted-foreground uppercase font-medium">Next Payout In</div>
-                <div className="text-lg font-bold text-emerald-500 font-mono mt-0.5">
+              <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-4 border-t sm:border-t-0 border-emerald-500/10 pt-3 sm:pt-0 pl-11 sm:pl-0">
+                <span className="text-[10px] sm:text-xs text-muted-foreground uppercase font-bold tracking-wider">Next Payout In</span>
+                <span className="text-base sm:text-lg font-black text-emerald-500 font-mono sm:mt-1">
                   <RoiCountdown targetDate={latestInvestment.nextRoiPayoutAt} />
-                </div>
+                </span>
               </div>
             </div>
           )}
 
           {/* Top Stat Cards Grid */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <StatCard icon={Wallet} label="Total Balance" value={`$${walletBalance.toFixed(2)}`} accent="green" />
             <StatCard icon={TrendingUp} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="gold" />
             <StatCard icon={Activity} label="Total Earnings" value={`$${totalEarnings.toFixed(2)}`} accent="green" />
             <StatCard icon={DollarSign} label="Today's Profit" value={`$${todayProfit.toFixed(2)}`} accent="yellow" />
-            <StatCard icon={Percent} label="ROI (Daily)" value={latestInvestment ? `${latestInvestment.currentRoi}%` : "1.20%"} subtitle="Every 24 Hours" accent="green" />
+            {/* <StatCard icon={Percent} label="ROI (Daily)" value={latestInvestment ? `${latestInvestment.currentRoi}%` : "1.20%"} subtitle="Every 24 Hours" accent="green" /> */}
+            <StatCard icon={Users} label="Direct Team" value={downlineData?.directReferralsCount ?? 0} subtitle={`Invested: $${totalDirectsInvestment.toFixed(2)}`} accent="primary" />
+            <StatCard icon={Users} label="Total Team" value={downlineData?.totalTeamSize ?? 0} subtitle={`Invested: $${totalTeamInvestment.toFixed(2)}`} accent="gold" />
           </div>
-
           {/* Middle Charts & Promo Row */}
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            {/* Invest in Stock Market Promo Banner */}
+            <Card className="glass-card-hover shadow-card border-soft bg-[#002b1c] text-white relative group min-h-[280px] flex flex-col justify-between">
+              {/* Background Image & Overlay */}
+              <img
+                src={stockMarketGrowth}
+                alt="Stock Market Growth Visual"
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-30 mix-blend-overlay transition-transform duration-500 group-hover:scale-105 rounded-2xl z-0"
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#002b1c] via-[#002b1c]/90 to-transparent z-10 pointer-events-none rounded-2xl" />
+
+              <CardContent className="p-5 relative z-20 flex flex-col justify-between h-full flex-1">
+                <div className="space-y-2.5">
+                  <Badge className="bg-[#f3ba2f] text-[#002b1c] font-black border-0 text-[9px] uppercase tracking-wider px-2 py-0.5">Hot Offer</Badge>
+                  <h3 className="text-base font-black tracking-tight leading-tight text-white">
+                    Invest in Stock Market <br />
+                    <span className="text-[#f3ba2f] text-lg">Earn Daily ROI</span>
+                  </h3>
+                  <p className="text-[10px] text-emerald-100/80 leading-normal max-w-[170px]">
+                    Your money is in safe hands and working in the stock market for stable daily yields.
+                  </p>
+                </div>
+
+                <Link to="/dashboard/packages" className="block w-full mt-4" onClick={() => playSound.playClick()}>
+                  <Button className="w-full bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[11px] h-9 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer">
+                    Make Investment
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+            {/* Referral Program Info */}
+            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
+              <CardHeader className="flex flex-row items-center justify-between pb-1">
+                <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">Referral Program</CardTitle>
+                <Link
+                  to="/dashboard/team"
+                  className="text-[11px] text-[#f3ba2f] hover:underline font-bold flex items-center gap-0.5"
+                  onClick={() => playSound.playClick()}
+                >
+                  View All <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-1 flex-1 flex flex-col justify-between">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
+                    <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Total</div>
+                    <div className="text-sm font-extrabold text-foreground mt-1 flex items-center justify-center gap-1">
+                      <Users className="h-3 w-3 text-primary" /> {downlineData?.directReferralsCount ?? 0}
+                    </div>
+                  </div>
+                  <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
+                    <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Active</div>
+                    <div className="text-sm font-extrabold text-[#0e9f6e] mt-1 flex items-center justify-center gap-1">
+                      <Users className="h-3 w-3 text-[#0e9f6e]" /> {downlineData?.activeDirectReferralsCount ?? 0}
+                    </div>
+                  </div>
+                  <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
+                    <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Earnings</div>
+                    <div className="text-[11px] font-extrabold text-foreground mt-1.5 truncate">
+                      ${(walletsData?.referral || 1280.50).toFixed(0)}
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-[9px] text-muted-foreground font-bold uppercase">Your Referral Link</div>
+                  <div className="flex items-center gap-2 rounded-xl bg-secondary/40 border border-glass-border p-2">
+                    <input readOnly value={referralLink} className="flex-1 bg-transparent text-[10px] outline-none text-foreground truncate" />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 hover:bg-secondary cursor-pointer flex-shrink-0"
+                      onClick={() => {
+                        playSound.playChime();
+                        navigator.clipboard.writeText(referralLink);
+                        toast.success("Referral link copied!");
+                      }}
+                    >
+                      <Copy size={11} />
+                    </Button>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => {
+                    playSound.playChime();
+                    navigator.clipboard.writeText(referralLink);
+                    toast.success("Referral link copied! Share it to invite team members.");
+                  }}
+                  className="w-full bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[11px] h-9 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer mt-1"
+                >
+                  Invite & Earn More
+                </Button>
+              </CardContent>
+            </Card>
             {/* Earnings Overview Area Chart */}
             <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -732,7 +846,10 @@ function DashboardHome() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </div>
 
+          {/* Bottom Data Grid */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
             {/* Investment Distribution Donut Chart */}
             <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
               <CardHeader className="pb-1">
@@ -778,40 +895,6 @@ function DashboardHome() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Invest in Stock Market Promo Banner */}
-            <Card className="glass-card-hover shadow-card border-soft bg-[#002b1c] text-white relative group min-h-[280px] flex flex-col justify-between">
-              {/* Background Image & Overlay */}
-              <img
-                src={stockMarketGrowth}
-                alt="Stock Market Growth Visual"
-                className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-30 mix-blend-overlay transition-transform duration-500 group-hover:scale-105 rounded-2xl z-0"
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#002b1c] via-[#002b1c]/90 to-transparent z-10 pointer-events-none rounded-2xl" />
-
-              <CardContent className="p-5 relative z-20 flex flex-col justify-between h-full flex-1">
-                <div className="space-y-2.5">
-                  <Badge className="bg-[#f3ba2f] text-[#002b1c] font-black border-0 text-[9px] uppercase tracking-wider px-2 py-0.5">Hot Offer</Badge>
-                  <h3 className="text-base font-black tracking-tight leading-tight text-white">
-                    Invest in Stock Market <br />
-                    <span className="text-[#f3ba2f] text-lg">Earn Daily ROI</span>
-                  </h3>
-                  <p className="text-[10px] text-emerald-100/80 leading-normal max-w-[170px]">
-                    Your money is in safe hands and working in the stock market for stable daily yields.
-                  </p>
-                </div>
-
-                <Link to="/dashboard/packages" className="block w-full mt-4" onClick={() => playSound.playClick()}>
-                  <Button className="w-full bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[11px] h-9 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer">
-                    Make Investment
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Bottom Data Grid */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
             {/* Recent Transactions List */}
             <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -901,70 +984,6 @@ function DashboardHome() {
                   </div>
                   <Progress value={100} className="mt-1 h-1.5 bg-secondary" />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Referral Program Info */}
-            <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md flex flex-col justify-between">
-              <CardHeader className="flex flex-row items-center justify-between pb-1">
-                <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">Referral Program</CardTitle>
-                <Link
-                  to="/dashboard/team"
-                  className="text-[11px] text-[#f3ba2f] hover:underline font-bold flex items-center gap-0.5"
-                  onClick={() => playSound.playClick()}
-                >
-                  View All <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-1 flex-1 flex flex-col justify-between">
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
-                    <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Total</div>
-                    <div className="text-sm font-extrabold text-foreground mt-1 flex items-center justify-center gap-1">
-                      <Users className="h-3 w-3 text-primary" /> 32
-                    </div>
-                  </div>
-                  <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
-                    <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Active</div>
-                    <div className="text-sm font-extrabold text-[#0e9f6e] mt-1 flex items-center justify-center gap-1">
-                      <Users className="h-3 w-3 text-[#0e9f6e]" /> 28
-                    </div>
-                  </div>
-                  <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
-                    <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Earnings</div>
-                    <div className="text-[11px] font-extrabold text-foreground mt-1.5 truncate">
-                      ${(walletsData?.referral || 1280.50).toFixed(0)}
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="text-[9px] text-muted-foreground font-bold uppercase">Your Referral Link</div>
-                  <div className="flex items-center gap-2 rounded-xl bg-secondary/40 border border-glass-border p-2">
-                    <input readOnly value={referralLink} className="flex-1 bg-transparent text-[10px] outline-none text-foreground truncate" />
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6 hover:bg-secondary cursor-pointer flex-shrink-0"
-                      onClick={() => {
-                        playSound.playChime();
-                        navigator.clipboard.writeText(referralLink);
-                        toast.success("Referral link copied!");
-                      }}
-                    >
-                      <Copy size={11} />
-                    </Button>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => {
-                    playSound.playChime();
-                    navigator.clipboard.writeText(referralLink);
-                    toast.success("Referral link copied! Share it to invite team members.");
-                  }}
-                  className="w-full bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[11px] h-9 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer mt-1"
-                >
-                  Invite & Earn More
-                </Button>
               </CardContent>
             </Card>
           </div>

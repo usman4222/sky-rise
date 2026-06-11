@@ -42,7 +42,7 @@ export const faqs = [
   { q: "What is the minimum investment amount?", a: "You can start investing with as little as $10 using the Starter Share Investment package." },
   { q: "How does daily ROI work?", a: "Each package distributes a daily ROI percentage based on your active investment. ROI grows over time according to package rules." },
   { q: "What is auto reinvest?", a: "Auto reinvest automatically routes your daily ROI back into your active investment, compounding your position." },
-  { q: "What happens if I do not claim daily ROI within 24 hours?", a: "Manual ROI must be claimed within 24 hours or it may expire as per platform rules." },
+  { q: "What happens if I do not claim daily ROI within 6 hours?", a: "Manual ROI must be claimed within 6 hours or it may expire as per platform rules." },
   { q: "How does direct referral income work?", a: "You earn 8% from direct referral investments based on the real deposited amount." },
   { q: "How do I unlock level income?", a: "Higher levels are unlocked by sponsoring active direct members and paying a small activation fee." },
   { q: "What are VIP salary rewards?", a: "VIP salary rewards are weekly payouts based on your VIP rank and 5-leg team business." },

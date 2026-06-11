@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TrendingUp, Shield, Users, Eye, EyeOff } from "lucide-react";
 import { GearSpinner } from "@/components/gear-loader";
+import { SkyRiseLogo } from "@/components/logo";
 
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
@@ -118,9 +119,7 @@ function LoginPage() {
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-4 py-10 md:px-6 lg:grid-cols-2">
         <div className="order-2 lg:order-1">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="h-20 w-20 flex items-center justify-center rounded-full bg-primary-gradient shadow-soft" >
-              <img src="/skyrise-logo.png" alt="Logo" className="h-15" />
-            </div>
+            <SkyRiseLogo variant="light" className="h-10 w-auto" />
           </Link>
           <Card className="mt-8">
             <CardContent className="p-8">

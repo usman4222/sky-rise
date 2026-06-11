@@ -426,7 +426,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                         }`}
                     >
                       <span className="text-xs font-semibold">Manual-Claim</span>
-                      <span className="text-[10px] opacity-80 mt-1">Claim manually inside a strict 1-hour window, or lose it.</span>
+                      <span className="text-[10px] opacity-80 mt-1">Claim manually inside a strict 6-hour window, or lose it.</span>
                     </button>
                   </div>
                 </div>

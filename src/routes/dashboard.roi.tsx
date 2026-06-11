@@ -92,7 +92,7 @@ function RoiPage() {
                   <AlertTriangle className="h-4 w-4 text-gold" />
                   <AlertTitle>Manual claim window</AlertTitle>
                   <AlertDescription className="text-xs">
-                    Manual ROI must be claimed within 24 hours or it may expire.
+                    Manual ROI must be claimed within 6 hours or it may expire.
                   </AlertDescription>
                 </Alert>
               </>

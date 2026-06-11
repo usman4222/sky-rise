@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SkyRiseLogo } from "@/components/logo";
 import {
   Gift, Users, Upload, Download, ArrowLeftRight, RefreshCw,
   Shield, Crown, ChevronRight, Eye, EyeOff, Info, ArrowUpRight, TrendingUp, TrendingDown, Wallet
@@ -63,6 +64,14 @@ function WalletPage() {
   const [paymentMethodId, setPaymentMethodId] = useState("");
   const [showBalance, setShowBalance] = useState(true);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+
+  const comingSoonCurrencies = [
+    { code: "INR", name: "Indian Rupee", flag: "🇮🇳" },
+    { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳" },
+    { code: "AED", name: "UAE Dirham", flag: "🇦🇪" },
+    { code: "SAR", name: "Saudi Riyal", flag: "🇸🇦" },
+  ];
 
   // 1. Fetch live coin prices from Binance API with automatic fallback
   const { data: rates } = useQuery<RatesData>({
@@ -108,7 +117,7 @@ function WalletPage() {
 
   // 3. Fetch automated payment gateways for deposits
   const { data: paymentMethods = [] } = useQuery({
-    queryKey: ["paymentMethods"],
+    queryKey: ["depositPaymentMethods"],
     queryFn: async () => {
       const res = await financeApi.getPaymentMethods();
       return res.methods || [];
@@ -194,14 +203,14 @@ function WalletPage() {
       <div className="space-y-6">
 
         {/* Live Coin Prices Grid (Responsive matching card design) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+        <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar flex-nowrap lg:grid lg:grid-cols-4 gap-3 sm:gap-4 w-full pb-3 lg:pb-0 scroll-smooth">
           {coinTickers.map((t) => {
             const liveRate = rates ? rates[t.tag as keyof RatesData] : { price: t.initial, change: 1.5 };
             const isPositive = liveRate.change >= 0;
             return (
               <div
                 key={t.symbol}
-                className="glass-card-hover bg-white/95 dark:bg-[#0c1b15]/95 border border-[#e2f0eb] dark:border-emerald-950/40 rounded-[28px] shadow-[0_8px_24px_rgba(8,26,18,0.02)] transition-all duration-300 hover:shadow-[0_12px_28px_rgba(8,26,18,0.04)] hover:-translate-y-0.5"
+                className="snap-start flex-shrink-0 w-[47%] sm:w-[31%] lg:w-auto glass-card-hover bg-white/95 dark:bg-[#0c1b15]/95 border border-[#e2f0eb] dark:border-emerald-950/40 rounded-[28px] shadow-[0_8px_24px_rgba(8,26,18,0.02)] transition-all duration-300 hover:shadow-[0_12px_28px_rgba(8,26,18,0.04)] lg:hover:-translate-y-0.5"
               >
                 <div className="p-4 sm:p-5 flex items-center justify-between gap-3">
                   {/* Left Side: Details */}
@@ -378,13 +387,28 @@ function WalletPage() {
                     </DialogHeader>
                     <div className="space-y-4 py-3 text-xs">
                       <div className="space-y-1.5">
-                        <Label >Select Deposit Gateway</Label>
-                        <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+                        <Label>Select Deposit Gateway</Label>
+                        <Select
+                          value={paymentMethodId}
+                          onValueChange={(val) => {
+                            if (["INR", "CNY", "AED", "SAR"].includes(val)) {
+                              playSound.playChime();
+                              setIsComingSoonOpen(true);
+                              return;
+                            }
+                            setPaymentMethodId(val);
+                          }}
+                        >
                           <SelectTrigger><SelectValue placeholder="Choose gateway..." /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="max-h-[300px] overflow-y-auto">
                             {automatedMethods.map((m: any) => (
                               <SelectItem key={m._id} value={m._id}>
-                                {m.currency === "PKR" ? "Deposit in PKR" : "Deposit in USDT"}
+                                {m.currency === "PKR" ? "🇵🇰 Deposit in PKR" : "💵 Deposit in USDT"}
+                              </SelectItem>
+                            ))}
+                            {comingSoonCurrencies.map((c) => (
+                              <SelectItem key={c.code} value={c.code} className="text-xs opacity-75">
+                                {c.flag} Deposit in {c.code}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -507,13 +531,28 @@ function WalletPage() {
                 ) : (
                   <>
                     <div className="space-y-1.5">
-                      <Label className="font-bold text-foreground">Select Payment Method</Label>
-                      <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+                      <Label className="font-bold block mb-2 text-foreground">Select Payment Method</Label>
+                      <Select
+                        value={paymentMethodId}
+                        onValueChange={(val) => {
+                          if (["INR", "CNY", "AED", "SAR"].includes(val)) {
+                            playSound.playChime();
+                            setIsComingSoonOpen(true);
+                            return;
+                          }
+                          setPaymentMethodId(val);
+                        }}
+                      >
                         <SelectTrigger className="h-9.5 text-xs"><SelectValue placeholder="Choose a payment gateway" /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-[300px] overflow-y-auto">
                           {automatedMethods.map((m: any) => (
                             <SelectItem key={m._id} value={m._id} className="text-xs">
-                              {m.currency === "PKR" ? "Deposit in PKR" : "Deposit in USDT"}
+                              {m.currency === "PKR" ? "🇵🇰 Deposit in PKR" : "Deposit in USDT"}
+                            </SelectItem>
+                          ))}
+                          {comingSoonCurrencies.map((c) => (
+                            <SelectItem key={c.code} value={c.code} className="text-xs opacity-75">
+                              {c.flag} Deposit in {c.code}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -521,7 +560,7 @@ function WalletPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="font-bold text-foreground">Amount to Deposit {selectedMethod ? `(${selectedMethod.currency})` : ""}</Label>
+                      <Label className="font-bold block mb-2 text-foreground">Amount to Deposit {selectedMethod ? `(${selectedMethod.currency})` : ""}</Label>
                       <div className="relative">
                         <Input
                           type="number"
@@ -653,13 +692,28 @@ function WalletPage() {
           </DialogHeader>
           <div className="space-y-4 py-3 text-xs">
             <div className="space-y-1.5">
-              <Label className="mb-2 block">Select Deposit Gateway</Label>
-              <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+              <Label className="mb-2 block font-bold">Select Deposit Gateway</Label>
+              <Select
+                value={paymentMethodId}
+                onValueChange={(val) => {
+                  if (["INR", "CNY", "AED", "SAR"].includes(val)) {
+                    playSound.playChime();
+                    setIsComingSoonOpen(true);
+                    return;
+                  }
+                  setPaymentMethodId(val);
+                }}
+              >
                 <SelectTrigger className="h-9.5 text-xs"><SelectValue placeholder="Choose gateway..." /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
                   {automatedMethods.map((m: any) => (
                     <SelectItem key={m._id} value={m._id} className="text-xs">
-                      {m.currency === "PKR" ? "Deposit in PKR" : "Deposit in USDT"}
+                      {m.currency === "PKR" ? "🇵🇰 Deposit in PKR" : "💵 Deposit in USDT"}
+                    </SelectItem>
+                  ))}
+                  {comingSoonCurrencies.map((c) => (
+                    <SelectItem key={c.code} value={c.code} className="text-xs opacity-75">
+                      {c.flag} Deposit in {c.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -679,6 +733,28 @@ function WalletPage() {
           <DialogFooter>
             <Button className="w-full glass-button-primary" onClick={handleDepositSubmit} disabled={depositMutation.isPending}>
               {depositMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : `Initiate Deposit`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Coming Soon Dialog for select currencies */}
+      <Dialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen}>
+        <DialogContent className="max-w-sm rounded-[28px] p-6 text-center space-y-4">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="animate-bounce mr-3 mt-5">
+              <SkyRiseLogo variant="light" className="h-12 w-auto" />
+            </div>
+            <DialogTitle className="text-lg font-black text-foreground mt-4">
+              Currency Coming Soon!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            We are working hard to integrate local payment gateways for this region. Automatic deposits and withdrawals in this currency will be available soon!
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setIsComingSoonOpen(false)} className="w-full bg-[#0e9f6e] hover:bg-[#0c6a46] text-white font-extrabold h-10 rounded-xl cursor-pointer shadow-md">
+              Got It
             </Button>
           </DialogFooter>
         </DialogContent>

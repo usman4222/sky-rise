@@ -51,7 +51,7 @@ function SupportPage() {
   });
 
   const replyMutation = useMutation({
-    mutationFn: (vars: { ticketId: string; message: string }) => 
+    mutationFn: (vars: { ticketId: string; message: string }) =>
       supportApi.replyTicket(vars.ticketId, { message: vars.message }),
     onSuccess: (res) => {
       toast.success("Reply sent successfully.");
@@ -66,7 +66,7 @@ function SupportPage() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (vars: { ticketId: string; status: string }) => 
+    mutationFn: (vars: { ticketId: string; status: string }) =>
       supportApi.updateTicketStatus(vars.ticketId, { status: vars.status }),
     onSuccess: (res) => {
       toast.success(`Ticket marked as ${res.ticket.status}.`);
@@ -119,26 +119,26 @@ function SupportPage() {
           <CardContent>
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Subject</Label>
-                <Input 
-                  placeholder="How can we help?" 
-                  value={subject} 
-                  onChange={(e) => setSubject(e.target.value)} 
+                <Label className="block mb-2">Subject</Label>
+                <Input
+                  placeholder="How can we help?"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
                   disabled={submitMutation.isPending}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Message</Label>
-                <Textarea 
-                  rows={6} 
-                  placeholder="Describe your issue in detail…" 
-                  value={message} 
-                  onChange={(e) => setMessage(e.target.value)} 
+                <Label className="block mb-2">Message</Label>
+                <Textarea
+                  rows={6}
+                  placeholder="Describe your issue in detail…"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   disabled={submitMutation.isPending}
                 />
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-primary-gradient text-primary-foreground"
                 disabled={submitMutation.isPending || !subject.trim() || !message.trim()}
               >
@@ -158,21 +158,37 @@ function SupportPage() {
         <div className="space-y-4">
           {[
             { icon: Mail, t: "Email Us", d: "support@skyrisefuture.com" },
-            { icon: MessageCircle, t: "Live Chat", d: "Available 24 / 7" },
+            { icon: MessageCircle, t: "WhatsApp Channel", d: "Join official channel", link: "https://whatsapp.com/channel/0029VbCfERo1SWswjFBAVt10", iconColor: "text-emerald-500", bg: "bg-emerald-500/10" },
+            { icon: Send, t: "Telegram Channel", d: "Join official channel", link: "https://t.me/SkyRiseFuture", iconColor: "text-blue-500", bg: "bg-blue-500/10" },
             { icon: FileQuestion, t: "Help Center", d: "Browse our FAQ" },
-          ].map((c) => (
-            <Card key={c.t} className="border-soft shadow-card">
-              <CardContent className="p-5 flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
-                  <c.icon size={18} />
-                </div>
-                <div>
-                  <div className="font-semibold text-sm">{c.t}</div>
-                  <div className="text-xs text-muted-foreground">{c.d}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          ].map((c) => {
+            const CardWrapper = c.link ? "a" : "div";
+            return (
+              <Card key={c.t} className="border-soft shadow-card hover:border-primary/20 transition-all duration-300">
+                <CardContent className="p-0">
+                  <CardWrapper
+                    {...(c.link ? { href: c.link, target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className={`p-5 flex items-center gap-3 ${c.link ? "cursor-pointer" : ""}`}
+                  >
+                    <div className={`grid h-10 w-10 place-items-center rounded-lg ${c.bg || "bg-primary/10"} ${c.iconColor || "text-primary"}`}>
+                      <c.icon size={18} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-sm flex items-center gap-1.5">
+                        {c.t}
+                        {c.link && (
+                          <span className="text-[9px] bg-primary/10 text-primary dark:bg-primary/20 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                            Join
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{c.d}</div>
+                    </div>
+                  </CardWrapper>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
@@ -181,10 +197,10 @@ function SupportPage() {
           <CardTitle>
             {isAdmin ? "Global Support Tickets Queue" : "Your Past Support Tickets"}
           </CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => refetchTickets()} 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetchTickets()}
             disabled={isFetching}
             className="gap-1.5 h-8 text-xs font-semibold"
           >
@@ -237,12 +253,12 @@ function SupportPage() {
                           {t.message}
                         </TableCell>
                         <TableCell>
-                          <Badge 
+                          <Badge
                             className={
-                              t.status === "open" 
-                                ? "bg-gold/15 text-gold border-0" 
-                                : t.status === "answered" 
-                                  ? "bg-profit/10 text-profit border-0" 
+                              t.status === "open"
+                                ? "bg-gold/15 text-gold border-0"
+                                : t.status === "answered"
+                                  ? "bg-profit/10 text-profit border-0"
                                   : "bg-muted text-muted-foreground border-0"
                             }
                           >
@@ -253,8 +269,8 @@ function SupportPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => setSelectedTicket(t)}
                             className="gap-1.5"
@@ -288,22 +304,22 @@ function SupportPage() {
                   {selectedTicket.subject}
                 </DialogTitle>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full flex items-center justify-center" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full flex items-center justify-center"
                     onClick={() => refetchTickets()}
                     disabled={isFetching}
                     title="Sync Replies"
                   >
                     <RotateCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
                   </Button>
-                  <Badge 
+                  <Badge
                     className={
-                      selectedTicket.status === "open" 
-                        ? "bg-gold/15 text-gold border-0 capitalize" 
-                        : selectedTicket.status === "answered" 
-                          ? "bg-profit/10 text-profit border-0 capitalize" 
+                      selectedTicket.status === "open"
+                        ? "bg-gold/15 text-gold border-0 capitalize"
+                        : selectedTicket.status === "answered"
+                          ? "bg-profit/10 text-profit border-0 capitalize"
                           : "bg-muted text-muted-foreground border-0 capitalize"
                     }
                   >
@@ -336,27 +352,24 @@ function SupportPage() {
                 const isAdminReply = reply.sender !== selectedTicket.user?._id && reply.sender !== selectedTicket.user;
 
                 return (
-                  <div 
-                    key={idx} 
-                    className={`flex items-start gap-2.5 max-w-[85%] ${
-                      isReplyFromMe ? "ml-auto justify-end" : ""
-                    }`}
-                  >
-                    <div 
-                      className={`rounded-2xl p-4 text-sm ${
-                        isReplyFromMe 
-                          ? "bg-primary text-white" 
-                          : isAdminReply
-                            ? "bg-amber-500/10 text-foreground border border-amber-500/20"
-                            : "bg-secondary text-foreground"
+                  <div
+                    key={idx}
+                    className={`flex items-start gap-2.5 max-w-[85%] ${isReplyFromMe ? "ml-auto justify-end" : ""
                       }`}
-                    >
-                      <div 
-                        className={`font-semibold text-[10px] mb-1 ${
-                          isReplyFromMe 
-                            ? "text-white/80" 
-                            : "text-muted-foreground"
+                  >
+                    <div
+                      className={`rounded-2xl p-4 text-sm ${isReplyFromMe
+                        ? "bg-primary text-white"
+                        : isAdminReply
+                          ? "bg-amber-500/10 text-foreground border border-amber-500/20"
+                          : "bg-secondary text-foreground"
                         }`}
+                    >
+                      <div
+                        className={`font-semibold text-[10px] mb-1 ${isReplyFromMe
+                          ? "text-white/80"
+                          : "text-muted-foreground"
+                          }`}
                       >
                         {isAdminReply ? "🛡️ Support Representative" : "Customer Reply"} • {new Date(reply.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
@@ -370,14 +383,14 @@ function SupportPage() {
             {/* Action Bar (Send reply, Toggle Status) */}
             <div className="border-t border-soft pt-4 flex-shrink-0">
               <form onSubmit={handleSendReply} className="flex gap-2">
-                <Input 
-                  placeholder="Type your support message..." 
+                <Input
+                  placeholder="Type your support message..."
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
                   disabled={replyMutation.isPending || selectedTicket.status === "closed"}
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   size="icon"
                   className="bg-primary-gradient text-primary-foreground flex-shrink-0"
                   disabled={replyMutation.isPending || !replyMessage.trim() || selectedTicket.status === "closed"}
@@ -389,19 +402,19 @@ function SupportPage() {
                   )}
                 </Button>
               </form>
-              
+
               <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
                 <span>
-                  {selectedTicket.status === "closed" 
+                  {selectedTicket.status === "closed"
                     ? "This support ticket is closed and read-only."
                     : "Need to change ticket status?"}
                 </span>
-                
+
                 {selectedTicket.status !== "closed" && (
                   <div className="flex gap-2">
                     {isAdmin && selectedTicket.status !== "answered" && (
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => statusMutation.mutate({ ticketId: selectedTicket._id, status: "answered" })}
                         disabled={statusMutation.isPending}
@@ -410,8 +423,8 @@ function SupportPage() {
                         Mark Answered
                       </Button>
                     )}
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => statusMutation.mutate({ ticketId: selectedTicket._id, status: "closed" })}
                       disabled={statusMutation.isPending}

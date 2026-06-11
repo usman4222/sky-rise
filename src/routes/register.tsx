@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Gift, CheckCircle, Eye, EyeOff, Smartphone, ShieldCheck, ArrowLeft, KeyRound } from "lucide-react";
 import { GearSpinner } from "@/components/gear-loader";
+import { SkyRiseLogo } from "@/components/logo";
 
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
@@ -226,9 +227,7 @@ function RegisterPage() {
 
       <div className="mx-auto max-w-2xl px-4 py-12 md:px-6">
         <Link to="/" className="inline-flex items-center gap-2">
-          <div className="h-20 w-20 flex items-center justify-center rounded-full bg-primary-gradient shadow-soft" >
-            <img src="/skyrise-logo.png" alt="Logo" className="h-15" />
-          </div>
+          <SkyRiseLogo variant="light" className="h-10 w-auto" />
         </Link>
         <Card className="mt-8">
           <CardContent className="p-8">

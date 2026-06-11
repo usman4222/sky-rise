@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
   User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Megaphone,
-  Home, Clock
+  Home, Clock, Send, MessageCircle
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -142,6 +142,33 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
         )}
 
+        {/* Official Social Channels */}
+        <div className="pt-4 mt-4 border-t border-glass-border/30 space-y-2">
+          <div className="px-4 text-[10px] font-bold text-foreground/45 tracking-wider uppercase">
+            Official Channels
+          </div>
+          <div className="flex gap-2 px-2">
+            <a
+              href="https://t.me/SkyRiseFuture"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-glass-border bg-glass-surface-soft py-2 px-1 text-xs font-semibold text-foreground/80 hover:bg-blue-500/10 hover:text-blue-500 hover:border-blue-500/30 transition-all cursor-pointer select-none"
+            >
+              <Send size={13} className="text-blue-500" />
+              <span>Telegram</span>
+            </a>
+            <a
+              href="https://whatsapp.com/channel/0029VbCfERo1SWswjFBAVt10"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-glass-border bg-glass-surface-soft py-2 px-1 text-xs font-semibold text-foreground/80 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30 transition-all cursor-pointer select-none"
+            >
+              <MessageCircle size={13} className="text-emerald-500" />
+              <span>WhatsApp</span>
+            </a>
+          </div>
+        </div>
+
         <button
           onClick={handleLogout}
           className="mt-4 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
@@ -223,12 +250,12 @@ export function DashboardLayout({ title, children }: { title: string; children: 
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6">
-            {!isAdmin && (
+            {/* {!isAdmin && (
               <div className="flex flex-col text-right justify-center">
                 <span className="text-[9px] font-extrabold text-[#2E6F52] dark:text-emerald-400/80 uppercase tracking-widest leading-none">Wallet</span>
                 <span className="text-sm sm:text-base font-black text-[#0e9f6e] dark:text-[#10b981] font-sans mt-1 leading-none">${walletBalance.toFixed(2)}</span>
               </div>
-            )}
+            )} */}
             <Link to="/dashboard/profile" className="flex flex-col items-center min-w-[56px] group cursor-pointer focus:outline-none">
               <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-[#00693e]/20 shadow-sm transition-transform hover:scale-105 group-hover:scale-105 duration-200">
                 {(user?.imageUrl || user?.avatarUrl || user?.photoUrl) ? (
