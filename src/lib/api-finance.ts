@@ -14,6 +14,9 @@ export const financeApi = {
   createUsdtDeposit: (data: { amountUSDT: number }) =>
     api.post<{ deposit: any }>("/payments/usdt/deposit/create", data),
     
+  getUsdtDepositStatus: (depositId: string) =>
+    api.get<{ deposit: any }>(`/payments/usdt/deposit/status/${depositId}`),
+    
   // Withdrawals
   addWithdrawalAccount: (data: { 
     name: string; 

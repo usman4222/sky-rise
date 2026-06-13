@@ -157,14 +157,15 @@ function RegisterPage() {
 
   const onSubmit = async (data: RegisterInput) => {
     try {
-      await handleSendOtp(data.phone, data.email);
-      setPendingData(data);
-      setOtpCode("");
-      setShowOtpScreen(true);
+      setJustRegistered(true);
+      await registerAction(data, "MOCK_TOKEN");
+      setShowSuccessModal(true);
     } catch (error: any) {
-      // Error handled in handleSendOtp
+      setJustRegistered(false);
+      toast.error(error.message || "Registration failed");
     }
   };
+
 
   const handleVerifyAndRegister = async () => {
     if (!otpCode || otpCode.length !== 6) {

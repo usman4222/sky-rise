@@ -64,7 +64,37 @@ export interface AchievementResponse {
   nextTarget: AchievementItem | null;
 }
 
+export interface LeadershipRewardItem {
+  _id: string;
+  createdAt: string;
+  downlineUser: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  rewardName: string;
+  amount: number;
+  targetTier: number;
+  status: "paid" | "missed" | "recovered";
+  recoveredAt?: string;
+}
+
+export interface LeadershipStatusResponse {
+  success: boolean;
+  message: string;
+  qualifiedTier: number;
+  autoReinvestOn: boolean;
+  totalSelfInvestment: number;
+  activeDirectsCount: number;
+  vipRank: number;
+  achievementRank: number;
+  history: LeadershipRewardItem[];
+  pendingRecoveryTotal: number;
+}
+
 export const rewardsApi = {
   getVipStatus: () => api.get<VipStatusResponse>("/rewards/vip-status"),
   getAchievements: () => api.get<AchievementResponse>("/rewards/achievements"),
+  getLeadershipStatus: () => api.get<LeadershipStatusResponse>("/rewards/leadership-status"),
+  recoverLeadershipRewards: () => api.post<{ success: boolean; message: string; recoveredAmount: number }>("/rewards/recover-leadership-rewards", {}),
 };

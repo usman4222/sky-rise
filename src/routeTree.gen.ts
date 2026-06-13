@@ -25,8 +25,10 @@ import { Route as DashboardWithdrawRouteImport } from './routes/dashboard.withdr
 import { Route as DashboardWeeklySalaryRouteImport } from './routes/dashboard.weekly-salary'
 import { Route as DashboardWalletRouteImport } from './routes/dashboard.wallet'
 import { Route as DashboardVipRouteImport } from './routes/dashboard.vip'
+import { Route as DashboardUplineRewardsRouteImport } from './routes/dashboard.upline-rewards'
 import { Route as DashboardTransferRouteImport } from './routes/dashboard.transfer'
 import { Route as DashboardTransactionsRouteImport } from './routes/dashboard.transactions'
+import { Route as DashboardTeamBonusRouteImport } from './routes/dashboard.team-bonus'
 import { Route as DashboardTeamRouteImport } from './routes/dashboard.team'
 import { Route as DashboardSupportRouteImport } from './routes/dashboard.support'
 import { Route as DashboardRoiRouteImport } from './routes/dashboard.roi'
@@ -36,11 +38,14 @@ import { Route as DashboardPackagesRouteImport } from './routes/dashboard.packag
 import { Route as DashboardLevelsRouteImport } from './routes/dashboard.levels'
 import { Route as DashboardInvestmentsRouteImport } from './routes/dashboard.investments'
 import { Route as DashboardAchievementsRouteImport } from './routes/dashboard.achievements'
+import { Route as DashboardCheckoutDepositIdRouteImport } from './routes/dashboard.checkout.$depositId'
 import { Route as DashboardAdminWithdrawalsRouteImport } from './routes/dashboard.admin.withdrawals'
 import { Route as DashboardAdminWeeklySalaryRouteImport } from './routes/dashboard.admin.weekly-salary'
 import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard.admin.users'
 import { Route as DashboardAdminKycRouteImport } from './routes/dashboard.admin.kyc'
 import { Route as DashboardAdminDepositsRouteImport } from './routes/dashboard.admin.deposits'
+import { Route as DashboardAdminBalanceHistoryRouteImport } from './routes/dashboard.admin.balance-history'
+import { Route as DashboardAdminBalanceAdjustRouteImport } from './routes/dashboard.admin.balance-adjust'
 import { Route as DashboardAdminAnnouncementsRouteImport } from './routes/dashboard.admin.announcements'
 
 const VipRoute = VipRouteImport.update({
@@ -123,6 +128,11 @@ const DashboardVipRoute = DashboardVipRouteImport.update({
   path: '/vip',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardUplineRewardsRoute = DashboardUplineRewardsRouteImport.update({
+  id: '/upline-rewards',
+  path: '/upline-rewards',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardTransferRoute = DashboardTransferRouteImport.update({
   id: '/transfer',
   path: '/transfer',
@@ -131,6 +141,11 @@ const DashboardTransferRoute = DashboardTransferRouteImport.update({
 const DashboardTransactionsRoute = DashboardTransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTeamBonusRoute = DashboardTeamBonusRouteImport.update({
+  id: '/team-bonus',
+  path: '/team-bonus',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardTeamRoute = DashboardTeamRouteImport.update({
@@ -178,6 +193,12 @@ const DashboardAchievementsRoute = DashboardAchievementsRouteImport.update({
   path: '/achievements',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardCheckoutDepositIdRoute =
+  DashboardCheckoutDepositIdRouteImport.update({
+    id: '/checkout/$depositId',
+    path: '/checkout/$depositId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardAdminWithdrawalsRoute =
   DashboardAdminWithdrawalsRouteImport.update({
     id: '/admin/withdrawals',
@@ -205,6 +226,18 @@ const DashboardAdminDepositsRoute = DashboardAdminDepositsRouteImport.update({
   path: '/admin/deposits',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminBalanceHistoryRoute =
+  DashboardAdminBalanceHistoryRouteImport.update({
+    id: '/admin/balance-history',
+    path: '/admin/balance-history',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardAdminBalanceAdjustRoute =
+  DashboardAdminBalanceAdjustRouteImport.update({
+    id: '/admin/balance-adjust',
+    path: '/admin/balance-adjust',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardAdminAnnouncementsRoute =
   DashboardAdminAnnouncementsRouteImport.update({
     id: '/admin/announcements',
@@ -232,8 +265,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/roi': typeof DashboardRoiRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/team': typeof DashboardTeamRoute
+  '/dashboard/team-bonus': typeof DashboardTeamBonusRoute
   '/dashboard/transactions': typeof DashboardTransactionsRoute
   '/dashboard/transfer': typeof DashboardTransferRoute
+  '/dashboard/upline-rewards': typeof DashboardUplineRewardsRoute
   '/dashboard/vip': typeof DashboardVipRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/dashboard/weekly-salary': typeof DashboardWeeklySalaryRoute
@@ -241,11 +276,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/admin/announcements': typeof DashboardAdminAnnouncementsRoute
+  '/dashboard/admin/balance-adjust': typeof DashboardAdminBalanceAdjustRoute
+  '/dashboard/admin/balance-history': typeof DashboardAdminBalanceHistoryRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/admin/weekly-salary': typeof DashboardAdminWeeklySalaryRoute
   '/dashboard/admin/withdrawals': typeof DashboardAdminWithdrawalsRoute
+  '/dashboard/checkout/$depositId': typeof DashboardCheckoutDepositIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -266,8 +304,10 @@ export interface FileRoutesByTo {
   '/dashboard/roi': typeof DashboardRoiRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/team': typeof DashboardTeamRoute
+  '/dashboard/team-bonus': typeof DashboardTeamBonusRoute
   '/dashboard/transactions': typeof DashboardTransactionsRoute
   '/dashboard/transfer': typeof DashboardTransferRoute
+  '/dashboard/upline-rewards': typeof DashboardUplineRewardsRoute
   '/dashboard/vip': typeof DashboardVipRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/dashboard/weekly-salary': typeof DashboardWeeklySalaryRoute
@@ -275,11 +315,14 @@ export interface FileRoutesByTo {
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/admin/announcements': typeof DashboardAdminAnnouncementsRoute
+  '/dashboard/admin/balance-adjust': typeof DashboardAdminBalanceAdjustRoute
+  '/dashboard/admin/balance-history': typeof DashboardAdminBalanceHistoryRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/admin/weekly-salary': typeof DashboardAdminWeeklySalaryRoute
   '/dashboard/admin/withdrawals': typeof DashboardAdminWithdrawalsRoute
+  '/dashboard/checkout/$depositId': typeof DashboardCheckoutDepositIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -302,8 +345,10 @@ export interface FileRoutesById {
   '/dashboard/roi': typeof DashboardRoiRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/team': typeof DashboardTeamRoute
+  '/dashboard/team-bonus': typeof DashboardTeamBonusRoute
   '/dashboard/transactions': typeof DashboardTransactionsRoute
   '/dashboard/transfer': typeof DashboardTransferRoute
+  '/dashboard/upline-rewards': typeof DashboardUplineRewardsRoute
   '/dashboard/vip': typeof DashboardVipRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/dashboard/weekly-salary': typeof DashboardWeeklySalaryRoute
@@ -311,11 +356,14 @@ export interface FileRoutesById {
   '/dashboard/withdrawals': typeof DashboardWithdrawalsRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/admin/announcements': typeof DashboardAdminAnnouncementsRoute
+  '/dashboard/admin/balance-adjust': typeof DashboardAdminBalanceAdjustRoute
+  '/dashboard/admin/balance-history': typeof DashboardAdminBalanceHistoryRoute
   '/dashboard/admin/deposits': typeof DashboardAdminDepositsRoute
   '/dashboard/admin/kyc': typeof DashboardAdminKycRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/admin/weekly-salary': typeof DashboardAdminWeeklySalaryRoute
   '/dashboard/admin/withdrawals': typeof DashboardAdminWithdrawalsRoute
+  '/dashboard/checkout/$depositId': typeof DashboardCheckoutDepositIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -339,8 +387,10 @@ export interface FileRouteTypes {
     | '/dashboard/roi'
     | '/dashboard/support'
     | '/dashboard/team'
+    | '/dashboard/team-bonus'
     | '/dashboard/transactions'
     | '/dashboard/transfer'
+    | '/dashboard/upline-rewards'
     | '/dashboard/vip'
     | '/dashboard/wallet'
     | '/dashboard/weekly-salary'
@@ -348,11 +398,14 @@ export interface FileRouteTypes {
     | '/dashboard/withdrawals'
     | '/dashboard/'
     | '/dashboard/admin/announcements'
+    | '/dashboard/admin/balance-adjust'
+    | '/dashboard/admin/balance-history'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
     | '/dashboard/admin/weekly-salary'
     | '/dashboard/admin/withdrawals'
+    | '/dashboard/checkout/$depositId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -373,8 +426,10 @@ export interface FileRouteTypes {
     | '/dashboard/roi'
     | '/dashboard/support'
     | '/dashboard/team'
+    | '/dashboard/team-bonus'
     | '/dashboard/transactions'
     | '/dashboard/transfer'
+    | '/dashboard/upline-rewards'
     | '/dashboard/vip'
     | '/dashboard/wallet'
     | '/dashboard/weekly-salary'
@@ -382,11 +437,14 @@ export interface FileRouteTypes {
     | '/dashboard/withdrawals'
     | '/dashboard'
     | '/dashboard/admin/announcements'
+    | '/dashboard/admin/balance-adjust'
+    | '/dashboard/admin/balance-history'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
     | '/dashboard/admin/weekly-salary'
     | '/dashboard/admin/withdrawals'
+    | '/dashboard/checkout/$depositId'
   id:
     | '__root__'
     | '/'
@@ -408,8 +466,10 @@ export interface FileRouteTypes {
     | '/dashboard/roi'
     | '/dashboard/support'
     | '/dashboard/team'
+    | '/dashboard/team-bonus'
     | '/dashboard/transactions'
     | '/dashboard/transfer'
+    | '/dashboard/upline-rewards'
     | '/dashboard/vip'
     | '/dashboard/wallet'
     | '/dashboard/weekly-salary'
@@ -417,11 +477,14 @@ export interface FileRouteTypes {
     | '/dashboard/withdrawals'
     | '/dashboard/'
     | '/dashboard/admin/announcements'
+    | '/dashboard/admin/balance-adjust'
+    | '/dashboard/admin/balance-history'
     | '/dashboard/admin/deposits'
     | '/dashboard/admin/kyc'
     | '/dashboard/admin/users'
     | '/dashboard/admin/weekly-salary'
     | '/dashboard/admin/withdrawals'
+    | '/dashboard/checkout/$depositId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -551,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardVipRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/upline-rewards': {
+      id: '/dashboard/upline-rewards'
+      path: '/upline-rewards'
+      fullPath: '/dashboard/upline-rewards'
+      preLoaderRoute: typeof DashboardUplineRewardsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/transfer': {
       id: '/dashboard/transfer'
       path: '/transfer'
@@ -563,6 +633,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/dashboard/transactions'
       preLoaderRoute: typeof DashboardTransactionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/team-bonus': {
+      id: '/dashboard/team-bonus'
+      path: '/team-bonus'
+      fullPath: '/dashboard/team-bonus'
+      preLoaderRoute: typeof DashboardTeamBonusRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/team': {
@@ -628,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAchievementsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/checkout/$depositId': {
+      id: '/dashboard/checkout/$depositId'
+      path: '/checkout/$depositId'
+      fullPath: '/dashboard/checkout/$depositId'
+      preLoaderRoute: typeof DashboardCheckoutDepositIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/admin/withdrawals': {
       id: '/dashboard/admin/withdrawals'
       path: '/admin/withdrawals'
@@ -663,6 +747,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminDepositsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/admin/balance-history': {
+      id: '/dashboard/admin/balance-history'
+      path: '/admin/balance-history'
+      fullPath: '/dashboard/admin/balance-history'
+      preLoaderRoute: typeof DashboardAdminBalanceHistoryRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/admin/balance-adjust': {
+      id: '/dashboard/admin/balance-adjust'
+      path: '/admin/balance-adjust'
+      fullPath: '/dashboard/admin/balance-adjust'
+      preLoaderRoute: typeof DashboardAdminBalanceAdjustRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/admin/announcements': {
       id: '/dashboard/admin/announcements'
       path: '/admin/announcements'
@@ -683,8 +781,10 @@ interface DashboardRouteChildren {
   DashboardRoiRoute: typeof DashboardRoiRoute
   DashboardSupportRoute: typeof DashboardSupportRoute
   DashboardTeamRoute: typeof DashboardTeamRoute
+  DashboardTeamBonusRoute: typeof DashboardTeamBonusRoute
   DashboardTransactionsRoute: typeof DashboardTransactionsRoute
   DashboardTransferRoute: typeof DashboardTransferRoute
+  DashboardUplineRewardsRoute: typeof DashboardUplineRewardsRoute
   DashboardVipRoute: typeof DashboardVipRoute
   DashboardWalletRoute: typeof DashboardWalletRoute
   DashboardWeeklySalaryRoute: typeof DashboardWeeklySalaryRoute
@@ -692,11 +792,14 @@ interface DashboardRouteChildren {
   DashboardWithdrawalsRoute: typeof DashboardWithdrawalsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardAdminAnnouncementsRoute: typeof DashboardAdminAnnouncementsRoute
+  DashboardAdminBalanceAdjustRoute: typeof DashboardAdminBalanceAdjustRoute
+  DashboardAdminBalanceHistoryRoute: typeof DashboardAdminBalanceHistoryRoute
   DashboardAdminDepositsRoute: typeof DashboardAdminDepositsRoute
   DashboardAdminKycRoute: typeof DashboardAdminKycRoute
   DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
   DashboardAdminWeeklySalaryRoute: typeof DashboardAdminWeeklySalaryRoute
   DashboardAdminWithdrawalsRoute: typeof DashboardAdminWithdrawalsRoute
+  DashboardCheckoutDepositIdRoute: typeof DashboardCheckoutDepositIdRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -709,8 +812,10 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardRoiRoute: DashboardRoiRoute,
   DashboardSupportRoute: DashboardSupportRoute,
   DashboardTeamRoute: DashboardTeamRoute,
+  DashboardTeamBonusRoute: DashboardTeamBonusRoute,
   DashboardTransactionsRoute: DashboardTransactionsRoute,
   DashboardTransferRoute: DashboardTransferRoute,
+  DashboardUplineRewardsRoute: DashboardUplineRewardsRoute,
   DashboardVipRoute: DashboardVipRoute,
   DashboardWalletRoute: DashboardWalletRoute,
   DashboardWeeklySalaryRoute: DashboardWeeklySalaryRoute,
@@ -718,11 +823,14 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardWithdrawalsRoute: DashboardWithdrawalsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardAdminAnnouncementsRoute: DashboardAdminAnnouncementsRoute,
+  DashboardAdminBalanceAdjustRoute: DashboardAdminBalanceAdjustRoute,
+  DashboardAdminBalanceHistoryRoute: DashboardAdminBalanceHistoryRoute,
   DashboardAdminDepositsRoute: DashboardAdminDepositsRoute,
   DashboardAdminKycRoute: DashboardAdminKycRoute,
   DashboardAdminUsersRoute: DashboardAdminUsersRoute,
   DashboardAdminWeeklySalaryRoute: DashboardAdminWeeklySalaryRoute,
   DashboardAdminWithdrawalsRoute: DashboardAdminWithdrawalsRoute,
+  DashboardCheckoutDepositIdRoute: DashboardCheckoutDepositIdRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

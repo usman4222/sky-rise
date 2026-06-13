@@ -19,8 +19,9 @@ export const packagesApi = {
   getPublicPackages: () => 
     api.get<{ packages: PackageData[] }>("/investments/packages"),
     
-  purchasePackage: (packageId: string, amount: number, useSignupBonus: boolean = true, roiClaimMode: 'auto' | 'manual' = 'auto') => 
-    api.post("/investments/purchase", { packageId, amount, useSignupBonus, roiClaimMode }),
+  purchasePackage: (packageId: string, amount: number, useSignupBonus: boolean = true, useAdminAllocated: boolean = false, autoReinvest: boolean = true) => 
+    api.post("/investments/purchase", { packageId, amount, useSignupBonus, useAdminAllocated, autoReinvest }),
+
 
   // === ADMIN ENDPOINTS ===
   getAdminPackages: () => 

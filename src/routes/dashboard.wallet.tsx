@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SkyRiseLogo } from "@/components/logo";
 import {
   Gift, Users, Upload, Download, ArrowLeftRight, RefreshCw,
-  Shield, Crown, ChevronRight, Eye, EyeOff, Info, ArrowUpRight, TrendingUp, TrendingDown, Wallet
+  Shield, Crown, ChevronRight, Eye, EyeOff, Info, ArrowUpRight, TrendingUp, TrendingDown, Wallet,
+  Copy, Check, AlertTriangle, Clock, Layers
 } from "lucide-react";
 import { GearSpinner } from "@/components/gear-loader";
 
@@ -59,12 +60,14 @@ function Sparkline({ change }: { change: number }) {
 function WalletPage() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
 
   const [depositAmount, setDepositAmount] = useState("");
   const [paymentMethodId, setPaymentMethodId] = useState("");
   const [showBalance, setShowBalance] = useState(true);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+
 
   const comingSoonCurrencies = [
     { code: "INR", name: "Indian Rupee", flag: "🇮🇳" },
@@ -143,10 +146,16 @@ function WalletPage() {
     onSuccess: (res: any) => {
       if (res?.deposit?.checkoutUrl) {
         playSound.playSuccess();
-        toast.success("Redirecting to payment gateway...");
-        setTimeout(() => {
-          window.location.href = res.deposit.checkoutUrl;
-        }, 1200);
+        if (isPkr) {
+          toast.success("Redirecting to PayFast payment gateway...");
+          setTimeout(() => {
+            window.location.href = res.deposit.checkoutUrl;
+          }, 1200);
+        } else {
+          // Redirect to the dedicated checkout page
+          setIsDepositModalOpen(false);
+          navigate({ to: "/dashboard/checkout/$depositId", params: { depositId: res.deposit.id } });
+        }
       } else {
         toast.error("Failed to initiate deposit checkout link.");
       }
@@ -185,9 +194,11 @@ function WalletPage() {
   // Withdrawal Balance: Available ROI and referral/salary earnings minus already withdrawn
   const withdrawableBal = Math.max(0, (roiBal + referralBal + salaryBal + achievementBal) - withdrawalDeducted);
   const freeBonusBal = walletsData?.freeRegBonus || 0;
+  const bonusActivationBal = walletsData?.bonusActivation || 0;
+  const bonusTransferableBal = walletsData?.bonusTransferable || 0;
 
   // Total assets balance
-  const totalBalance = depositBal + bonusBal + withdrawableBal + freeBonusBal;
+  const totalBalance = depositBal + bonusBal + withdrawableBal + freeBonusBal + bonusActivationBal + bonusTransferableBal;
   const formattedBalance = totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // Tickers list configuration with live values matching reference screenshot style
@@ -499,6 +510,76 @@ function WalletPage() {
                   </div>
                 </Link>
 
+                {/* 5. Transferable Team Bonus */}
+                <Link to="/dashboard/transfer" onClick={() => playSound.playClick()} className="flex items-center justify-between p-4 hover:bg-secondary/25 transition-colors cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-[#0e9f6e] text-white">
+                      <ArrowLeftRight size={16} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-foreground">Transferable Team Bonus</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5 font-medium flex flex-wrap items-center gap-1.5">
+                        <span>50% registration rewards for downline transfer</span>
+                        {user?.teamBonusDeadline && (
+                          <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${
+                            new Date(user.teamBonusDeadline) > new Date()
+                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                              : "bg-muted text-muted-foreground border border-glass-border-soft"
+                          }`}>
+                            {new Date(user.teamBonusDeadline) > new Date() ? "Active" : "Ended"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="text-right">
+                      <div className="text-xs font-black text-foreground font-mono">
+                        {showBalance ? `${bonusTransferableBal.toFixed(2)} USDT` : "••••••"}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground font-medium font-mono mt-0.5">
+                        {showBalance ? `≈ $${bonusTransferableBal.toFixed(2)}` : "••••••"}
+                      </div>
+                    </div>
+                    <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </div>
+                </Link>
+
+                {/* 6. Level Activation Bonus */}
+                <Link to="/dashboard/levels" onClick={() => playSound.playClick()} className="flex items-center justify-between p-4 hover:bg-secondary/25 transition-colors cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-indigo-600 text-white">
+                      <Layers size={16} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-foreground">Level Activation Bonus</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5 font-medium flex flex-wrap items-center gap-1.5">
+                        <span>50% registration rewards for levels usage</span>
+                        {user?.teamBonusDeadline && (
+                          <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${
+                            new Date(user.teamBonusDeadline) > new Date()
+                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                              : "bg-muted text-muted-foreground border border-glass-border-soft"
+                          }`}>
+                            {new Date(user.teamBonusDeadline) > new Date() ? "Active" : "Ended"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="text-right">
+                      <div className="text-xs font-black text-foreground font-mono">
+                        {showBalance ? `${bonusActivationBal.toFixed(2)} USDT` : "••••••"}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground font-medium font-mono mt-0.5">
+                        {showBalance ? `≈ $${bonusActivationBal.toFixed(2)}` : "••••••"}
+                      </div>
+                    </div>
+                    <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </div>
+                </Link>
+
               </CardContent>
             </Card>
 
@@ -759,6 +840,8 @@ function WalletPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+
 
     </DashboardLayout>
   );

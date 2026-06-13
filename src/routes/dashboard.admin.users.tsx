@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/dashboard/admin/users")({
 
 function AdminUsersPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -78,6 +79,8 @@ function AdminUsersPage() {
     onError: (err) => toast.error(getFirebaseErrorMessage(err)),
   });
 
+
+ 
   const handleOpenDetails = (id: string) => {
     setSelectedUserId(id);
     setIsDetailOpen(true);
@@ -219,15 +222,28 @@ function AdminUsersPage() {
                         <TableCell className="py-3">{getVipBadge(u.vipRank)}</TableCell>
                         <TableCell className="py-3">{getStatusBadge(u.status)}</TableCell>
                         <TableCell className="text-right py-3">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="h-8 text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-200 shadow-sm"
-                            onClick={() => handleOpenDetails(u._id)}
-                          >
-                            <Eye size={12} />
-                            View Audit
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-8 text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-200 shadow-sm"
+                              onClick={() => handleOpenDetails(u._id)}
+                            >
+                              <Eye size={12} />
+                              View Audit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-8 text-xs gap-1.5 border-[#f3ba2f]/45 text-[#f3ba2f] hover:bg-[#f3ba2f]/10 transition-all duration-200 shadow-sm"
+                              onClick={() => {
+                                navigate({ to: "/dashboard/admin/balance-adjust", search: { userId: u._id } });
+                              }}
+                            >
+                              <Wallet size={12} />
+                              Adjust Balance
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -329,6 +345,7 @@ function AdminUsersPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {[
                       { label: "Deposit Wallet", val: detailData.wallet?.deposit || 0, icon: Wallet, color: "text-primary" },
+                      { label: "Admin Allocated Balance", val: detailData.wallet?.adminAllocated || 0, icon: Wallet, color: "text-[#f3ba2f]" },
                       { label: "ROI Earnings", val: detailData.wallet?.roi || 0, icon: Wallet, color: "text-profit" },
                       { label: "Referral Bonus", val: detailData.wallet?.referral || 0, icon: Users, color: "text-profit" },
                       { label: "Weekly VIP Salary", val: detailData.wallet?.salary || 0, icon: Wallet, color: "text-gold" },
@@ -351,6 +368,8 @@ function AdminUsersPage() {
                       );
                     })}
                   </div>
+
+
                 </TabsContent>
 
                 {/* MLM Business & Legs Tab */}

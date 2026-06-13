@@ -194,7 +194,7 @@ function WithdrawPage() {
                 <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="source-wallet">Source Wallet Balance</Label>
+                      <Label htmlFor="source-wallet" className="mb-2">Source Wallet Balance</Label>
                       <Select value={walletType} onValueChange={setWalletType}>
                         <SelectTrigger id="source-wallet">
                           <SelectValue />
@@ -229,14 +229,14 @@ function WithdrawPage() {
                   <div className="space-y-1.5">
                     <Label htmlFor="withdraw-amt">Amount to Withdraw (USD)</Label>
                     <div className="relative">
-                      <Input 
-                        id="withdraw-amt" 
-                        type="number" 
-                        min="10" 
+                      <Input
+                        id="withdraw-amt"
+                        type="number"
+                        min="10"
                         step="any"
-                        placeholder="e.g. 50" 
-                        value={amount} 
-                        onChange={(e) => setAmount(e.target.value)} 
+                        placeholder="e.g. 50"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
                       />
                       <span className="absolute right-3 top-2.5 font-semibold text-muted-foreground">USD</span>
                     </div>
@@ -257,8 +257,8 @@ function WithdrawPage() {
                     </div>
                   )}
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full glass-button-primary h-10 font-bold"
                     disabled={requestMutation.isPending || numAmount < 10 || currentBal < numAmount}
                   >
@@ -356,9 +356,9 @@ function WithdrawPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         {w.status === "pending" && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             className="h-7 text-[10px] text-destructive hover:bg-destructive/10"
                             onClick={() => {
                               if (confirm("Cancel this withdrawal request and refund your balance?")) {

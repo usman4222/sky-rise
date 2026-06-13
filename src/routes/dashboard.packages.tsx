@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { CheckCircle2, Plus, Edit, ShieldAlert, TrendingUp, Rocket } from "lucide-react";
+import { CheckCircle2, Plus, Edit, ShieldAlert, TrendingUp, Rocket, Coins } from "lucide-react";
 import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 import { packagesApi, type PackageData } from "@/lib/api-packages";
 import { useAuthStore } from "@/store/authStore";
@@ -70,8 +70,9 @@ function PackagesDash() {
     }
   });
 
-  // Read real bonusReceived directly from auth store (already synced via fetchProfile on every page)
+  // Read real balances directly from auth store
   const bonusReceivedBalance = (user?.wallets as any)?.bonusReceived || 0;
+  const adminAllocatedBalance = (user?.wallets as any)?.adminAllocated || 0;
 
 
   const getPackageTag = (pkg: PackageData) => {
@@ -87,8 +88,8 @@ function PackagesDash() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: (vars: { id: string; amount: number; roiClaimMode: 'auto' | 'manual'; pkgName: string; roi: number; regBonusApplied: boolean }) =>
-      packagesApi.purchasePackage(vars.id, vars.amount, true, vars.roiClaimMode),
+    mutationFn: (vars: { id: string; amount: number; autoReinvest: boolean; pkgName: string; roi: number; regBonusApplied: boolean; useAdminAllocated?: boolean }) =>
+      packagesApi.purchasePackage(vars.id, vars.amount, !vars.useAdminAllocated, vars.useAdminAllocated, vars.autoReinvest),
     onSuccess: (_, vars) => {
       playSound.playSuccess();
       // Show celebration dialog with purchase summary
@@ -257,15 +258,17 @@ function PackagesDash() {
                   isPurchasing={purchaseMutation.isPending}
                   isToggling={toggleMutation.isPending}
                   walletBonusReceived={bonusReceivedBalance}
+                  walletAdminAllocated={adminAllocatedBalance}
                   registrationBonusActive={user?.registrationBonusActive !== false}
                   hasFreeRegBonus={(user?.freeRegBonus || 0) >= 5}
-                  onPurchase={(amount, roiClaimMode, regBonusApplied, onSuccess) => purchaseMutation.mutate({
+                  onPurchase={(amount, autoReinvest, regBonusApplied, useAdminAllocated, onSuccess) => purchaseMutation.mutate({
                     id: p._id,
                     amount,
-                    roiClaimMode,
+                    autoReinvest,
                     pkgName: p.name,
                     roi: p.startRoi,
-                    regBonusApplied: regBonusApplied || false
+                    regBonusApplied: regBonusApplied || false,
+                    useAdminAllocated: useAdminAllocated || false
                   }, {
                     onSuccess: () => {
                       if (onSuccess) onSuccess();
@@ -284,32 +287,41 @@ function PackagesDash() {
   );
 }
 
-function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggling, onUpdate, isUpdating, walletBonusReceived, registrationBonusActive, hasFreeRegBonus }: {
+function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggling, onUpdate, isUpdating, walletBonusReceived, walletAdminAllocated, registrationBonusActive, hasFreeRegBonus }: {
   pkg: PackageData;
   isAdmin?: boolean;
   isPurchasing: boolean;
   isToggling: boolean;
   isUpdating: boolean;
   walletBonusReceived: number;
+  walletAdminAllocated: number;
   registrationBonusActive: boolean;
   hasFreeRegBonus: boolean;
-  onPurchase: (amt: number, mode: 'auto' | 'manual', regBonusApplied: boolean, onSuccess: () => void) => void;
+  onPurchase: (amt: number, autoReinvest: boolean, regBonusApplied: boolean, useAdminAllocated: boolean, onSuccess: () => void) => void;
   onToggle: (active: boolean) => void;
   onUpdate: (data: Partial<PackageData>) => void;
 }) {
   const [amount, setAmount] = useState(pkg.minAmount);
-  const [roiClaimMode, setRoiClaimMode] = useState<'auto' | 'manual'>('auto');
+  const [autoReinvest, setAutoReinvest] = useState(true);
+  const [useAdminAllocated, setUseAdminAllocated] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
 
-  // Team bonus (10% of investment from bonusReceived wallet)
-  const maxBonusAllowed = amount * 0.1;
-  const teamBonus = Math.min(maxBonusAllowed, walletBonusReceived);
+  // Reset flag when dialog opens
+  useEffect(() => {
+    if (isInvestDialogOpen) {
+      setUseAdminAllocated(false);
+    }
+  }, [isInvestDialogOpen]);
+
+  // Team bonus (10% of investment from bonusReceived wallet) - disable if admin allocated is used
+  const maxBonusAllowed = useAdminAllocated ? 0 : amount * 0.1;
+  const teamBonus = useAdminAllocated ? 0 : Math.min(maxBonusAllowed, walletBonusReceived);
   const real = amount - teamBonus;
 
-  // Registration bonus state
-  const regBonusEligible = registrationBonusActive && hasFreeRegBonus && amount >= 50;
-  const regBonusLocked = registrationBonusActive && hasFreeRegBonus && amount < 50;
+  // Registration bonus state - disable if admin allocated is used
+  const regBonusEligible = !useAdminAllocated && registrationBonusActive && hasFreeRegBonus && amount >= 50;
+  const regBonusLocked = !useAdminAllocated && registrationBonusActive && hasFreeRegBonus && amount < 50;
   const totalWithRegBonus = regBonusEligible ? real + 5 : real;
 
   let tag = "Starter";
@@ -403,32 +415,71 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="block mb-3">ROI Claim Mode</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setRoiClaimMode("auto")}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${roiClaimMode === "auto"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border hover:border-primary/50 text-muted-foreground"
-                        }`}
-                    >
-                      <span className="text-xs font-semibold">Auto-Collect</span>
-                      <span className="text-[10px] opacity-80 mt-1">ROI is credited directly to your balance every 24h.</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRoiClaimMode("manual")}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${roiClaimMode === "manual"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border hover:border-primary/50 text-muted-foreground"
-                        }`}
-                    >
-                      <span className="text-xs font-semibold">Manual-Claim</span>
-                      <span className="text-[10px] opacity-80 mt-1">Claim manually inside a strict 6-hour window, or lose it.</span>
-                    </button>
+                {/* Use Admin Allocated Balance Checkbox */}
+                {walletAdminAllocated > 0 && (
+                  <div className="flex items-center space-x-2 my-2 border border-glass-border/30 rounded-xl p-3 bg-white/5">
+                    <input
+                      type="checkbox"
+                      id={`useAdminAllocated-${pkg._id}`}
+                      checked={useAdminAllocated}
+                      onChange={(e) => {
+                        setUseAdminAllocated(e.target.checked);
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                    />
+                    <Label htmlFor={`useAdminAllocated-${pkg._id}`} className="text-xs font-semibold cursor-pointer">
+                      Use Admin Allocated Balance (${walletAdminAllocated.toFixed(2)} available)
+                    </Label>
                   </div>
+                )}
+
+                {/* Admin Allocated Balance warning warning */}
+                {useAdminAllocated && (
+                  <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 my-2">
+                    <ShieldAlert className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1 text-xs text-amber-600 dark:text-amber-400">
+                      <p className="font-bold leading-none">Special Package Rules Apply</p>
+                      <p className="leading-relaxed opacity-90">
+                        Purchasing with Admin Allocated Balance will tag this investment as an <strong>Admin Funded Package</strong>. 
+                        Capital exit will be permanently locked (no early withdrawal), and no direct referral or MLM team matching commissions will be paid to uplines.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-black/5 dark:bg-white/5 border border-glass-border/30 rounded-2xl p-3.5">
+                    <div className="space-y-1 pr-4">
+                      <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                        <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                        Auto-Reinvest Daily ROI
+                      </span>
+                      <span className="text-[10px] text-muted-foreground block leading-normal">
+                        {autoReinvest 
+                          ? "Daily ROI compounds automatically into your active principal amount." 
+                          : "Daily ROI accumulates as a claimable balance that must be collected."
+                        }
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Switch 
+                        checked={autoReinvest} 
+                        onCheckedChange={setAutoReinvest}
+                      />
+                      <span className="text-[10px] font-black uppercase text-muted-foreground w-8 text-center">
+                        {autoReinvest ? "ON" : "OFF"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {!autoReinvest && (
+                    <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3">
+                      <Coins className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium leading-relaxed">
+                        <strong>Manual Collect Policy:</strong> You must manually claim your daily ROI payouts. Payouts are available to claim for a maximum of <strong>6 hours</strong> after each 24-hour cycle completion, otherwise they will expire.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Registration Bonus — unlock nudge (amount < $50) */}
@@ -491,7 +542,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
               <DialogFooter>
                 <Button
                   className="w-full glass-button-primary h-14 text-base rounded-full"
-                  onClick={() => onPurchase(amount, roiClaimMode, regBonusEligible, () => setIsInvestDialogOpen(false))}
+                  onClick={() => onPurchase(amount, autoReinvest, regBonusEligible, useAdminAllocated, () => setIsInvestDialogOpen(false))}
                   disabled={isPurchasing}
                 >
                   {isPurchasing ? <GearSpinner className="mr-2 h-5 w-5" /> : null}

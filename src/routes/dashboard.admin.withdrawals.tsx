@@ -164,8 +164,15 @@ function AdminWithdrawalsPage() {
                     return (
                       <TableRow key={w._id}>
                         <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-xs text-foreground">{w.user?.name || "Deleted User"}</span>
+                          <div className="flex flex-col items-start gap-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-semibold text-xs text-foreground">{w.user?.name || "Deleted User"}</span>
+                              {w.isAdminFundedUser && (
+                                <Badge className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/15 border-0 text-[8px] uppercase tracking-wider font-extrabold py-0.5 px-1.5">
+                                  Admin Funded
+                                </Badge>
+                              )}
+                            </div>
                             <span className="text-[10px] text-muted-foreground">{w.user?.email || ""}</span>
                           </div>
                         </TableCell>
@@ -211,7 +218,14 @@ function AdminWithdrawalsPage() {
                                   <div className="grid grid-cols-2 gap-3 p-3 bg-secondary/50 rounded-xl">
                                     <div>
                                       <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Customer Name</span>
-                                      <span className="font-semibold text-foreground">{selectedWithdrawal.user?.name}</span>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="font-semibold text-foreground">{selectedWithdrawal.user?.name}</span>
+                                        {selectedWithdrawal.isAdminFundedUser && (
+                                          <Badge className="bg-amber-500/10 text-amber-500 border-0 text-[8px] uppercase tracking-wider font-extrabold py-0.5 px-1.5">
+                                            Admin Funded
+                                          </Badge>
+                                        )}
+                                      </div>
                                     </div>
                                     <div>
                                       <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Email</span>

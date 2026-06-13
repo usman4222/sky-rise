@@ -33,6 +33,7 @@ export interface UserProfile {
   // Registration bonus state
   registrationBonusActive?: boolean; // true = bonus still available
   freeRegBonus?: number;             // Should be 5 until consumed
+  teamBonusDeadline?: string;        // 10 days signup cutoff date
 }
 
 interface AuthState {

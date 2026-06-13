@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Package, Wallet, TrendingUp, Users, Layers,
   Gift, ArrowLeftRight, Crown, Trophy, ArrowDownToLine, Receipt,
   User, LifeBuoy, LogOut, Bell, Search, Menu, X, CreditCard, Megaphone,
-  Home, Clock, Send, MessageCircle
+  Home, Clock, Send, MessageCircle, Award, Sparkles, ArrowLeft
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -21,11 +21,13 @@ const nav = [
   { to: "/dashboard/investments", label: "My Investments", icon: Wallet },
   { to: "/dashboard/roi", label: "Daily ROI", icon: TrendingUp },
   { to: "/dashboard/team", label: "Referral Team", icon: Users },
+  { to: "/dashboard/team-bonus", label: "Team Building Bonus", icon: Sparkles },
   { to: "/dashboard/levels", label: "Level Income", icon: Layers },
   { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
   { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
   { to: "/dashboard/weekly-salary", label: "VIP Salary Claims", icon: Crown },
   { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
+  { to: "/dashboard/upline-rewards", label: "Upline Team Rewards", icon: Award },
   { to: "/dashboard/withdraw", label: "Withdraw Funds", icon: ArrowDownToLine },
   { to: "/dashboard/payment-methods", label: "Saved Accounts", icon: CreditCard },
   { to: "/dashboard/transactions", label: "Transactions", icon: Receipt },
@@ -55,7 +57,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       </div>
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
         {nav.filter(n => !isAdmin || n.hasAdmin).map((n) => {
-          const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
+          const active = n.exact ? pathname === n.to : (pathname === n.to || pathname.startsWith(n.to + "/"));
           const Icon = n.icon;
           return (
             <Link
@@ -85,11 +87,13 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
             </div>
             {[
               { to: "/dashboard/admin/users", label: "Users Management", icon: Users },
+              { to: "/dashboard/admin/balance-adjust", label: "Adjust User Balance", icon: Wallet },
               { to: "/dashboard/admin/withdrawals", label: "Verify Withdrawals Queue", icon: ArrowDownToLine },
               { to: "/dashboard/admin/weekly-salary", label: "Verify Salary Queue", icon: Crown },
               { to: "/dashboard/admin/announcements", label: "Manage Announcements", icon: Megaphone },
+              { to: "/dashboard/admin/balance-history", label: "Admin Balance History", icon: Receipt },
             ].map((n) => {
-              const active = pathname.startsWith(n.to);
+              const active = pathname === n.to || pathname.startsWith(n.to + "/");
               const Icon = n.icon;
               return (
                 <Link
@@ -210,7 +214,7 @@ export function DashboardLayout({ title, children }: { title: string; children: 
   let iconBgClass = "bg-[#0e9f6e] shadow-[0_4px_12px_rgba(14,159,110,0.25)]";
   if (currentNav) {
     const label = currentNav.label.toLowerCase();
-    if (label.includes("withdraw") || label.includes("salary") || label.includes("achievement") || label.includes("saved") || label.includes("profile")) {
+    if (label.includes("withdraw") || label.includes("salary") || label.includes("achievement") || label.includes("saved") || label.includes("profile") || label.includes("upline")) {
       iconBgClass = "bg-[#f3ba2f] shadow-[0_4px_12px_rgba(243,186,47,0.25)]";
     } else if (label.includes("support")) {
       iconBgClass = "bg-blue-500 shadow-[0_4px_12px_rgba(59,130,246,0.25)]";
@@ -221,9 +225,9 @@ export function DashboardLayout({ title, children }: { title: string; children: 
 
   const bottomNavItems = [
     { to: "/dashboard", label: "Home", icon: Home, exact: true },
-    { to: "/dashboard/packages", label: "Plans", icon: Package },
+    { to: "/dashboard/packages", label: "Invest/Plans", icon: Package },
     { to: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-    { to: "/dashboard/transactions", label: "History", icon: Clock },
+    { to: "/dashboard/team", label: "Teams", icon: Users },
   ];
 
   return (
@@ -274,7 +278,21 @@ export function DashboardLayout({ title, children }: { title: string; children: 
             </Link>
           </div>
         </header>
-        <main className="flex-1 p-4 pb-24 md:p-6 lg:p-8 bg-gradient-liquid-bg">{children}</main>
+        <main className="flex-1 p-4 pb-24 md:p-6 lg:p-8 bg-gradient-liquid-bg">
+          {pathname !== "/dashboard" && pathname !== "/dashboard/" && (
+            <button
+              onClick={() => {
+                playSound.playClick();
+                window.history.back();
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2E6F52] dark:text-emerald-400/90 hover:opacity-80 transition-opacity mb-4 group cursor-pointer focus:outline-none animate-in fade-in duration-200"
+            >
+              <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
+              <span>Back</span>
+            </button>
+          )}
+          {children}
+        </main>
 
         {/* Mobile Bottom Navigation Bar (Floating Pill Layout) */}
         {!isAdmin && (

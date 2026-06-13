@@ -35,4 +35,12 @@ export const adminApi = {
   
   // System Settings
   updateExchangeRate: (data: { currency: string; rate: number }) => api.post("/admin/exchange-rate", data),
+
+  // Balance adjustments
+  adjustUserBalance: (id: string, data: { balanceType: 'deposit' | 'adminAllocated'; action: 'add' | 'deduct'; amount: number; remarks?: string }) =>
+    api.post(`/admin/users/${id}/balance/adjust`, data),
+  
+  getBalanceHistory: (search?: string, page?: number, limit?: number) =>
+    api.get(`/admin/balance/history?page=${page || 1}&limit=${limit || 10}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
 };
+
