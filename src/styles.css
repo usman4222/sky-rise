@@ -1485,5 +1485,89 @@ textarea:focus {
   }
 }
 
+/* ──────────────────────────────────────────────────────────
+   MOBILE PERFORMANCE OPTIMIZATIONS (SCREENS <= 768PX)
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* 1. Disable expensive backdrop-filter calculations to prevent GPU scroll lag */
+  .glass,
+  .glass-panel,
+  .glass-card,
+  .glass-navbar,
+  .glass-sidebar,
+  .glass-popover,
+  .glass-pill,
+  .glass-input,
+  .glass-table,
+  [data-slot="card"],
+  [data-slot="popover-content"],
+  [data-slot="dialog-content"],
+  [data-slot="sheet-content"],
+  .glass-hero,
+  .bg-card,
+  .bg-popover,
+  .bg-sidebar,
+  .bg-secondary,
+  .bg-muted,
+  .glass-blur-sm,
+  .glass-blur-md,
+  .glass-blur-lg,
+  .landing-card-glass,
+  [class*="backdrop-blur"],
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. Disable heavy layout animations and infinite glows on mobile */
+  .glass-card-hover::before,
+  .glass-hover::before,
+  .glass-card-hover::after,
+  .glass-hover::after,
+  .active-nav-circle::before,
+  .active-nav-circle::after,
+  .filter-pill-active::before,
+  .filter-pill-active::after,
+  .glass-button::before,
+  .glass-btn::before,
+  .glass-button-primary::before,
+  .glass-btn-primary::before,
+  .glass-button-secondary::before,
+  .glass-btn-secondary::before,
+  .glass-button-gold::before,
+  .glass-btn-gold::before,
+  .btn-liquid::before {
+    animation: none !important;
+    display: none !important; /* Completely omit the glowing overlay elements */
+  }
+
+  /* 3. Disable heavy fixed-position blur background animations */
+  body::before {
+    filter: none !important;
+    background: var(--background) !important; /* Fallback to solid background color */
+  }
+
+  body::after {
+    display: none !important; /* Hide grid overlay */
+  }
+
+  .landing-card-blob {
+    animation: none !important;
+    filter: none !important;
+    display: none !important; /* Hide bouncing blur blobs */
+  }
+
+  .active-nav-circle {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .filter-pill-active {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+
 
 

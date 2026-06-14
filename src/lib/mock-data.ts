@@ -52,15 +52,15 @@ export const faqs = [
 
 export const levels = [
   { level: 1, income: 8, unlocked: true, requirement: "Automatically open" },
-  { level: 2, income: 4, unlocked: false, requirement: "1 direct active member + $5 activation fee" },
-  { level: 3, income: 4, unlocked: false, requirement: "1 additional direct active member + $5 activation fee" },
-  { level: 4, income: 3, unlocked: false, requirement: "2 direct active members + $5 fee" },
-  { level: 5, income: 2, unlocked: false, requirement: "3 direct active members + $5 fee" },
-  { level: 6, income: 2, unlocked: false, requirement: "3 direct active members + $5 fee" },
-  { level: 7, income: 2, unlocked: false, requirement: "4 direct active members + $5 fee" },
-  { level: 8, income: 2, unlocked: false, requirement: "4 direct active members + $5 fee" },
-  { level: 9, income: 2, unlocked: false, requirement: "5 direct active members + $5 fee" },
-  { level: 10, income: 2, unlocked: false, requirement: "5 direct active members + $5 fee" },
+  { level: 2, income: 4, unlocked: false, requirement: "1 Direct Active Member + $5 activation fee" },
+  { level: 3, income: 4, unlocked: false, requirement: "Another Direct Active Member (Total 2) + $5 activation fee" },
+  { level: 4, income: 3, unlocked: false, requirement: "Another Direct Active Member (Total 3) + $5 activation fee" },
+  { level: 5, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 4) + $5 activation fee" },
+  { level: 6, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 5) + $5 activation fee" },
+  { level: 7, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 6) + $5 activation fee" },
+  { level: 8, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 7) + $5 activation fee" },
+  { level: 9, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 8) + $5 activation fee" },
+  { level: 10, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 9) + $5 activation fee" },
 ];
 
 export const user = {

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 // @ts-ignore
-import fluidCursor from '@/hooks/useFluidCursor.jsx';
+import fluidCursor from '@/hooks/useFluidCursor.js';
 
 const FluidCursor = () => {
   useEffect(() => {

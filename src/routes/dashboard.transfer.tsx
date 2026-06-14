@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { GearSpinner } from "@/components/gear-loader";
+import { Wallet } from "lucide-react";
 
 import { financeApi } from "@/lib/api-finance";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
@@ -20,6 +21,16 @@ function TransferPage() {
   const queryClient = useQueryClient();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
+
+  const { data: walletsData } = useQuery({
+    queryKey: ["wallets"],
+    queryFn: async () => {
+      const res = await financeApi.getWallets();
+      return res.wallet;
+    }
+  });
+
+  const bonusTransferableBal = walletsData?.bonusTransferable || 0;
 
   const { data: history = [] } = useQuery({
     queryKey: ["ledgerHistory", "transfer"],
@@ -47,19 +58,48 @@ function TransferPage() {
         <Card className="border-soft shadow-card">
           <CardHeader><CardTitle>Transfer Bonus</CardTitle></CardHeader>
           <CardContent>
+            {/* Display Available Balance */}
+            <div className="mb-5 rounded-2xl bg-[#00a86b]/10 border border-[#00a86b]/20 p-4.5 flex justify-between items-center">
+              <div>
+                <p className="text-[10px] sm:text-xs font-extrabold text-[#3d6652]/85 dark:text-[#00e676]/70 uppercase tracking-widest leading-none">
+                  Available Transferable Bonus
+                </p>
+                <h3 className="text-2xl font-black text-[#051409] dark:text-[#e2f0ea] mt-2 font-sans leading-none">
+                  ${bonusTransferableBal.toFixed(2)}
+                </h3>
+              </div>
+              <div className="h-11 w-11 rounded-full bg-[#00a86b] text-white flex items-center justify-center shadow-[0_8px_18px_rgba(0,168,107,0.20)]">
+                <Wallet className="h-5 w-5" />
+              </div>
+            </div>
+
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label className="block mb-2">Receiver Referral Code or User ID</Label>
                 <Input placeholder="SKY-XXXXX" value={recipient} onChange={(e) => setRecipient(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label className="block mb-2">Amount (USD)</Label>
+                <div className="flex justify-between items-center mb-1">
+                  <Label>Amount (USD)</Label>
+                  <button 
+                    type="button"
+                    onClick={() => setAmount(bonusTransferableBal.toString())}
+                    className="text-xs text-primary font-bold hover:underline cursor-pointer"
+                  >
+                    Use Max (${bonusTransferableBal.toFixed(2)})
+                  </button>
+                </div>
                 <Input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                {amount && Number(amount) < 5 && (
+                  <p className="text-[10px] text-destructive font-bold mt-1 animate-pulse">
+                    ⚠️ Minimum transfer amount is $5.00
+                  </p>
+                )}
               </div>
               <Button
                 className="w-full bg-primary-gradient text-primary-foreground h-14 rounded-full text-base font-semibold"
                 onClick={() => transferMutation.mutate()}
-                disabled={transferMutation.isPending || !recipient || !amount}
+                disabled={transferMutation.isPending || !recipient || !amount || Number(amount) < 5 || Number(amount) > bonusTransferableBal}
               >
                 {transferMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : "Send Transfer"}
               </Button>
@@ -71,6 +111,7 @@ function TransferPage() {
           <CardHeader><CardTitle>Transfer Rules</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>• Transfer allowed only within 5-level downline team.</p>
+            <p>• Minimum transfer amount is $5.00.</p>
             <p>• Bonus balance cannot be withdrawn directly.</p>
             <p>• Received transfer balance can cover up to 10% of investment costs.</p>
             <p>• Sent from your "Bonus Transferable" wallet.</p>

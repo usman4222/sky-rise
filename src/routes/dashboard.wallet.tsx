@@ -224,7 +224,6 @@ function WalletPage() {
                 className="snap-start flex-shrink-0 w-[47%] sm:w-[31%] lg:w-auto glass-card-hover bg-white/95 dark:bg-[#0c1b15]/95 border border-[#e2f0eb] dark:border-emerald-950/40 rounded-[28px] shadow-[0_8px_24px_rgba(8,26,18,0.02)] transition-all duration-300 hover:shadow-[0_12px_28px_rgba(8,26,18,0.04)] lg:hover:-translate-y-0.5"
               >
                 <div className="p-4 sm:p-5 flex items-center justify-between gap-3">
-                  {/* Left Side: Details */}
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] sm:text-xs font-extrabold text-[#2E6F52] dark:text-emerald-400/80 uppercase tracking-widest leading-none truncate">
                       {t.name} ({t.tag})
@@ -242,7 +241,6 @@ function WalletPage() {
                     </div>
                   </div>
 
-                  {/* Right Side: Circular Badge */}
                   <div className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full flex items-center justify-center font-black text-sm sm:text-base flex-shrink-0 text-white ${t.logoBg}`}>
                     {t.logo}
                   </div>
@@ -521,11 +519,10 @@ function WalletPage() {
                       <div className="text-[10px] text-muted-foreground mt-0.5 font-medium flex flex-wrap items-center gap-1.5">
                         <span>50% registration rewards for downline transfer</span>
                         {user?.teamBonusDeadline && (
-                          <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${
-                            new Date(user.teamBonusDeadline) > new Date()
+                          <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${new Date(user.teamBonusDeadline) > new Date()
                               ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
                               : "bg-muted text-muted-foreground border border-glass-border-soft"
-                          }`}>
+                            }`}>
                             {new Date(user.teamBonusDeadline) > new Date() ? "Active" : "Ended"}
                           </span>
                         )}
@@ -556,11 +553,10 @@ function WalletPage() {
                       <div className="text-[10px] text-muted-foreground mt-0.5 font-medium flex flex-wrap items-center gap-1.5">
                         <span>50% registration rewards for levels usage</span>
                         {user?.teamBonusDeadline && (
-                          <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${
-                            new Date(user.teamBonusDeadline) > new Date()
+                          <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${new Date(user.teamBonusDeadline) > new Date()
                               ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
                               : "bg-muted text-muted-foreground border border-glass-border-soft"
-                          }`}>
+                            }`}>
                             {new Date(user.teamBonusDeadline) > new Date() ? "Active" : "Ended"}
                           </span>
                         )}

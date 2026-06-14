@@ -34,7 +34,7 @@ function WithdrawPage() {
   const queryClient = useQueryClient();
 
   // Form State
-  const [walletType, setWalletType] = useState<string>("roi");
+  const [walletType, setWalletType] = useState<string>("all");
   const [amount, setAmount] = useState<string>("");
   const [paymentMethodId, setPaymentMethodId] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -107,9 +107,13 @@ function WithdrawPage() {
       return;
     }
 
-    const currentBalance = wallets[walletType] || 0;
+    const currentBalance = walletType === "all" ? totalWithdrawable : (wallets[walletType] || 0);
     if (currentBalance < withdrawAmt) {
-      toast.error(`Insufficient balance in your ${walletType} wallet.`);
+      toast.error(
+        walletType === "all"
+          ? `Insufficient total withdrawable balance. You have $${totalWithdrawable.toFixed(2)}.`
+          : `Insufficient balance in your ${walletType} wallet.`
+      );
       return;
     }
 
@@ -142,7 +146,8 @@ function WithdrawPage() {
     }
   };
 
-  const currentBal = wallets[walletType] || 0;
+  const totalWithdrawable = (wallets.roi || 0) + (wallets.referral || 0) + (wallets.salary || 0) + (wallets.achievement || 0);
+  const currentBal = walletType === "all" ? totalWithdrawable : (wallets[walletType] || 0);
   const numAmount = parseFloat(amount) || 0;
   const fee = numAmount * 0.05;
   const netAmount = numAmount > 0 ? Math.max(0, numAmount - fee) : 0;
@@ -194,23 +199,24 @@ function WithdrawPage() {
                 <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="source-wallet" className="mb-2">Source Wallet Balance</Label>
-                      <Select value={walletType} onValueChange={setWalletType}>
-                        <SelectTrigger id="source-wallet">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {WALLET_TYPES.map((w) => (
-                            <SelectItem key={w.value} value={w.value}>
-                              {w.label} (${(wallets[w.value] || 0).toFixed(2)})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label className="block mb-2">Available Withdrawable Funds (Total)</Label>
+                      <div className="rounded-xl border border-glass-border bg-[#00a86b]/10 p-3 flex justify-between items-center h-10.5">
+                        <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">Pooled Balance</span>
+                        <span className="font-extrabold text-[#00a86b] text-sm">${totalWithdrawable.toFixed(2)}</span>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="pm-select">Select Receiving Account</Label>
+                      <div className="flex justify-between items-center mb-1">
+                        <Label htmlFor="pm-select" className="block mb-2">Select Receiving Account</Label>
+                        <Link
+                          to="/dashboard/payment-methods"
+                          onClick={() => playSound.playClick()}
+                          className="text-xs text-primary font-bold hover:underline cursor-pointer"
+                        >
+                          + Add New Account
+                        </Link>
+                      </div>
                       <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
                         <SelectTrigger id="pm-select">
                           <SelectValue placeholder="Choose payment method..." />
@@ -227,7 +233,16 @@ function WithdrawPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="withdraw-amt">Amount to Withdraw (USD)</Label>
+                    <div className="flex justify-between items-center mb-1">
+                      <Label htmlFor="withdraw-amt" className="block">Amount to Withdraw (USD)</Label>
+                      <button
+                        type="button"
+                        onClick={() => setAmount(currentBal.toString())}
+                        className="text-xs text-primary font-bold hover:underline cursor-pointer"
+                      >
+                        Use Max
+                      </button>
+                    </div>
                     <div className="relative">
                       <Input
                         id="withdraw-amt"
