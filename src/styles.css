@@ -1489,7 +1489,7 @@ textarea:focus {
    MOBILE PERFORMANCE OPTIMIZATIONS (SCREENS <= 768PX)
    ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* 1. Disable expensive backdrop-filter calculations to prevent GPU scroll lag */
+  /* 1. Optimize Glassmorphism instead of removing it - use a lighter blur and force GPU hardware acceleration */
   .glass,
   .glass-panel,
   .glass-card,
@@ -1517,15 +1517,22 @@ textarea:focus {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   textarea,
   select {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    backdrop-filter: blur(8px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(145%) !important;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    will-change: transform;
   }
 
-  /* 2. Disable heavy layout animations and infinite glows on mobile */
+  /* 2. Disable infinite background hover animations on mobile (since touchscreens do not support hovers) to stop GPU repaint cycles */
   .glass-card-hover::before,
   .glass-hover::before,
   .glass-card-hover::after,
-  .glass-hover::after,
+  .glass-hover::after {
+    animation: none !important;
+  }
+
+  /* 3. Keep active navigation and button highlights animated but fully hardware-accelerated */
   .active-nav-circle::before,
   .active-nav-circle::after,
   .filter-pill-active::before,
@@ -1539,32 +1546,52 @@ textarea:focus {
   .glass-button-gold::before,
   .glass-btn-gold::before,
   .btn-liquid::before {
-    animation: none !important;
-    display: none !important; /* Completely omit the glowing overlay elements */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
   }
 
-  /* 3. Disable heavy fixed-position blur background animations */
+  /* 4. Keep the gorgeous background radial gradients but remove the expensive filter: blur() to ensure smooth scrolling */
   body::before {
-    filter: none !important;
-    background: var(--background) !important; /* Fallback to solid background color */
+    filter: none !important; /* Eliminate expensive fixed-position blur filter */
+    background:
+      radial-gradient(circle at 15% 15%, rgba(0, 168, 107, 0.12), transparent 45%),
+      radial-gradient(circle at 85% 20%, rgba(243, 186, 47, 0.08), transparent 45%),
+      radial-gradient(circle at 72% 80%, rgba(0, 105, 62, 0.08), transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(0, 229, 160, 0.05), transparent 65%) !important;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
 
   body::after {
-    display: none !important; /* Hide grid overlay */
+    opacity: 0.12 !important; /* Keep subtle grid pattern overlay */
   }
 
+  /* 5. Keep the animated bouncing blobs but replace expensive CSS filter blur with natural radial gradients */
   .landing-card-blob {
-    animation: none !important;
     filter: none !important;
-    display: none !important; /* Hide bouncing blur blobs */
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  
+  .blob-primary {
+    background: radial-gradient(circle, #7b5cff 0%, transparent 70%) !important;
+  }
+  .blob-gold {
+    background: radial-gradient(circle, #f7b84f 0%, transparent 70%) !important;
+  }
+  .blob-profit {
+    background: radial-gradient(circle, #18b66a 0%, transparent 70%) !important;
+  }
+  .blob-red {
+    background: radial-gradient(circle, #ff0000 0%, transparent 70%) !important;
   }
 
-  .active-nav-circle {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .filter-pill-active {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  /* 6. Optimize off-screen card rendering on mobile using modern CSS content-visibility */
+  [data-slot="card"],
+  .glass-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 260px;
   }
 }
 
