@@ -376,7 +376,7 @@ function DashboardHome() {
               <ShieldAlert className="h-5 w-5 text-primary" />
               <h2 className="text-base font-bold text-foreground">Global Platform Metrics</h2>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
               <Link to="/dashboard/admin/users" className="block transition-all hover:scale-[1.02] cursor-pointer">
                 <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" />
               </Link>
@@ -389,6 +389,12 @@ function DashboardHome() {
               </Link>
               <Link to="/dashboard/packages" className="block transition-all hover:scale-[1.02] cursor-pointer">
                 <StatCard icon={CheckCircle2} label="Active Packages" value={adminStats?.activePackagesCount || 0} accent="primary" />
+              </Link>
+              <Link to="/dashboard/admin/balance-adjust" search={{ userId: undefined }} className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={DollarSign} label="Total Admin Deposit" value={`$${Number(adminStats?.totalAdminDeposit || 0).toFixed(2)}`} accent="profit" />
+              </Link>
+              <Link to="/dashboard/admin/balance-adjust" search={{ userId: undefined }} className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={Gift} label="Total Admin Allocated" value={`$${Number(adminStats?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" />
               </Link>
             </div>
           </div>
@@ -710,11 +716,13 @@ function DashboardHome() {
           )}
 
           {/* Top Stat Cards Grid */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
             <StatCard icon={Wallet} label="Total Balance" value={`$${walletBalance.toFixed(2)}`} accent="green" />
             <StatCard icon={TrendingUp} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="gold" />
             <StatCard icon={Activity} label="Total Earnings" value={`$${totalEarnings.toFixed(2)}`} accent="green" />
             <StatCard icon={DollarSign} label="Today's Profit" value={`$${todayProfit.toFixed(2)}`} accent="yellow" />
+            <StatCard icon={Wallet} label="Admin Deposit" value={`$${Number(w?.totalAdminDeposit || 0).toFixed(2)}`} accent="profit" />
+            <StatCard icon={Gift} label="Admin Funded" value={`$${Number(w?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" />
             {/* <StatCard icon={Percent} label="ROI (Daily)" value={latestInvestment ? `${latestInvestment.currentRoi}%` : "1.20%"} subtitle="Every 24 Hours" accent="green" /> */}
             <StatCard icon={Users} label="Direct Team" value={downlineData?.directReferralsCount ?? 0} subtitle={`Invested: $${totalDirectsInvestment.toFixed(2)}`} accent="primary" />
             <StatCard icon={Users} label="Total Team" value={downlineData?.totalTeamSize ?? 0} subtitle={`Invested: $${totalTeamInvestment.toFixed(2)}`} accent="gold" />

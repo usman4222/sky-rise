@@ -214,7 +214,7 @@ function WalletPage() {
       <div className="space-y-6">
 
         {/* Live Coin Prices Grid (Responsive matching card design) */}
-        <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar flex-nowrap lg:grid lg:grid-cols-4 gap-3 sm:gap-4 w-full pb-3 lg:pb-0 scroll-smooth">
+        {/* <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar flex-nowrap lg:grid lg:grid-cols-4 gap-3 sm:gap-4 w-full pb-3 lg:pb-0 scroll-smooth">
           {coinTickers.map((t) => {
             const liveRate = rates ? rates[t.tag as keyof RatesData] : { price: t.initial, change: 1.5 };
             const isPositive = liveRate.change >= 0;
@@ -248,7 +248,7 @@ function WalletPage() {
               </div>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Layout Grid: 3 Columns on Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -520,8 +520,8 @@ function WalletPage() {
                         <span>50% registration rewards for downline transfer</span>
                         {user?.teamBonusDeadline && (
                           <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${new Date(user.teamBonusDeadline) > new Date()
-                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                              : "bg-muted text-muted-foreground border border-glass-border-soft"
+                            ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                            : "bg-muted text-muted-foreground border border-glass-border-soft"
                             }`}>
                             {new Date(user.teamBonusDeadline) > new Date() ? "Active" : "Ended"}
                           </span>
@@ -554,8 +554,8 @@ function WalletPage() {
                         <span>50% registration rewards for levels usage</span>
                         {user?.teamBonusDeadline && (
                           <span className={`text-[8.5px] px-1.5 py-0.25 rounded font-black tracking-wider uppercase leading-none ${new Date(user.teamBonusDeadline) > new Date()
-                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                              : "bg-muted text-muted-foreground border border-glass-border-soft"
+                            ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                            : "bg-muted text-muted-foreground border border-glass-border-soft"
                             }`}>
                             {new Date(user.teamBonusDeadline) > new Date() ? "Active" : "Ended"}
                           </span>

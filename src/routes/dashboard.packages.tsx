@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { CheckCircle2, Plus, Edit, ShieldAlert, TrendingUp, Rocket, Coins } from "lucide-react";
+import { CheckCircle2, Plus, Edit, ShieldAlert, TrendingUp, Rocket, Coins, X } from "lucide-react";
 import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 import { packagesApi, type PackageData } from "@/lib/api-packages";
 import { useAuthStore } from "@/store/authStore";
@@ -20,15 +20,20 @@ import { playSound } from "@/lib/sounds";
 export const Route = createFileRoute("/dashboard/packages")({ component: PackagesDash });
 
 function PackagesDash() {
-  const { user } = useAuthStore();
+  const { user, fetchProfile } = useAuthStore();
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  // Refresh profile on page mount to sync real-time wallet balance updates
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<"All" | "Starter" | "Standard" | "Pro" | "VIP">("All");
   const [showCelebration, setShowCelebration] = useState(false);
-  const [lastPurchase, setLastPurchase] = useState<{ pkgName: string; amount: number; totalActive: number; roi: number } | null>(null);
+  const [lastPurchase, setLastPurchase] = useState<{ pkgName: string; amount: number; totalActive: number; roi: number; isMarketer?: boolean } | null>(null);
   const confettiRef = useRef<HTMLDivElement>(null);
 
   // Confetti animation — mirrors the registration success animation
@@ -94,7 +99,7 @@ function PackagesDash() {
       playSound.playSuccess();
       // Show celebration dialog with purchase summary
       const totalActive = vars.regBonusApplied ? vars.amount + 5 : vars.amount;
-      setLastPurchase({ pkgName: vars.pkgName, amount: vars.amount, totalActive, roi: vars.roi });
+      setLastPurchase({ pkgName: vars.pkgName, amount: vars.amount, totalActive, roi: vars.roi, isMarketer: vars.useAdminAllocated });
       setShowCelebration(true);
       queryClient.invalidateQueries({ queryKey: ["packages"] });
       queryClient.invalidateQueries({ queryKey: ["myInvestments"] });
@@ -143,6 +148,18 @@ function PackagesDash() {
             {/* Glow ring */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
 
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowCelebration(false);
+                setLastPurchase(null);
+              }}
+              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors cursor-pointer p-1.5 hover:bg-white/5 rounded-full z-20"
+              aria-label="Close dialog"
+            >
+              <X size={18} />
+            </button>
+
             {/* Animated checkmark */}
             {/* <div className="flex justify-center mb-5">
               <div className="checkmark-circle">
@@ -181,7 +198,7 @@ function PackagesDash() {
               </div>
               <div className="flex justify-between">
                 <span className="text-emerald-300/70">Activates</span>
-                <span className="font-bold text-white">Tonight at Midnight</span>
+                <span className="font-bold text-white">Instantly</span>
               </div>
             </div>
 
@@ -307,12 +324,14 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
 
-  // Reset flag when dialog opens
+  // Reset flag and options when dialog opens
   useEffect(() => {
     if (isInvestDialogOpen) {
-      setUseAdminAllocated(false);
+      const isMarketer = pkg.packageTarget === "marketer";
+      setUseAdminAllocated(isMarketer);
+      setAutoReinvest(!isMarketer);
     }
-  }, [isInvestDialogOpen]);
+  }, [isInvestDialogOpen, pkg.packageTarget]);
 
   // Team bonus (10% of investment from bonusReceived wallet) - disable if admin allocated is used
   const maxBonusAllowed = useAdminAllocated ? 0 : amount * 0.1;
@@ -344,7 +363,12 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
     <Card className={`glass-card-hover transition-all flex flex-col h-full ${!pkg.isActive ? 'opacity-70 grayscale' : ''} bg-white/90 dark:bg-card/90 border-glass-border shadow-soft`}>
       <CardContent className="p-6 pb-8 flex flex-col flex-1">
         <div className="flex items-center justify-between">
-          <Badge className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold ${badgeStyle}`}>{tag}</Badge>
+          <div className="flex gap-1.5 flex-wrap">
+            <Badge className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold ${badgeStyle}`}>{tag}</Badge>
+            {pkg.packageTarget === "marketer" && (
+              <Badge className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold bg-blue-500/15 text-blue-500 border border-blue-500/25">Marketer</Badge>
+            )}
+          </div>
           {isAdmin && (
             <Switch
               checked={pkg.isActive}
@@ -361,7 +385,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
         <div className="space-y-3 text-xs mb-6 flex-1">
           <div className="flex justify-between"><span className="text-muted-foreground font-medium">Starting ROI</span><span className="font-bold text-foreground">{pkg.startRoi}%</span></div>
           <div className="flex justify-between border-t border-glass-border/30 pt-2"><span className="text-muted-foreground font-medium">Max ROI</span><span className="font-extrabold text-[#0e9f6e]">{pkg.maxRoi}%</span></div>
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-4"><CheckCircle2 className="h-4 w-4 text-[#0e9f6e] flex-shrink-0" /> <span>Activates at End of Day</span></div>
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-4"><CheckCircle2 className="h-4 w-4 text-[#0e9f6e] flex-shrink-0" /> <span>Activates Instantly</span></div>
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground"><CheckCircle2 className="h-4 w-4 text-[#0e9f6e] flex-shrink-0" /> <span>ROI grows over {pkg.durationMonths || 12} months</span></div>
         </div>
 
@@ -394,7 +418,9 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Invest in {pkg.name}</DialogTitle>
-                <p className="text-xs text-muted-foreground mt-1">Please note: Investments officially activate at Midnight (End of Day).</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Please note: This package activates instantly.
+                </p>
               </DialogHeader>
               <div className="space-y-4 py-2">
                 <div className="space-y-1.5">
@@ -415,69 +441,82 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                   </div>
                 </div>
 
-                {/* Use Admin Allocated Balance Checkbox */}
-                {walletAdminAllocated > 0 && (
-                  <div className="flex items-center space-x-2 my-2 border border-glass-border/30 rounded-xl p-3 bg-white/5">
-                    <input
-                      type="checkbox"
-                      id={`useAdminAllocated-${pkg._id}`}
-                      checked={useAdminAllocated}
-                      onChange={(e) => {
-                        setUseAdminAllocated(e.target.checked);
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                    />
-                    <Label htmlFor={`useAdminAllocated-${pkg._id}`} className="text-xs font-semibold cursor-pointer">
-                      Use Admin Allocated Balance (${walletAdminAllocated.toFixed(2)} available)
-                    </Label>
+                {/* Use Admin Allocated Balance Checkbox / Forced Info */}
+                {pkg.packageTarget === "marketer" ? (
+                  <div className="space-y-1.5 my-2">
+                    <div className="flex items-center space-x-2 border border-emerald-500/30 rounded-xl p-3 bg-emerald-500/5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                      <Label className="text-xs font-semibold text-emerald-400">
+                        Will use Admin Allocated Balance (${walletAdminAllocated.toFixed(2)} available)
+                      </Label>
+                    </div>
+                    {walletAdminAllocated < amount && (
+                      <div className="text-[11px] text-red-500 font-bold px-1">
+                        ⚠️ Insufficient admin allocated balance. You need ${amount.toFixed(2)} but only have ${walletAdminAllocated.toFixed(2)}.
+                      </div>
+                    )}
                   </div>
-                )}
+                ) : null}
 
                 {/* Admin Allocated Balance warning warning */}
                 {useAdminAllocated && (
                   <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 my-2">
                     <ShieldAlert className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
                     <div className="space-y-1 text-xs text-amber-600 dark:text-amber-400">
-                      <p className="font-bold leading-none">Special Package Rules Apply</p>
+                      <p className="font-bold leading-none">Special Marketer Package Rules Apply</p>
                       <p className="leading-relaxed opacity-90">
-                        Purchasing with Admin Allocated Balance will tag this investment as an <strong>Admin Funded Package</strong>. 
-                        Capital exit will be permanently locked (no early withdrawal), and no direct referral or MLM team matching commissions will be paid to uplines.
+                        Marketer packages can only be purchased using admin-allocated funds.
+                        Capital exit is permanently locked (no early withdrawal), and it will never generate Direct/Level commissions, Team business volume, Ranks, VIP Salary, or Achievement rewards. Only daily ROI remains active.
                       </p>
                     </div>
                   </div>
                 )}
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between bg-black/5 dark:bg-white/5 border border-glass-border/30 rounded-2xl p-3.5">
-                    <div className="space-y-1 pr-4">
-                      <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                        <TrendingUp className="h-3.5 w-3.5 text-primary" />
-                        Auto-Reinvest Daily ROI
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block leading-normal">
-                        {autoReinvest 
-                          ? "Daily ROI compounds automatically into your active principal amount." 
-                          : "Daily ROI accumulates as a claimable balance that must be collected."
-                        }
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Switch 
-                        checked={autoReinvest} 
-                        onCheckedChange={setAutoReinvest}
-                      />
-                      <span className="text-[10px] font-black uppercase text-muted-foreground w-8 text-center">
-                        {autoReinvest ? "ON" : "OFF"}
-                      </span>
-                    </div>
-                  </div>
+                  {pkg.packageTarget !== "marketer" ? (
+                    <>
+                      <div className="flex items-center justify-between bg-black/5 dark:bg-white/5 border border-glass-border/30 rounded-2xl p-3.5">
+                        <div className="space-y-1 pr-4">
+                          <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                            Auto-Reinvest Daily ROI
+                          </span>
+                          <span className="text-[10px] text-muted-foreground block leading-normal">
+                            {autoReinvest
+                              ? "Daily ROI compounds automatically into your active principal amount."
+                              : "Daily ROI accumulates as a claimable balance that must be collected."
+                            }
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Switch
+                            checked={autoReinvest}
+                            onCheckedChange={setAutoReinvest}
+                          />
+                          <span className="text-[10px] font-black uppercase text-muted-foreground w-8 text-center">
+                            {autoReinvest ? "ON" : "OFF"}
+                          </span>
+                        </div>
+                      </div>
 
-                  {!autoReinvest && (
+                      {!autoReinvest && (
+                        <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3">
+                          <Coins className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium leading-relaxed">
+                            <strong>Manual Collect Policy:</strong> You must manually claim your daily ROI payouts. Payouts are available to claim for a maximum of <strong>6 hours</strong> after each 24-hour cycle completion, otherwise they will expire.
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
                     <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3">
                       <Coins className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium leading-relaxed">
-                        <strong>Manual Collect Policy:</strong> You must manually claim your daily ROI payouts. Payouts are available to claim for a maximum of <strong>6 hours</strong> after each 24-hour cycle completion, otherwise they will expire.
-                      </p>
+                      <div className="space-y-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                        <p className="font-bold leading-none">Manual Collect & Staking Policy</p>
+                        <p className="leading-relaxed opacity-90 mt-1">
+                          You will get ROI after each 24h completion. A collection button will show for exactly <strong>6 hours</strong>. After that, the collection button will disappear, you will lose your daily ROI, and you must wait for the next 24h to collect.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -582,7 +621,8 @@ function PackageFormDialog({
     earlyWithdrawalPenaltyMonths: 5,
     earlyWithdrawalPenaltyPercent: 15,
     isHidden: false,
-    isActive: true
+    isActive: true,
+    packageTarget: "user"
   });
 
   useEffect(() => {
@@ -592,7 +632,7 @@ function PackageFormDialog({
       setFormData({
         name: "", minAmount: 10, maxAmount: 1000, startRoi: 0.5, maxRoi: 1.5,
         durationMonths: 12, earlyWithdrawalPenaltyMonths: 5, earlyWithdrawalPenaltyPercent: 15,
-        isHidden: false, isActive: true
+        isHidden: false, isActive: true, packageTarget: "user"
       });
     }
   }, [initialData, isOpen]);
@@ -648,6 +688,36 @@ function PackageFormDialog({
             <div className="space-y-2">
               <Label className="block mb-2">Early Withdrawal Penalty (%)</Label>
               <Input required type="number" name="earlyWithdrawalPenaltyPercent" value={formData.earlyWithdrawalPenaltyPercent || 0} onChange={handleChange} min={0} />
+            </div>
+          </div>
+          <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
+            <div>
+              <Label className="text-sm font-semibold">Package Target Audience</Label>
+              <p className="text-xs text-muted-foreground">Select if this package is for standard Users or Marketers.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={formData.packageTarget === "user" ? "default" : "outline"}
+                className={`h-8 text-xs font-semibold px-4 rounded-xl transition-all ${formData.packageTarget === "user"
+                  ? "bg-primary text-white"
+                  : "border-glass-border text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                onClick={() => setFormData(p => ({ ...p, packageTarget: "user" }))}
+              >
+                User
+              </Button>
+              <Button
+                type="button"
+                variant={formData.packageTarget === "marketer" ? "default" : "outline"}
+                className={`h-8 text-xs font-semibold px-4 rounded-xl transition-all ${formData.packageTarget === "marketer"
+                  ? "bg-primary text-white"
+                  : "border-glass-border text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                onClick={() => setFormData(p => ({ ...p, packageTarget: "marketer" }))}
+              >
+                Marketer
+              </Button>
             </div>
           </div>
           <div className="flex items-center justify-between border-t border-border pt-4 mt-4">

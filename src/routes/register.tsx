@@ -27,12 +27,7 @@ export const Route = createFileRoute("/register")({
   component: RegisterPage,
 });
 
-const COUNTRIES = [
-  { name: "Pakistan", code: "+92", flag: "🇵🇰" },
-  { name: "India", code: "+91", flag: "🇮🇳" },
-  { name: "United Kingdom", code: "+44", flag: "🇬🇧" },
-  { name: "United Arab Emirates", code: "+971", flag: "🇦🇪" },
-];
+
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -55,22 +50,9 @@ function RegisterPage() {
   const [pendingData, setPendingData] = useState<RegisterInput | null>(null);
   const [resendCountdown, setResendCountdown] = useState(0);
 
-  // Country code selector states
-  const [selectedCountry, setSelectedCountry] = useState("+92");
-  const [phoneBody, setPhoneBody] = useState("");
+
 
   const confettiContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    register("phone");
-  }, [register]);
-
-  useEffect(() => {
-    // Strip leading 0 from phone body if user enters it (e.g. 03001234567 -> 3001234567)
-    const formattedBody = phoneBody.startsWith("0") ? phoneBody.slice(1) : phoneBody;
-    const combined = formattedBody ? `${selectedCountry}${formattedBody}` : "";
-    setValue("phone", combined);
-  }, [selectedCountry, phoneBody, setValue]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -162,7 +144,7 @@ function RegisterPage() {
       setShowSuccessModal(true);
     } catch (error: any) {
       setJustRegistered(false);
-      toast.error(error.message || "Registration failed");
+      toast.error(getFirebaseErrorMessage(error));
     }
   };
 
@@ -189,7 +171,7 @@ function RegisterPage() {
       setShowSuccessModal(true);
     } catch (err: any) {
       setJustRegistered(false);
-      toast.error(err.message || "Verification or registration failed");
+      toast.error(getFirebaseErrorMessage(err));
     } finally {
       setOtpLoading(false);
     }
@@ -328,28 +310,13 @@ function RegisterPage() {
 
                   <div className="space-y-2">
                     <Label className="text-sm block mb-2 font-semibold" htmlFor="phone">Phone Number</Label>
-                    <div className="flex gap-2">
-                      <select
-                        value={selectedCountry}
-                        onChange={(e) => setSelectedCountry(e.target.value)}
-                        className="flex h-10 rounded-md border border-glass-border bg-background/50 hover:bg-background/80 transition-colors px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background w-[110px] text-foreground font-medium cursor-pointer"
-                      >
-                        {COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.code} className="bg-background text-foreground">
-                            {c.flag} {c.code}
-                          </option>
-                        ))}
-                      </select>
-                      <Input
-                        id="phone"
-                        type="text"
-                        placeholder="300 1234567"
-                        value={phoneBody}
-                        onChange={(e) => setPhoneBody(e.target.value.replace(/\D/g, ""))}
-                        className="flex-1"
-                        aria-invalid={!!errors.phone}
-                      />
-                    </div>
+                    <Input
+                      id="phone"
+                      type="text"
+                      placeholder="+92 300 1234567"
+                      {...register("phone")}
+                      aria-invalid={!!errors.phone}
+                    />
                     {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
                   </div>
 

@@ -22,8 +22,8 @@ const nav = [
   { to: "/dashboard/roi", label: "Daily ROI", icon: TrendingUp },
   { to: "/dashboard/team", label: "Referral Team", icon: Users },
   { to: "/dashboard/team-bonus", label: "Team Building Bonus", icon: Sparkles },
-  { to: "/dashboard/levels", label: "Level Income", icon: Layers },
   { to: "/dashboard/wallet", label: "Bonus Wallet", icon: Gift },
+  { to: "/dashboard/levels", label: "Level Income", icon: Layers },
   { to: "/dashboard/transfer", label: "Transfer Bonus", icon: ArrowLeftRight },
   { to: "/dashboard/weekly-salary", label: "VIP Salary Claims", icon: Crown },
   { to: "/dashboard/achievements", label: "Achievement Rewards", icon: Trophy },
@@ -115,7 +115,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           </>
         )}
 
-        {!isAdmin && (
+        {/* {!isAdmin && (
           <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-[#001a0d]/98 to-[#000d07]/98 border border-[#f3ba2f]/22 relative overflow-hidden group shadow-[0_8px_24px_rgba(0,0,0,0.4)] text-left transition-all duration-300 hover:border-[#f3ba2f]/50 hover:shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_20px_rgba(0,230,118,0.08)]">
             <div className="relative z-10 space-y-3">
               <h3 className="text-xs font-black text-white tracking-wider uppercase flex items-center gap-1.5">
@@ -125,7 +125,6 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                 Smart investments in Stock Market for Stable Daily Returns
               </p>
 
-              {/* Structured Framed bull image container with neon green glow */}
               <div className="overflow-hidden rounded-xl border border-[#00693e]/40 bg-[#000a05]/70 p-1 flex items-center justify-center shadow-inner relative group-hover:border-[#00e676]/30 group-hover:shadow-[0_0_12px_rgba(0,230,118,0.12)] transition-all duration-300">
                 <img
                   src={chargingBull}
@@ -140,11 +139,10 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                 </Button>
               </Link>
             </div>
-            {/* Neon glow orb matching image circuit node glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00693e]/12 via-transparent to-[#f3ba2f]/6 opacity-70 pointer-events-none" />
             <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-[#00e676]/8 rounded-full blur-xl pointer-events-none" />
           </div>
-        )}
+        )} */}
 
         {/* Official Social Channels */}
         <div className="pt-4 mt-4 border-t border-glass-border/30 space-y-2">

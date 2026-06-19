@@ -12,6 +12,7 @@ export interface PackageData {
   earlyWithdrawalPenaltyPercent: number;
   isActive: boolean;
   isHidden: boolean;
+  packageTarget?: 'user' | 'marketer';
 }
 
 export const packagesApi = {

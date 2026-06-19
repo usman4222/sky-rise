@@ -5,7 +5,8 @@ import { auth } from "@/lib/firebase";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  signOut
+  signOut,
+  sendEmailVerification
 } from "firebase/auth";
 import type { LoginInput, RegisterInput } from "@/lib/validations/auth";
 
@@ -34,6 +35,7 @@ export interface UserProfile {
   registrationBonusActive?: boolean; // true = bonus still available
   freeRegBonus?: number;             // Should be 5 until consumed
   teamBonusDeadline?: string;        // 10 days signup cutoff date
+  emailVerified?: boolean;
 }
 
 interface AuthState {
@@ -51,6 +53,7 @@ interface AuthState {
   register: (data: RegisterInput, phoneVerificationToken: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
   setHydrated: () => void;
 }
 
@@ -119,6 +122,13 @@ export const useAuthStore = create<AuthState>()(
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const idToken = await userCredential.user.getIdToken();
           
+          // Try sending email verification link
+          try {
+            await sendEmailVerification(userCredential.user);
+          } catch (emailErr) {
+            console.error("Failed to send verification email:", emailErr);
+          }
+          
           // 2. Sync profile details to MongoDB backend
           const response = await api.post<{ user: UserProfile }>(
             "/firebase-auth/sync",
@@ -156,23 +166,7 @@ export const useAuthStore = create<AuthState>()(
         
         set({ isLoading: true });
         try {
-          console.log("[Auth Debug] Attempting profile fetch using cached token...");
-          try {
-            const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
-              headers: { Authorization: `Bearer ${cachedToken}` }
-            });
-            
-            if (response && response.user) {
-              console.log("[Auth Debug] Backend verified user successfully with cached token:", response.user.email);
-              get().setAuth(cachedToken, response.user, response.user.roles || []);
-              set({ isLoading: false });
-              return; // Success, no need to query Firebase SDK
-            }
-          } catch (cachedError: any) {
-            console.warn("[Auth Debug] Cached token verification failed, checking Firebase SDK...", cachedError.message || cachedError);
-          }
-
-          // Fallback: If cached token failed, use Firebase SDK to get a fresh token
+          // Fallback/Resolve: Get current Firebase user
           let firebaseUser = auth.currentUser;
           console.log("[Auth Debug] Current auth.currentUser state:", firebaseUser ? `UID: ${firebaseUser.uid}` : "null (waiting for SDK)");
 
@@ -193,6 +187,10 @@ export const useAuthStore = create<AuthState>()(
             return;
           }
 
+          // Reload Firebase user status to get the fresh email verification status
+          console.log("[Auth Debug] Reloading Firebase user status...");
+          await firebaseUser.reload();
+
           // Get fresh token from Firebase
           console.log("[Auth Debug] Fetching fresh ID token from Firebase...");
           const idToken = await firebaseUser.getIdToken(true);
@@ -211,11 +209,19 @@ export const useAuthStore = create<AuthState>()(
             get().clearAuth();
           }
         } catch (error: any) {
-          console.error("[Auth Debug] Error during fetchProfile fallback:", error.message || error);
+          console.error("[Auth Debug] Error during fetchProfile:", error.message || error);
           get().clearAuth();
         } finally {
           set({ isLoading: false });
         }
+      },
+
+      resendVerificationEmail: async () => {
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error("No user is currently logged in.");
+        }
+        await sendEmailVerification(user);
       },
     }),
     {

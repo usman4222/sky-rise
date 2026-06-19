@@ -465,7 +465,16 @@ function AdminUsersPage() {
                           <TableBody>
                             {detailData.investments?.map((inv: any) => (
                               <TableRow key={inv._id}>
-                                <TableCell className="font-semibold">{inv.package?.name || "Standard Package"}</TableCell>
+                                <TableCell className="font-semibold">
+                                  <div className="flex flex-col items-start gap-1">
+                                    <span>{inv.package?.name || "Standard Package"}</span>
+                                    {inv.packageType === "Admin Funded Package" && (
+                                      <Badge className="bg-amber-500/10 text-amber-500 border-0 text-[8px] uppercase tracking-wider font-extrabold py-0.5 px-1.5">
+                                        Admin Funded
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
                                 <TableCell className="font-mono font-semibold">${Number(inv.amount || 0).toFixed(2)}</TableCell>
                                 <TableCell className="font-mono">{inv.currentRoi}% Daily</TableCell>
                                 <TableCell className="font-mono text-profit">${Number(inv.totalRoiEarned || 0).toFixed(2)}</TableCell>

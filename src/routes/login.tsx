@@ -192,7 +192,7 @@ function LoginPage() {
             <CardContent className="p-6 space-y-5">
               {[
                 { icon: TrendingUp, t: "Live ROI tracking", d: "Daily growth at a glance." },
-                { icon: Users, t: "Team insights", d: "5-level overview, direct referrals, and more." },
+                { icon: Users, t: "Team insights", d: "10-level overview, direct referrals, and more." },
                 { icon: Shield, t: "Transparent rules", d: "Bonus, level, and withdrawal rules clearly defined." },
               ].map((f) => (
                 <div key={f.t} className="flex items-start gap-3">
