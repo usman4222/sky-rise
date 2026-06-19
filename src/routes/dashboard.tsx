@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import { Mail, RefreshCw, LogOut, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { GearSpinner } from "@/components/gear-loader";
+import { GearSpinner, GearSectionLoader } from "@/components/gear-loader";
 import { SkyRiseLogo } from "@/components/logo";
 
 export const Route = createFileRoute("/dashboard")({
@@ -145,7 +145,7 @@ function VerifyEmailView() {
 }
 
 function DashboardLayoutWrapper() {
-  const { isAuthenticated, isHydrated, user } = useAuthStore();
+  const { isAuthenticated, isHydrated, user, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -156,6 +156,15 @@ function DashboardLayoutWrapper() {
 
   if (!isHydrated || !isAuthenticated) {
     return null;
+  }
+
+  // If loading and user details are not fully loaded yet, show a clean loader
+  if (isLoading && (!user || !user.email)) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-liquid-bg p-4 animate-in fade-in duration-300">
+        <GearSectionLoader text="Securing session..." />
+      </div>
+    );
   }
 
   // Intercept dashboard routes for non-verified users (Admins are bypassed)

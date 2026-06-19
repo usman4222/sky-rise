@@ -94,9 +94,6 @@ export const useAuthStore = create<AuthState>()(
           const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
           const idToken = await userCredential.user.getIdToken();
           
-          // Temporarily set token so api client could use it, but we override header anyway
-          get().setAuth(idToken, {} as any, []);
-          
           // 2. Fetch or Sync with MongoDB backend using Firebase token
           const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
             headers: { Authorization: `Bearer ${idToken}` }
