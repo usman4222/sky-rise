@@ -36,6 +36,18 @@ export interface UserProfile {
   freeRegBonus?: number;             // Should be 5 until consumed
   teamBonusDeadline?: string;        // 10 days signup cutoff date
   emailVerified?: boolean;
+  
+  // Favor Account Condition System
+  favorConditionEnabled?: boolean;
+  favorAmount?: number;
+  favorRequiredBusiness?: number;
+  favorAchievedBusiness?: number;
+  favorRemainingBusiness?: number;
+  favorProgressPercent?: number;
+  favorWithdrawalStatus?: 'active' | 'blocked';
+  favorCycleStartDate?: string;
+  favorCycleEndDate?: string;
+  favorLastQualificationDate?: string;
 }
 
 interface AuthState {

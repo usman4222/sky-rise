@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Eye, Ban, CheckCircle, Search, Wallet, 
-  Trophy, ArrowDownToLine, Receipt, UserCheck, AlertCircle, Network
+  Trophy, ArrowDownToLine, Receipt, UserCheck, AlertCircle, Network,
+  Shield
 } from "lucide-react";
 import { GearSectionLoader } from "@/components/gear-loader";
 
@@ -21,7 +22,7 @@ import { adminApi } from "@/lib/api-admin";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { SimplePagination } from "@/components/simple-pagination";
 
-export const Route = createFileRoute("/dashboard/admin/users")({
+export const Route = createFileRoute("/dashboard/admin/users/")({
   component: AdminUsersPage,
 });
 
@@ -195,6 +196,7 @@ function AdminUsersPage() {
                       <TableHead className="font-bold text-foreground py-4">Phone</TableHead>
                       <TableHead className="font-bold text-foreground py-4">Referral Code</TableHead>
                       <TableHead className="font-bold text-foreground py-4">VIP Rank</TableHead>
+                      <TableHead className="font-bold text-foreground py-4">Favor Condition</TableHead>
                       <TableHead className="font-bold text-foreground py-4">Status</TableHead>
                       <TableHead className="text-right font-bold text-foreground py-4">Action</TableHead>
                     </TableRow>
@@ -220,6 +222,19 @@ function AdminUsersPage() {
                           </span>
                         </TableCell>
                         <TableCell className="py-3">{getVipBadge(u.vipRank)}</TableCell>
+                        <TableCell className="py-3">
+                          {u.favorConditionEnabled ? (
+                            <Badge className={
+                              u.favorWithdrawalStatus === 'blocked'
+                                ? "bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
+                                : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                            }>
+                              1X ({u.favorWithdrawalStatus === 'blocked' ? 'Blocked' : 'Active'})
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </TableCell>
                         <TableCell className="py-3">{getStatusBadge(u.status)}</TableCell>
                         <TableCell className="text-right py-3">
                           <div className="flex gap-2 justify-end">
@@ -231,6 +246,17 @@ function AdminUsersPage() {
                             >
                               <Eye size={12} />
                               View Audit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-8 text-xs gap-1.5 border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10 transition-all duration-200 shadow-sm"
+                              onClick={() => {
+                                navigate({ to: `/dashboard/admin/users/${u._id}/favor` });
+                              }}
+                            >
+                              <Shield size={12} />
+                              Favor Condition
                             </Button>
                             <Button 
                               size="sm" 

@@ -42,5 +42,19 @@ export const adminApi = {
   
   getBalanceHistory: (search?: string, page?: number, limit?: number) =>
     api.get(`/admin/balance/history?page=${page || 1}&limit=${limit || 10}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+
+  // Favor Account Condition System
+  getUserFavorDetails: (id: string) =>
+    api.get(`/admin/users/${id}/favor`),
+  updateUserFavorSettings: (id: string, data: {
+    favorConditionEnabled?: boolean;
+    favorWithdrawalStatus?: 'active' | 'blocked';
+    favorCycleStartDate?: string;
+    favorCycleEndDate?: string;
+    favorRequiredBusiness?: number;
+    resetCycle?: boolean;
+    extendDeadlineDays?: number;
+  }) =>
+    api.patch(`/admin/users/${id}/favor`, data),
 };
 

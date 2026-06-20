@@ -47,6 +47,11 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
     navigate({ to: "/login", replace: true });
   };
 
+  const userNav = [
+    ...nav.filter(n => !isAdmin || n.hasAdmin),
+    ...(user?.favorConditionEnabled ? [{ to: "/dashboard/favor" as any, label: "Leader Condition", icon: Award }] : [])
+  ];
+
   return (
     <aside className="flex h-full w-64 flex-col glass-sidebar glass-blur-md">
       <div className="flex items-center justify-between px-6 py-5 border-b border-glass-border">
@@ -56,7 +61,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         {onClose && <button onClick={onClose} className="lg:hidden hover:opacity-70 transition"><X size={18} /></button>}
       </div>
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-        {nav.filter(n => !isAdmin || n.hasAdmin).map((n) => {
+        {userNav.map((n) => {
           const active = n.exact ? pathname === n.to : (pathname === n.to || pathname.startsWith(n.to + "/"));
           const Icon = n.icon;
           return (

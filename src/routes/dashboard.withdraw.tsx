@@ -3,6 +3,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard-layout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Landmark, ArrowUpRight, HelpCircle, RefreshCw, PlusCircle, AlertCircle, XCircle } from "lucide-react";
 import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
+import { useAuthStore } from "@/store/authStore";
 
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { financeApi } from "@/lib/api-finance";
@@ -32,12 +43,14 @@ const WALLET_TYPES = [
 
 function WithdrawPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
 
   // Form State
   const [walletType, setWalletType] = useState<string>("all");
   const [amount, setAmount] = useState<string>("");
   const [paymentMethodId, setPaymentMethodId] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [cancelWithdrawalId, setCancelWithdrawalId] = useState<string | null>(null);
 
   // Queries
   const { data: walletsRes, isLoading: isWalletsLoading } = useQuery({
@@ -181,6 +194,18 @@ function WithdrawPage() {
               <CardDescription className="text-xs">Deduct funds from available withdrawable wallets and route to your saved account.</CardDescription>
             </CardHeader>
             <CardContent>
+              {user?.favorConditionEnabled && user?.favorWithdrawalStatus === 'blocked' && (
+                <div className="p-4 mb-4 border border-destructive/20 bg-destructive/10 text-destructive rounded-2xl flex items-start gap-3 animate-pulse">
+                  <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="space-y-1 text-xs font-semibold">
+                    <span className="font-bold block text-sm">Withdrawal Suspended</span>
+                    <span className="block opacity-90 font-medium text-xs">
+                      Monthly 1X business target not completed. Your profit withdrawal has been temporarily suspended.
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {paymentMethods.length === 0 && !isMethodsLoading ? (
                 <div className="p-6 border border-amber-500/20 bg-amber-500/5 rounded-2xl flex flex-col items-center justify-center text-center space-y-3">
                   <AlertCircle className="h-9 w-9 text-amber-500" />
@@ -275,7 +300,12 @@ function WithdrawPage() {
                   <Button
                     type="submit"
                     className="w-full glass-button-primary h-10 font-bold"
-                    disabled={requestMutation.isPending || numAmount < 10 || currentBal < numAmount}
+                    disabled={
+                      requestMutation.isPending || 
+                      numAmount < 10 || 
+                      currentBal < numAmount || 
+                      (user?.favorConditionEnabled && user?.favorWithdrawalStatus === 'blocked')
+                    }
                   >
                     {requestMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}
                     Confirm Withdrawal Request
@@ -376,9 +406,7 @@ function WithdrawPage() {
                             variant="ghost"
                             className="h-7 text-[10px] text-destructive hover:bg-destructive/10"
                             onClick={() => {
-                              if (confirm("Cancel this withdrawal request and refund your balance?")) {
-                                cancelMutation.mutate(w._id);
-                              }
+                              setCancelWithdrawalId(w._id);
                             }}
                             disabled={cancelMutation.isPending}
                           >
@@ -399,6 +427,31 @@ function WithdrawPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={!!cancelWithdrawalId} onOpenChange={(open) => !open && setCancelWithdrawalId(null)}>
+        <AlertDialogContent className="glass-card max-w-sm rounded-3xl border-glass-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-extrabold text-foreground text-sm">Cancel Withdrawal Request?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground">
+              Are you sure you want to cancel this withdrawal request? The funds will be refunded back to your withdrawable wallet balance immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-2">
+            <AlertDialogCancel className="h-9.5 text-xs rounded-xl border-glass-border cursor-pointer">No, Keep It</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (cancelWithdrawalId) {
+                  cancelMutation.mutate(cancelWithdrawalId);
+                  setCancelWithdrawalId(null);
+                }
+              }}
+              className="h-9.5 text-xs rounded-xl bg-destructive hover:bg-destructive/80 text-white font-semibold cursor-pointer border-0"
+            >
+              Yes, Cancel Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
