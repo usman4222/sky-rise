@@ -112,7 +112,6 @@ function AdminBalanceHistoryPage() {
                       <TableHead>User Account</TableHead>
                       <TableHead>Adjustment</TableHead>
                       <TableHead>Wallet Type</TableHead>
-                      <TableHead>Balance Flow</TableHead>
                       <TableHead>Processed By</TableHead>
                       <TableHead>Remarks / Notes</TableHead>
                     </TableRow>
@@ -136,12 +135,6 @@ function AdminBalanceHistoryPage() {
                         </TableCell>
                         <TableCell>{formatAmount(h)}</TableCell>
                         <TableCell>{getWalletBadge(h.balanceType)}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col text-[10px] font-mono">
-                            <span className="text-muted-foreground">Before: ${h.balanceBefore.toFixed(2)}</span>
-                            <span className="font-bold text-foreground">After: ${h.balanceAfter.toFixed(2)}</span>
-                          </div>
-                        </TableCell>
                         <TableCell>
                           <span className="text-xs font-semibold text-foreground">{h.adminName}</span>
                         </TableCell>

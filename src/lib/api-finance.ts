@@ -38,4 +38,6 @@ export const financeApi = {
   getWallets: () => api.get("/finance/wallets"),
   getLedgerHistory: (page?: number, limit?: number) =>
     api.get(`/finance/history?page=${page || 1}&limit=${limit || 10}`),
+  getEarningsHistory: () =>
+    api.get<{ chartData: Array<{ date: string; amount: number }> }>("/finance/earnings/history"),
 };

@@ -213,6 +213,13 @@ function DashboardHome() {
     enabled: !isAdmin,
   });
 
+  const { data: rawEarningsHistory } = useQuery({
+    queryKey: ["earningsHistory"],
+    queryFn: () => financeApi.getEarningsHistory(),
+    refetchOnWindowFocus: false,
+    enabled: !isAdmin,
+  });
+
   const { data: downlineData } = useQuery({
     queryKey: ["downline"],
     queryFn: () => networkApi.getDownline(),
@@ -291,17 +298,32 @@ function DashboardHome() {
     return acc + levelMembers.reduce((sum: number, m: any) => sum + (m.totalInvestments || 0), 0);
   }, 0);
 
-  // Growth graph values matching the total balance scale
-  const baseChartVal = totalEarnings > 0 ? totalEarnings : 2680.50;
-  const earningsHistory = [
-    { date: "May 01", amount: baseChartVal * 0.15 },
-    { date: "May 05", amount: baseChartVal * 0.35 },
-    { date: "May 10", amount: baseChartVal * 0.28 },
-    { date: "May 15", amount: baseChartVal * 0.55 },
-    { date: "May 20", amount: baseChartVal * 0.78 },
-    { date: "May 25", amount: baseChartVal * 0.65 },
-    { date: "May 30", amount: baseChartVal },
-  ];
+  // Calculate dynamic earnings history matching the total balance scale
+  let earningsHistory = rawEarningsHistory?.chartData || [];
+  if (earningsHistory.length === 0) {
+    const dates = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      dates.push({
+        date: dateStr,
+        amount: 0
+      });
+    }
+    earningsHistory = dates;
+  }
+
+  // Calculate growth percentage in the last 30 days
+  const startAmount = earningsHistory[0]?.amount || 0;
+  const endAmount = earningsHistory[earningsHistory.length - 1]?.amount || 0;
+  const growthAmount = endAmount - startAmount;
+  let growthPercent = 0;
+  if (startAmount > 0) {
+    growthPercent = (growthAmount / startAmount) * 100;
+  } else if (growthAmount > 0) {
+    growthPercent = 100;
+  }
 
   // Pie chart categories distribution
   const distributionData = [
@@ -826,14 +848,20 @@ function DashboardHome() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
                   <CardTitle className="text-sm font-extrabold text-foreground uppercase tracking-wider">Earnings Overview</CardTitle>
-                  <div className="text-2xl font-black text-foreground mt-1.5">${baseChartVal.toFixed(2)}</div>
+                  <div className="text-2xl font-black text-foreground mt-1.5">${totalEarnings.toFixed(2)}</div>
                   <p className="text-[10px] text-muted-foreground mt-0.5">Total Earnings</p>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
-                  <Badge className="bg-[#0e9f6e]/10 text-[#0e9f6e] border-0 text-[10px] font-bold">This Month</Badge>
-                  <span className="text-[10px] font-semibold text-emerald-500 flex items-center gap-0.5">
-                    <ArrowUpRight className="h-3 w-3" /> +18.42% vs last month
-                  </span>
+                  <Badge className="bg-[#0e9f6e]/10 text-[#0e9f6e] border-0 text-[10px] font-bold">Last 30 Days</Badge>
+                  {growthPercent > 0 ? (
+                    <span className="text-[10px] font-semibold text-emerald-500 flex items-center gap-0.5">
+                      <ArrowUpRight className="h-3 w-3" /> +{growthPercent.toFixed(2)}% growth
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-0.5">
+                      Stable growth
+                    </span>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="h-[200px] pt-4">

@@ -237,7 +237,7 @@ function AdminBalanceAdjustPage() {
                       {/* Wallet Type */}
                       <div className="space-y-2">
                         <Label className="text-[10px] font-extrabold uppercase text-muted-foreground tracking-wider">Target Wallet Type</Label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3">
                           <button
                             type="button"
                             onClick={() => {
@@ -252,7 +252,7 @@ function AdminBalanceAdjustPage() {
                             <span className="text-xs font-bold">Admin Allocated</span>
                             <span className="text-[9px] opacity-75 mt-0.5">Used for locked package activations</span>
                           </button>
-                          <button
+                          {/* <button
                             type="button"
                             onClick={() => {
                               playSound.playClick();
@@ -265,14 +265,14 @@ function AdminBalanceAdjustPage() {
                           >
                             <span className="text-xs font-bold">Deposit Wallet</span>
                             <span className="text-[9px] opacity-75 mt-0.5">Used for standard account deposits</span>
-                          </button>
+                          </button> */}
                         </div>
                       </div>
 
                       {/* Adjust Action Type (Credit vs Debit) */}
                       <div className="space-y-2">
                         <Label className="text-[10px] font-extrabold uppercase text-muted-foreground tracking-wider">Adjustment Action</Label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3">
                           <button
                             type="button"
                             onClick={() => {
@@ -286,7 +286,7 @@ function AdminBalanceAdjustPage() {
                           >
                             <PlusCircle size={15} /> Add Funds (Credit)
                           </button>
-                          <button
+                          {/* <button
                             type="button"
                             onClick={() => {
                               playSound.playClick();
@@ -298,7 +298,7 @@ function AdminBalanceAdjustPage() {
                               }`}
                           >
                             <MinusCircle size={15} /> Deduct Funds (Debit)
-                          </button>
+                          </button> */}
                         </div>
                       </div>
 
