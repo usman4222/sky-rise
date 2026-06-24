@@ -19,6 +19,7 @@ import {
 import { GearSpinner } from "@/components/gear-loader";
 
 import { financeApi } from "@/lib/api-finance";
+import { investmentsApi } from "@/lib/api-investments";
 import { useAuthStore } from "@/store/authStore";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { playSound } from "@/lib/sounds";
@@ -118,6 +119,15 @@ function WalletPage() {
     }
   });
 
+  // 5. Fetch user investments for dynamic stats
+  const { data: investments = [] } = useQuery({
+    queryKey: ["myInvestments"],
+    queryFn: async () => {
+      const res = await investmentsApi.getMyInvestments();
+      return res.investments || [];
+    }
+  });
+
   // 3. Fetch automated payment gateways for deposits
   const { data: paymentMethods = [] } = useQuery({
     queryKey: ["depositPaymentMethods"],
@@ -200,6 +210,11 @@ function WalletPage() {
   // Total assets balance
   const totalBalance = depositBal + bonusBal + withdrawableBal + freeBonusBal + bonusActivationBal + bonusTransferableBal;
   const formattedBalance = totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Dynamic estimation of today's ROI profit and change percentage
+  const activeInvestments = investments.filter((i: any) => i.status === "active");
+  const todayProfit = activeInvestments.reduce((sum: number, inv: any) => sum + (inv.amount * (inv.currentRoi || 1.2) / 100), 0);
+  const changePercent = totalBalance > 0 ? (todayProfit / totalBalance) * 100 : 0;
 
   // Tickers list configuration with live values matching reference screenshot style
   const coinTickers = [
@@ -291,9 +306,9 @@ function WalletPage() {
                   </div>
                 </div>
 
-                <Badge className="bg-emerald-500/20 hover:bg-emerald-500/20 text-[#10b981] font-black border border-emerald-500/30 text-[9px] uppercase tracking-wider py-0.5 px-2 flex items-center gap-1 w-fit">
+                <Badge className={`bg-emerald-500/20 hover:bg-emerald-500/20 text-[#10b981] font-black border border-emerald-500/30 text-[9px] uppercase tracking-wider py-0.5 px-2 flex items-center gap-1 w-fit`}>
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  +3.42% (24h)
+                  {changePercent >= 0 ? "+" : ""}{changePercent.toFixed(2)}% (24h)
                 </Badge>
               </div>
             </div>
@@ -730,7 +745,9 @@ function WalletPage() {
             <div className="p-1.5 bg-[#f3ba2f]/10 text-[#f3ba2f] rounded-lg"><TrendingUp size={15} /></div>
             <div>
               <span className="text-[9px] text-muted-foreground block uppercase font-bold">24h Change</span>
-              <span className="font-extrabold text-emerald-500 mt-0.5 block">+3.42%</span>
+              <span className={`font-extrabold mt-0.5 block ${changePercent >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                {changePercent >= 0 ? "+" : ""}{changePercent.toFixed(2)}%
+              </span>
             </div>
           </div>
 
@@ -740,7 +757,9 @@ function WalletPage() {
             <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg"><RefreshCw size={15} /></div>
             <div>
               <span className="text-[9px] text-muted-foreground block uppercase font-bold">Today Profit</span>
-              <span className="font-extrabold text-emerald-500 mt-0.5 block font-mono">+$412.35</span>
+              <span className="font-extrabold text-emerald-500 mt-0.5 block font-mono">
+                {todayProfit >= 0 ? "+" : ""}${todayProfit.toFixed(2)}
+              </span>
             </div>
           </div>
 

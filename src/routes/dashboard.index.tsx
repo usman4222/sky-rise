@@ -809,7 +809,7 @@ function DashboardHome() {
                   <div className="p-2 bg-secondary/30 rounded-xl text-center border border-glass-border-soft">
                     <div className="text-[8px] text-muted-foreground font-bold uppercase truncate">Earnings</div>
                     <div className="text-[11px] font-extrabold text-foreground mt-1.5 truncate">
-                      ${(walletsData?.referral || 1280.50).toFixed(0)}
+                      ${(walletsData?.referral ?? 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -945,22 +945,28 @@ function DashboardHome() {
               </CardHeader>
               <CardContent className="pt-1 flex-1 flex flex-col justify-between">
                 <div className="space-y-2">
-                  {displayTx.map((tx: any) => (
-                    <div key={tx.id} className="flex items-center justify-between p-2 rounded-xl hover:bg-secondary/40 transition-colors border border-glass-border-soft">
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-lg ${tx.amount >= 0 ? 'bg-[#0e9f6e]/10 text-[#0e9f6e]' : 'bg-rose-500/10 text-rose-500'}`}>
-                          {tx.amount >= 0 ? <ArrowUpRight className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                  {recentTx.length > 0 ? (
+                    recentTx.map((tx: any) => (
+                      <div key={tx.id} className="flex items-center justify-between p-2 rounded-xl hover:bg-secondary/40 transition-colors border border-glass-border-soft">
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1.5 rounded-lg ${tx.amount >= 0 ? 'bg-[#0e9f6e]/10 text-[#0e9f6e]' : 'bg-rose-500/10 text-rose-500'}`}>
+                            {tx.amount >= 0 ? <ArrowUpRight className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                          </div>
+                          <div>
+                            <div className="text-[10px] font-bold text-foreground">{tx.type}</div>
+                            <div className="text-[8px] text-muted-foreground mt-0.5">{tx.date}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-[10px] font-bold text-foreground">{tx.type}</div>
-                          <div className="text-[8px] text-muted-foreground mt-0.5">{tx.date}</div>
-                        </div>
+                        <span className={`text-[10px] font-extrabold font-mono ${tx.amount >= 0 ? 'text-[#0e9f6e]' : 'text-rose-500'}`}>
+                          {tx.amount >= 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
+                        </span>
                       </div>
-                      <span className={`text-[10px] font-extrabold font-mono ${tx.amount >= 0 ? 'text-[#0e9f6e]' : 'text-rose-500'}`}>
-                        {tx.amount >= 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
-                      </span>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <p className="text-[10px] text-muted-foreground font-semibold">No recent transactions</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -978,48 +984,69 @@ function DashboardHome() {
                 </Link>
               </CardHeader>
               <CardContent className="space-y-4 pt-1 flex-1 flex flex-col justify-between">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[11px]">
-                  <div>
-                    <span className="text-muted-foreground block font-medium">Plan Name</span>
-                    <span className="font-extrabold text-foreground mt-0.5 block">{latestInvestment?.package?.name || "Premium Plan"}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block font-medium">Daily ROI</span>
-                    <span className="font-extrabold text-[#0e9f6e] mt-0.5 block">{latestInvestment?.currentRoi || 1.20}%</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block font-medium">Total Investment</span>
-                    <span className="font-extrabold text-foreground mt-0.5 block">${(latestInvestment?.amount || 10000).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block font-medium">Plan Duration</span>
-                    <span className="font-extrabold text-foreground mt-0.5 block">Lifetime</span>
-                  </div>
-                </div>
+                {latestInvestment ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[11px]">
+                      <div>
+                        <span className="text-muted-foreground block font-medium">Plan Name</span>
+                        <span className="font-extrabold text-foreground mt-0.5 block">{latestInvestment?.package?.name || "Standard Plan"}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block font-medium">Daily ROI</span>
+                        <span className="font-extrabold text-[#0e9f6e] mt-0.5 block">{latestInvestment?.currentRoi}%</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block font-medium">Total Investment</span>
+                        <span className="font-extrabold text-foreground mt-0.5 block">${(latestInvestment?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block font-medium">Plan Duration</span>
+                        <span className="font-extrabold text-foreground mt-0.5 block">Lifetime</span>
+                      </div>
+                    </div>
 
-                {latestInvestment && latestInvestment.pendingRoiClaim > 0 && (
-                  <div className="pt-2">
-                    <Button
-                      onClick={() => {
-                        playSound.playSuccess();
-                        claimRoiMutation.mutate(latestInvestment._id);
-                      }}
-                      disabled={claimRoiMutation.isPending}
-                      className="w-full bg-[#004d33] hover:bg-[#0c6a46] text-[#f3ba2f] font-bold text-[10px] h-8 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
-                    >
-                      {claimRoiMutation.isPending ? <GearSpinner className="h-3 w-3" /> : <Gift className="h-3 w-3" />}
-                      Claim ROI (${latestInvestment.pendingRoiClaim.toFixed(2)})
-                    </Button>
+                    {latestInvestment.pendingRoiClaim > 0 && (
+                      <div className="pt-2">
+                        <Button
+                          onClick={() => {
+                            playSound.playSuccess();
+                            claimRoiMutation.mutate(latestInvestment._id);
+                          }}
+                          disabled={claimRoiMutation.isPending}
+                          className="w-full bg-[#004d33] hover:bg-[#0c6a46] text-[#f3ba2f] font-bold text-[10px] h-8 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          {claimRoiMutation.isPending ? <GearSpinner className="h-3 w-3" /> : <Gift className="h-3 w-3" />}
+                          Claim ROI (${latestInvestment.pendingRoiClaim.toFixed(2)})
+                        </Button>
+                      </div>
+                    )}
+
+                    <div className="pt-2 border-t border-glass-border">
+                      <div className="flex justify-between text-[9px] text-muted-foreground uppercase font-bold">
+                        <span>Capital in Use</span>
+                        <span className="text-[#0e9f6e]">100%</span>
+                      </div>
+                      <Progress value={100} className="mt-1 h-1.5 bg-secondary" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-6 text-center space-y-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <TrendingUp size={20} />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-xs text-foreground">No Active Plan</h4>
+                      <p className="text-[10px] text-muted-foreground max-w-[200px]">
+                        Subscribe to an investment package to start earning daily returns.
+                      </p>
+                    </div>
+                    <Link to="/dashboard/packages" onClick={() => playSound.playClick()}>
+                      <Button size="sm" className="bg-[#f3ba2f] hover:bg-[#ffe082] text-[#002b1c] font-black text-[10px] h-8 px-4 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer mt-1">
+                        Invest Now
+                      </Button>
+                    </Link>
                   </div>
                 )}
-
-                <div className="pt-2 border-t border-glass-border">
-                  <div className="flex justify-between text-[9px] text-muted-foreground uppercase font-bold">
-                    <span>Capital in Use</span>
-                    <span className="text-[#0e9f6e]">100%</span>
-                  </div>
-                  <Progress value={100} className="mt-1 h-1.5 bg-secondary" />
-                </div>
               </CardContent>
             </Card>
           </div>

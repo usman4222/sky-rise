@@ -105,10 +105,49 @@ function CheckoutPage() {
     setTimeout(() => setCopiedAmount(false), 2000);
   };
 
-  const handleManualCheck = () => {
+  const handleManualCheck = async () => {
     playSound.playClick();
-    refetch();
     toast.info("Checking transaction status on blockchain...");
+    try {
+      const result = await refetch();
+      const updatedDeposit = result.data;
+      if (updatedDeposit) {
+        if (updatedDeposit.status === "completed" || updatedDeposit.status === "approved") {
+          toast.success("Payment verified! Wallet credited successfully.");
+        } else if (updatedDeposit.status === "expired" || updatedDeposit.status === "rejected") {
+          toast.error(`Payment failed. Invoice status: ${updatedDeposit.status}`);
+        } else {
+          toast.warning("Status: Pending. We are still waiting for blockchain confirmations.");
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to verify transaction. Please try again.");
+    }
+  };
+
+  const handleIHaveSent = async () => {
+    playSound.playClick();
+    toast.info("Verifying transaction on the blockchain...");
+    try {
+      const result = await refetch();
+      const updatedDeposit = result.data;
+      if (updatedDeposit) {
+        if (updatedDeposit.status === "completed" || updatedDeposit.status === "approved") {
+          toast.success("Payment verified! Redirecting to wallet...");
+          setTimeout(() => {
+            navigate({ to: "/dashboard/wallet" });
+          }, 1500);
+        } else if (updatedDeposit.status === "expired" || updatedDeposit.status === "rejected") {
+          toast.error(`Payment failed. Invoice status: ${updatedDeposit.status}`);
+        } else {
+          toast.warning("Payment not detected yet. Network confirmations may take 1 to 5 minutes. Please wait a moment and try again.");
+        }
+      } else {
+        toast.error("Failed to retrieve payment status. Please try again.");
+      }
+    } catch (err) {
+      toast.error("Failed to verify transaction. Please try again.");
+    }
   };
 
   if (isLoading) {
@@ -282,13 +321,13 @@ function CheckoutPage() {
                       <RefreshCw size={14} className={`mr-1.5 ${isRefetching ? "animate-spin" : ""}`} />
                       Check Payment Status
                     </Button>
-                    <Link to="/dashboard/wallet" className="flex-1">
-                      <Button 
-                        className="w-full bg-gradient-to-r from-[#004d33] to-[#0e9f6e] hover:from-[#0c6a46] hover:to-[#10b981] text-white font-black h-11 rounded-xl shadow-md transition-all cursor-pointer text-xs"
-                      >
-                        I have sent the payment
-                      </Button>
-                    </Link>
+                    <Button 
+                      onClick={handleIHaveSent}
+                      disabled={isRefetching || isInvoiceExpired}
+                      className="flex-1 bg-gradient-to-r from-[#004d33] to-[#0e9f6e] hover:from-[#0c6a46] hover:to-[#10b981] text-white font-black h-11 rounded-xl shadow-md transition-all cursor-pointer text-xs"
+                    >
+                      I have sent the payment
+                    </Button>
                   </div>
 
                 </CardContent>
