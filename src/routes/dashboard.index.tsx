@@ -743,8 +743,8 @@ function DashboardHome() {
             <StatCard icon={TrendingUp} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="gold" />
             <StatCard icon={Activity} label="Total Earnings" value={`$${totalEarnings.toFixed(2)}`} accent="green" />
             <StatCard icon={DollarSign} label="Today's Profit" value={`$${todayProfit.toFixed(2)}`} accent="yellow" />
-            <StatCard icon={Wallet} label="Admin Deposit" value={`$${Number(w?.totalAdminDeposit || 0).toFixed(2)}`} accent="profit" />
-            <StatCard icon={Gift} label="Admin Funded" value={`$${Number(w?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" />
+            {/* <StatCard icon={Wallet} label="Admin Deposit" value={`$${Number(w?.totalAdminDeposit || 0).toFixed(2)}`} accent="profit" /> */}
+            {/* <StatCard icon={Gift} label="Admin Funded" value={`$${Number(w?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" /> */}
             {/* <StatCard icon={Percent} label="ROI (Daily)" value={latestInvestment ? `${latestInvestment.currentRoi}%` : "1.20%"} subtitle="Every 24 Hours" accent="green" /> */}
             <StatCard icon={Users} label="Direct Team" value={downlineData?.directReferralsCount ?? 0} subtitle={`Invested: $${totalDirectsInvestment.toFixed(2)}`} accent="primary" />
             <StatCard icon={Users} label="Total Team" value={downlineData?.totalTeamSize ?? 0} subtitle={`Invested: $${totalTeamInvestment.toFixed(2)}`} accent="gold" />
