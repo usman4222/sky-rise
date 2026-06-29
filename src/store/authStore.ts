@@ -64,7 +64,7 @@ interface AuthState {
   login: (credentials: LoginInput) => Promise<void>;
   register: (data: RegisterInput, phoneVerificationToken: string) => Promise<void>;
   logout: () => Promise<void>;
-  fetchProfile: () => Promise<void>;
+  fetchProfile: (forceRefresh?: boolean) => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
   setHydrated: () => void;
 }
@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       isHydrated: false,
-
+ 
       setHydrated: () => set({ isHydrated: true }),
 
       setAuth: (token, user, roles = []) => {
@@ -165,9 +165,9 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      fetchProfile: async () => {
+      fetchProfile: async (forceRefresh = false) => {
         const cachedToken = get().token;
-        console.log("[Auth Debug] fetchProfile triggered. Cached token:", Boolean(cachedToken));
+        console.log("[Auth Debug] fetchProfile triggered. Cached token:", Boolean(cachedToken), "Force:", forceRefresh);
         if (!cachedToken) {
           console.warn("[Auth Debug] No cached token found, skipping profile fetch.");
           return;
@@ -196,30 +196,50 @@ export const useAuthStore = create<AuthState>()(
             return;
           }
 
-          // Reload Firebase user status to get the fresh email verification status
-          console.log("[Auth Debug] Reloading Firebase user status...");
-          await firebaseUser.reload();
+          // We check verification if emailVerified is not true yet in local state, or if forced
+          const needsVerificationCheck = !get().user?.emailVerified || forceRefresh;
 
-          // Get fresh token from Firebase
-          console.log("[Auth Debug] Fetching fresh ID token from Firebase...");
-          const idToken = await firebaseUser.getIdToken(true);
-          console.log("[Auth Debug] Fresh token retrieved successfully.");
+          if (needsVerificationCheck) {
+            // Reload Firebase user status to get the fresh email verification status
+            console.log("[Auth Debug] Reloading Firebase user status to check verification...");
+            await firebaseUser.reload();
+          }
+
+          // Get ID token: only force refresh from server if we are explicitly checking verification
+          console.log("[Auth Debug] Fetching ID token from Firebase...");
+          const idToken = await firebaseUser.getIdToken(needsVerificationCheck);
+          console.log("[Auth Debug] Token retrieved successfully.");
           
-          console.log("[Auth Debug] Calling backend /firebase-auth/me with fresh token...");
+          console.log("[Auth Debug] Calling backend /firebase-auth/me...");
           const response = await api.get<{ user: UserProfile }>("/firebase-auth/me", {
             headers: { Authorization: `Bearer ${idToken}` }
           });
           
           if (response && response.user) {
-            console.log("[Auth Debug] Backend verified user successfully with fresh token:", response.user.email);
+            console.log("[Auth Debug] Backend verified user successfully:", response.user.email);
             get().setAuth(idToken, response.user, response.user.roles || []);
           } else {
-            console.warn("[Auth Debug] Backend response did not contain user data with fresh token.");
+            console.warn("[Auth Debug] Backend response did not contain user data.");
             get().clearAuth();
           }
         } catch (error: any) {
           console.error("[Auth Debug] Error during fetchProfile:", error.message || error);
-          get().clearAuth();
+          
+          // Differentiate transient network/server failures from auth failures
+          const isTransientError =
+            error.code === "auth/network-request-failed" ||
+            error.code === "auth/internal-error" ||
+            error.message?.toLowerCase().includes("failed to fetch") ||
+            error.message?.toLowerCase().includes("network error") ||
+            error.message?.toLowerCase().includes("timeout") ||
+            (error.status && error.status >= 500);
+
+          if (!isTransientError) {
+            console.warn("[Auth Debug] Critical authentication error. Clearing auth.");
+            get().clearAuth();
+          } else {
+            console.warn("[Auth Debug] Transient network/server error. Keeping current session active.");
+          }
         } finally {
           set({ isLoading: false });
         }

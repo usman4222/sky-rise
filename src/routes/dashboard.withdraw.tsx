@@ -211,7 +211,7 @@ function WithdrawPage() {
                   <AlertCircle className="h-9 w-9 text-amber-500" />
                   <div className="space-y-1 text-xs">
                     <span className="font-bold text-foreground block">No Saved Payment Methods Found</span>
-                    <span className="text-muted-foreground block max-w-sm">To secure withdrawal disbursements, you must first register your JazzCash, Easypaisa, Raast, bank, or USDT TRC20 details.</span>
+                    <span className="text-muted-foreground block max-w-sm">To secure withdrawal disbursements, you must first register your JazzCash, Easypaisa, Raast or bank details.</span>
                   </div>
                   <Link to="/dashboard/payment-methods">
                     <Button className="glass-button-primary h-9 text-xs gap-1">

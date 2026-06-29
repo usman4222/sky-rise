@@ -43,7 +43,7 @@ function VerifyEmailView() {
   const handleCheckStatus = async () => {
     try {
       setIsChecking(true);
-      await fetchProfile();
+      await fetchProfile(true);
       
       const updatedUser = useAuthStore.getState().user;
       if (updatedUser && updatedUser.emailVerified) {

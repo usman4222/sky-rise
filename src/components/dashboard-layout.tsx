@@ -49,7 +49,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
   const userNav = [
     ...nav.filter(n => !isAdmin || n.hasAdmin),
-    ...(user?.favorConditionEnabled ? [{ to: "/dashboard/favor" as any, label: "Leader Condition", icon: Award }] : [])
+    ...(user?.favorConditionEnabled ? [{ to: "/dashboard/favor" as any, label: "Leader Condition", icon: Award, exact: false, hasAdmin: false }] : [])
   ];
 
   return (
