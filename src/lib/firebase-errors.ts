@@ -1,7 +1,14 @@
 export function getFirebaseErrorMessage(error: any): string {
-  if (!error || !error.code) {
+  if (!error) return "An unexpected error occurred.";
+
+  const errorMessage = error.message || "";
+  if (errorMessage.includes("auth/user-token-expired") || error.code === "auth/user-token-expired") {
+    return "Your session has expired. Please log in again.";
+  }
+
+  if (!error.code) {
     // If it's a backend sync error (not from Firebase directly) or generic error
-    return error?.message || "An unexpected error occurred.";
+    return errorMessage || "An unexpected error occurred.";
   }
   
   switch (error.code) {
@@ -21,7 +28,6 @@ export function getFirebaseErrorMessage(error: any): string {
       return 'Too many failed attempts. Please try again later.';
     default:
       // Remove the "Firebase:" prefix if it exists in the message
-      const msg = error.message || 'Authentication failed. Please try again.';
-      return msg.replace(/^Firebase:\s*/, '');
+      return errorMessage.replace(/^Firebase:\s*/, '');
   }
 }
