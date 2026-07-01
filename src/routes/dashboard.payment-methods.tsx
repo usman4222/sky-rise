@@ -21,10 +21,6 @@ export const Route = createFileRoute("/dashboard/payment-methods")({
 });
 
 const METHOD_TYPES = [
-  { value: "bank", label: "Bank Account", icon: Landmark },
-  { value: "raast", label: "Raast Instant Account", icon: Key },
-  { value: "jazzcash", label: "JazzCash", icon: Phone },
-  { value: "easypaisa", label: "Easypaisa", icon: Phone },
   { value: "usdt_bep20", label: "USDT BEP20 Wallet", icon: Landmark },
 ];
 
@@ -33,7 +29,7 @@ function PaymentMethodsPage() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Form State
-  const [methodType, setMethodType] = useState<string>("bank");
+  const [methodType, setMethodType] = useState<string>("usdt_bep20");
   const [accountTitle, setAccountTitle] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [bankName, setBankName] = useState("");
@@ -259,7 +255,7 @@ function PaymentMethodsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs my-2">
               <div className="space-y-1.5">
-                <Label className="block mb-3" htmlFor="method-type">Payment Channel Type</Label>
+                <Label className="block mb-3" htmlFor="method-type">Account</Label>
                 <Select value={methodType} onValueChange={setMethodType}>
                   <SelectTrigger id="method-type">
                     <SelectValue />

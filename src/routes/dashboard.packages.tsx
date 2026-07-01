@@ -503,7 +503,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                         <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3">
                           <Coins className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
                           <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium leading-relaxed">
-                            <strong>Manual Collect Policy:</strong> You must manually claim your daily ROI payouts. Payouts are available to claim for a maximum of <strong>6 hours</strong> after each 24-hour cycle completion, otherwise they will expire.
+                            <strong>Manual Collect Policy:</strong> You must manually claim your daily ROI payouts. Payouts are available to claim for a maximum of <strong>12 hours</strong> after each 24-hour cycle completion, otherwise they will expire.
                           </p>
                         </div>
                       )}
@@ -514,7 +514,7 @@ function PackageCard({ pkg, isAdmin, onPurchase, onToggle, isPurchasing, isToggl
                       <div className="space-y-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
                         <p className="font-bold leading-none">Manual Collect & Staking Policy</p>
                         <p className="leading-relaxed opacity-90 mt-1">
-                          You will get ROI after each 24h completion. A collection button will show for exactly <strong>6 hours</strong>. After that, the collection button will disappear, you will lose your daily ROI, and you must wait for the next 24h to collect.
+                          You will get ROI after each 24h completion. A collection button will show for exactly <strong>12 hours</strong>. After that, the collection button will disappear, you will lose your daily ROI, and you must wait for the next 24h to collect.
                         </p>
                       </div>
                     </div>

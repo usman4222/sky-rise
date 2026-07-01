@@ -190,6 +190,7 @@ function DashboardHome() {
       toast.success(res.message || "ROI claimed successfully! Balance credited to ROI wallet.");
       queryClient.invalidateQueries({ queryKey: ["myInvestments"] });
       queryClient.invalidateQueries({ queryKey: ["wallets"] });
+      queryClient.invalidateQueries({ queryKey: ["roiHistory"] });
     },
     onError: (err) => toast.error(getFirebaseErrorMessage(err))
   });
@@ -223,6 +224,13 @@ function DashboardHome() {
   const { data: downlineData } = useQuery({
     queryKey: ["downline"],
     queryFn: () => networkApi.getDownline(),
+    refetchOnWindowFocus: false,
+    enabled: !isAdmin,
+  });
+
+  const { data: roiHistoryData } = useQuery({
+    queryKey: ["roiHistory", 1],
+    queryFn: () => investmentsApi.getRoiHistory(1, 20),
     refetchOnWindowFocus: false,
     enabled: !isAdmin,
   });
@@ -284,8 +292,10 @@ function DashboardHome() {
     ? (w.roi || 0) + (w.referral || 0) + (w.bonusReceived || 0) + (w.salary || 0) + (w.achievement || 0)
     : 0;
 
-  // Dynamic estimation of today's ROI profit
-  const todayProfit = activeInvestments.reduce((sum: number, inv: any) => sum + (inv.amount * (inv.currentRoi || 1.2) / 100), 0);
+  // Actual ROI profit received today (sums both manual claimed and auto-compounded daily ROI payouts)
+  const todayProfit = (roiHistoryData?.roiHistory || [])
+    .filter((r: any) => new Date(r.createdAt).toDateString() === new Date().toDateString())
+    .reduce((sum: number, r: any) => sum + r.amount, 0);
 
   // Calculate direct referral stats
   const directsList = downlineData?.directReferralsList || [];
