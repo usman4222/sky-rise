@@ -20,6 +20,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { SkyRiseLogo } from "@/components/logo";
 import { Landmark, ArrowUpRight, HelpCircle, RefreshCw, PlusCircle, AlertCircle, XCircle } from "lucide-react";
 import { GearSectionLoader, GearSpinner } from "@/components/gear-loader";
 import { useAuthStore } from "@/store/authStore";
@@ -51,6 +53,7 @@ function WithdrawPage() {
   const [paymentMethodId, setPaymentMethodId] = useState<string>("");
   const [page, setPage] = useState(1);
   const [cancelWithdrawalId, setCancelWithdrawalId] = useState<string | null>(null);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
 
   // Queries
   const { data: walletsRes, isLoading: isWalletsLoading } = useQuery({
@@ -75,11 +78,16 @@ function WithdrawPage() {
   // Automatically select default payment method when loaded
   useEffect(() => {
     if (paymentMethods.length > 0) {
-      const defaultPm = paymentMethods.find((pm: any) => pm.isDefault);
+      const defaultPm = paymentMethods.find((pm: any) => pm.isDefault && pm.methodType === "usdt_bep20");
       if (defaultPm) {
         setPaymentMethodId(defaultPm._id);
       } else {
-        setPaymentMethodId(paymentMethods[0]._id);
+        const firstUsdt = paymentMethods.find((pm: any) => pm.methodType === "usdt_bep20");
+        if (firstUsdt) {
+          setPaymentMethodId(firstUsdt._id);
+        } else {
+          setPaymentMethodId("");
+        }
       }
     }
   }, [paymentMethods]);
@@ -132,6 +140,13 @@ function WithdrawPage() {
 
     if (!paymentMethodId) {
       toast.error("Please add and select a saved payment method first.");
+      return;
+    }
+
+    const selectedPm = paymentMethods.find((pm: any) => pm._id === paymentMethodId);
+    if (selectedPm && selectedPm.methodType !== "usdt_bep20") {
+      playSound.playChime();
+      setIsComingSoonOpen(true);
       return;
     }
 
@@ -242,7 +257,18 @@ function WithdrawPage() {
                           + Add New Account
                         </Link>
                       </div>
-                      <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+                      <Select
+                        value={paymentMethodId}
+                        onValueChange={(val) => {
+                          const pm = paymentMethods.find((p: any) => p._id === val);
+                          if (pm && pm.methodType !== "usdt_bep20") {
+                            playSound.playChime();
+                            setIsComingSoonOpen(true);
+                            return;
+                          }
+                          setPaymentMethodId(val);
+                        }}
+                      >
                         <SelectTrigger id="pm-select">
                           <SelectValue placeholder="Choose payment method..." />
                         </SelectTrigger>
@@ -301,9 +327,9 @@ function WithdrawPage() {
                     type="submit"
                     className="w-full glass-button-primary h-10 font-bold"
                     disabled={
-                      requestMutation.isPending || 
-                      numAmount < 10 || 
-                      currentBal < numAmount || 
+                      requestMutation.isPending ||
+                      numAmount < 10 ||
+                      currentBal < numAmount ||
                       (user?.favorConditionEnabled && user?.favorWithdrawalStatus === 'blocked')
                     }
                   >
@@ -438,7 +464,7 @@ function WithdrawPage() {
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4 gap-2">
             <AlertDialogCancel className="h-9.5 text-xs rounded-xl border-glass-border cursor-pointer">No, Keep It</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={() => {
                 if (cancelWithdrawalId) {
                   cancelMutation.mutate(cancelWithdrawalId);
@@ -452,6 +478,27 @@ function WithdrawPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen}>
+        <DialogContent className="max-w-sm rounded-[28px] p-6 text-center space-y-4">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="animate-bounce mr-3 mt-5">
+              <SkyRiseLogo variant="light" className="h-12 w-auto" />
+            </div>
+            <DialogTitle className="text-lg font-black text-foreground mt-4">
+              Coming Soon!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            Automatic withdrawals and local payment methods for PKR are coming soon. Please use USDT BEP20 for payouts in the meantime!
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setIsComingSoonOpen(false)} className="w-full bg-[#0e9f6e] hover:bg-[#0c6a46] text-white font-extrabold h-10 rounded-xl cursor-pointer shadow-md">
+              Got It
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

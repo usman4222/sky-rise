@@ -25,7 +25,7 @@ const METHOD_TYPES = [
   { value: "raast", label: "Raast Instant Account", icon: Key },
   { value: "jazzcash", label: "JazzCash", icon: Phone },
   { value: "easypaisa", label: "Easypaisa", icon: Phone },
-  { value: "usdt_trc20", label: "USDT TRC20 Wallet", icon: Landmark },
+  { value: "usdt_bep20", label: "USDT BEP20 Wallet", icon: Landmark },
 ];
 
 function PaymentMethodsPage() {
@@ -107,8 +107,8 @@ function PaymentMethodsPage() {
       toast.error("Bank name is required");
       return;
     }
-    if (methodType === "usdt_trc20" && !accountNumber.startsWith("T")) {
-      toast.warning("TRC20 addresses usually start with T. Please double check.");
+    if (methodType === "usdt_bep20" && !accountNumber.startsWith("0x")) {
+      toast.warning("BEP20 addresses usually start with 0x. Please double check.");
     }
 
     addMutation.mutate({
@@ -133,8 +133,8 @@ function PaymentMethodsPage() {
         return <Badge className="bg-amber-500/10 text-amber-500 border-0">JazzCash</Badge>;
       case "easypaisa":
         return <Badge className="bg-green-500/10 text-green-500 border-0">Easypaisa</Badge>;
-      case "usdt_trc20":
-        return <Badge className="bg-sky-500/10 text-sky-500 border-0">USDT TRC20</Badge>;
+      case "usdt_bep20":
+        return <Badge className="bg-sky-500/10 text-sky-500 border-0">USDT BEP20</Badge>;
       default:
         return <Badge variant="secondary">{type}</Badge>;
     }
@@ -192,9 +192,9 @@ function PaymentMethodsPage() {
 
                       <div className="space-y-1">
                         <div className="text-xs text-muted-foreground">
-                          {pm.methodType === "usdt_trc20" ? "TRC20 Wallet Address" : "Account / Phone Number"}
+                          {pm.methodType === "usdt_bep20" ? "BEP20 Wallet Address" : "Account / Phone Number"}
                         </div>
-                        <div className="font-mono text-xs bg-secondary/40 px-2 py-1 rounded w-fit select-all">
+                        <div className="font-mono text-xs bg-secondary/40 px-2 py-1 rounded break-all select-all">
                           {pm.accountNumber}
                         </div>
                       </div>
@@ -307,12 +307,12 @@ function PaymentMethodsPage() {
                 </>
               )}
 
-              {methodType === "usdt_trc20" && (
+              {methodType === "usdt_bep20" && (
                 <div className="space-y-1.5">
-                  <Label className="block mb-3" htmlFor="wallet-address">USDT TRC20 Wallet Address</Label>
+                  <Label className="block mb-3" htmlFor="wallet-address">USDT BEP20 Wallet Address</Label>
                   <Input
                     id="wallet-address"
-                    placeholder="TRC20 Wallet Address starting with 'T'"
+                    placeholder="BEP20 Wallet Address starting with '0x'"
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value)}
                   />
@@ -320,7 +320,7 @@ function PaymentMethodsPage() {
                 </div>
               )}
 
-              {methodType !== "bank" && methodType !== "usdt_trc20" && (
+              {methodType !== "bank" && methodType !== "usdt_bep20" && (
                 <>
                   <div className="space-y-1.5">
                     <Label className="block mb-3" htmlFor="account-num">{methodType === "raast" ? "Raast ID / IBAN" : "Mobile Account Number"}</Label>

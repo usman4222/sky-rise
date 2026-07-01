@@ -138,7 +138,7 @@ function WalletPage() {
   });
 
   const automatedMethods = paymentMethods.filter(
-    (m: any) => m.gateway === "payfast" || m.gateway === "coinpayments"
+    (m: any) => (m.gateway === "payfast" || m.gateway === "coinpayments") && m.currency !== "PKR"
   );
 
   const selectedMethod = automatedMethods.find((m: any) => m._id === paymentMethodId);
@@ -181,6 +181,12 @@ function WalletPage() {
     const numAmount = Number(depositAmount);
     if (Number.isNaN(numAmount) || numAmount <= 0) {
       toast.error("Please enter a valid deposit amount.");
+      return;
+    }
+    const selectedMethod = automatedMethods.find((m: any) => m._id === paymentMethodId);
+    if (selectedMethod?.currency === "PKR") {
+      playSound.playChime();
+      setIsComingSoonOpen(true);
       return;
     }
     playSound.playClick();
@@ -250,7 +256,14 @@ function WalletPage() {
                       <span className={`text-[8.5px] sm:text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-[6px] ${isPositive ? 'bg-[#EBF7F2] text-[#10b981]' : 'bg-rose-500/10 text-rose-500'}`}>
                         {isPositive ? "+" : ""}{liveRate.change.toFixed(2)}%
                       </span>
-                      <span className="text-[10px] sm:text-[11px] font-semibold text-[#668C7A] dark:text-[#8ca99e]">
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playSound.playChime();
+                          setIsComingSoonOpen(true);
+                        }}
+                        className="text-[10px] sm:text-[11px] font-semibold text-[#668C7A] dark:text-[#8ca99e] cursor-pointer hover:underline"
+                      >
                         ≈ PKR {Math.round(liveRate.price * 278.42).toLocaleString()}
                       </span>
                     </div>
@@ -373,7 +386,7 @@ function WalletPage() {
                   </div>
                   <span className="text-xs font-black uppercase text-foreground tracking-wider">Asset Breakdown</span>
                 </div>
-                <span className="text-[9px] font-extrabold text-[#0e9f6e] uppercase tracking-wider bg-[#0e9f6e]/10 px-2 py-0.5 rounded-full">Secure Cold Storage</span>
+                <span className="text-[9px] font-extrabold text-[#0e9f6e] uppercase tracking-wider bg-[#0e9f6e]/10 px-2 py-0.5 rounded-full whitespace-nowrap">Secure Cold Storage</span>
               </div>
               <CardContent className="p-0 divide-y divide-glass-border/40">
 
@@ -407,7 +420,7 @@ function WalletPage() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Deposit into USDT Wallet</DialogTitle>
-                      <p className="text-xs text-muted-foreground mt-1">Enter your amount below to checkout with PKR/USDT.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Enter your amount below to checkout with USDT.</p>
                     </DialogHeader>
                     <div className="space-y-4 py-3 text-xs">
                       <div className="space-y-1.5">
@@ -415,7 +428,8 @@ function WalletPage() {
                         <Select
                           value={paymentMethodId}
                           onValueChange={(val) => {
-                            if (["INR", "CNY", "AED", "SAR"].includes(val)) {
+                            const isPkrMethod = automatedMethods.find((m: any) => m._id === val)?.currency === "PKR";
+                            if (isPkrMethod || ["INR", "CNY", "AED", "SAR"].includes(val)) {
                               playSound.playChime();
                               setIsComingSoonOpen(true);
                               return;
@@ -424,7 +438,7 @@ function WalletPage() {
                           }}
                         >
                           <SelectTrigger><SelectValue placeholder="Choose gateway..." /></SelectTrigger>
-                          <SelectContent className="max-h-[300px] overflow-y-auto">
+                          <SelectContent className="max-h-[300px] overflow-y-auto font-bold">
                             {automatedMethods.map((m: any) => (
                               <SelectItem key={m._id} value={m._id}>
                                 {m.currency === "PKR" ? "🇵🇰 Deposit in PKR" : "💵 Deposit in USDT"}
@@ -627,7 +641,8 @@ function WalletPage() {
                       <Select
                         value={paymentMethodId}
                         onValueChange={(val) => {
-                          if (["INR", "CNY", "AED", "SAR"].includes(val)) {
+                          const isPkrMethod = automatedMethods.find((m: any) => m._id === val)?.currency === "PKR";
+                          if (isPkrMethod || ["INR", "CNY", "AED", "SAR"].includes(val)) {
                             playSound.playChime();
                             setIsComingSoonOpen(true);
                             return;
@@ -784,7 +799,7 @@ function WalletPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Initiate Secure Deposit</DialogTitle>
-            <p className="text-xs text-muted-foreground mt-1">Enter your amount below to checkout with PKR/USDT.</p>
+            <p className="text-xs text-muted-foreground mt-1">Enter your amount below to checkout with USDT.</p>
           </DialogHeader>
           <div className="space-y-4 py-3 text-xs">
             <div className="space-y-1.5">
@@ -792,7 +807,8 @@ function WalletPage() {
               <Select
                 value={paymentMethodId}
                 onValueChange={(val) => {
-                  if (["INR", "CNY", "AED", "SAR"].includes(val)) {
+                  const isPkrMethod = automatedMethods.find((m: any) => m._id === val)?.currency === "PKR";
+                  if (isPkrMethod || ["INR", "CNY", "AED", "SAR"].includes(val)) {
                     playSound.playChime();
                     setIsComingSoonOpen(true);
                     return;

@@ -21,35 +21,37 @@ export function PublicHeader() {
   const { isAuthenticated } = useAuthStore();
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-navbar glass-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
-        <Link to="/">
-          <SkyRiseLogo className="h-10 w-auto transition-transform hover:scale-[1.02]" />
-        </Link>
-        <nav className="hidden items-center gap-1 lg:flex">
-          {navItems.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${pathname === n.to ? "text-white bg-primary-gradient shadow-soft" : "text-foreground/80 hover:text-foreground hover:bg-glass-surface-soft"}`}
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="hidden items-center gap-3 lg:flex">
-          {isAuthenticated ? (
-            <Button asChild className="glass-button-primary"><Link to="/dashboard">Dashboard</Link></Button>
-          ) : (
-            <>
-              <Button asChild variant="outline"><Link to="/login">Login</Link></Button>
-              <Button asChild className="glass-button-primary"><Link to="/register">Get Started</Link></Button>
-            </>
-          )}
+    <header className="sticky top-0 z-40 w-full">
+      <div className="w-full glass-navbar glass-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
+          <Link to="/">
+            <SkyRiseLogo className="h-10 w-auto transition-transform hover:scale-[1.02]" />
+          </Link>
+          <nav className="hidden items-center gap-1 lg:flex">
+            {navItems.map((n) => (
+              <Link
+                key={n.to}
+                to={n.to}
+                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${pathname === n.to ? "text-white bg-primary-gradient shadow-soft" : "text-foreground/80 hover:text-foreground hover:bg-glass-surface-soft"}`}
+              >
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="hidden items-center gap-3 lg:flex">
+            {isAuthenticated ? (
+              <Button asChild className="glass-button-primary"><Link to="/dashboard">Dashboard</Link></Button>
+            ) : (
+              <>
+                <Button asChild variant="outline"><Link to="/login">Login</Link></Button>
+                <Button asChild className="glass-button-primary"><Link to="/register">Get Started</Link></Button>
+              </>
+            )}
+          </div>
+          <button className="lg:hidden hover:opacity-70 transition" onClick={() => setOpen(!open)} aria-label="Menu">
+            {open ? <X /> : <Menu />}
+          </button>
         </div>
-        <button className="lg:hidden hover:opacity-70 transition" onClick={() => setOpen(!open)} aria-label="Menu">
-          {open ? <X /> : <Menu />}
-        </button>
       </div>
       {open && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300 lg:hidden">
@@ -57,24 +59,24 @@ export function PublicHeader() {
           <div className="absolute inset-0" onClick={() => setOpen(false)} />
           
           {/* Capsule Card matching the screenshot style */}
-          <div className="relative w-full max-w-[420px] bg-[#f8fdf9]/98 dark:bg-[#081407]/98 border border-[#c2ddd2]/40 dark:border-[#00e676]/12 rounded-[96px] pt-12 pb-10 px-10 shadow-elevated flex flex-col justify-between overflow-hidden max-h-[92vh] animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-[360px] sm:max-w-[400px] bg-[#f8fdf9]/98 dark:bg-[#081407]/98 border border-[#c2ddd2]/40 dark:border-[#00e676]/12 rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 shadow-elevated flex flex-col overflow-hidden max-h-[85vh] animate-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="flex items-center justify-between w-full px-2">
-              <SkyRiseLogo className="h-10 w-auto" />
+            <div className="flex items-center justify-between w-full px-2 flex-shrink-0">
+              <SkyRiseLogo className="h-9 w-auto" />
               <button 
-                className="p-2 hover:opacity-75 transition-opacity text-foreground cursor-pointer focus:outline-none" 
+                className="p-1.5 hover:opacity-75 transition-opacity text-foreground cursor-pointer focus:outline-none rounded-full bg-secondary/50" 
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
             
             {/* Divider */}
-            <div className="border-b border-[#c2ddd2]/30 dark:border-[#00e676]/10 w-full my-5" />
+            <div className="border-b border-[#c2ddd2]/30 dark:border-[#00e676]/10 w-full my-4 flex-shrink-0" />
             
             {/* Navigation links stack */}
-            <div className="flex flex-col gap-6 py-4 px-4 overflow-y-auto max-h-[46vh] scrollbar-thin">
+            <div className="flex-1 flex flex-col gap-4 py-2 px-2 overflow-y-auto scrollbar-none">
               {navItems.map((n) => {
                 const active = pathname === n.to;
                 return (
@@ -82,7 +84,7 @@ export function PublicHeader() {
                     key={n.to}
                     to={n.to}
                     onClick={() => setOpen(false)}
-                    className={`text-lg font-bold transition-colors ${active ? "text-primary dark:text-[#00e676]" : "text-foreground/90 hover:text-primary dark:hover:text-[#00e676]"}`}
+                    className={`text-base sm:text-lg font-bold transition-colors py-1 ${active ? "text-primary dark:text-[#00e676]" : "text-foreground/90 hover:text-primary dark:hover:text-[#00e676]"}`}
                   >
                     {n.label}
                   </Link>
@@ -90,21 +92,24 @@ export function PublicHeader() {
               })}
             </div>
             
+            {/* Divider */}
+            <div className="border-b border-[#c2ddd2]/30 dark:border-[#00e676]/10 w-full my-4 flex-shrink-0" />
+
             {/* Footer action button */}
-            <div className="pt-6 px-2 mt-auto">
+            <div className="pt-2 px-2 flex-shrink-0 w-full">
               {isAuthenticated ? (
                 <Button
                   asChild
-                  className="w-full h-14 rounded-full bg-primary-gradient text-white font-bold text-base shadow-soft hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
+                  className="w-full h-12 rounded-full bg-primary-gradient text-white font-bold text-sm sm:text-base shadow-soft hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
                   onClick={() => setOpen(false)}
                 >
                   <Link to="/dashboard">Dashboard</Link>
                 </Button>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5">
                   <Button
                     asChild
-                    className="w-full h-14 rounded-full bg-primary-gradient text-white font-bold text-base shadow-soft hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
+                    className="w-full h-12 rounded-full bg-primary-gradient text-white font-bold text-sm sm:text-base shadow-soft hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
                     onClick={() => setOpen(false)}
                   >
                     <Link to="/register">Get Started</Link>
@@ -112,7 +117,7 @@ export function PublicHeader() {
                   <Button
                     asChild
                     variant="outline"
-                    className="w-full h-12 rounded-full font-bold text-sm cursor-pointer"
+                    className="w-full h-11 rounded-full font-bold text-xs sm:text-sm cursor-pointer"
                     onClick={() => setOpen(false)}
                   >
                     <Link to="/login">Login</Link>

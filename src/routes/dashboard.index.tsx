@@ -845,20 +845,20 @@ function DashboardHome() {
             </Card>
             {/* Earnings Overview Area Chart */}
             <Card className="glass-card-hover shadow-card border-soft bg-white/80 dark:bg-card/80 glass-blur-md">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div>
-                  <CardTitle className="text-sm font-extrabold text-foreground uppercase tracking-wider">Earnings Overview</CardTitle>
-                  <div className="text-2xl font-black text-foreground mt-1.5">${totalEarnings.toFixed(2)}</div>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 gap-2">
+                <div className="min-w-0">
+                  <CardTitle className="text-xs sm:text-sm font-extrabold text-foreground uppercase tracking-wider truncate">Earnings Overview</CardTitle>
+                  <div className="text-xl sm:text-2xl font-black text-foreground mt-1.5">${totalEarnings.toFixed(2)}</div>
                   <p className="text-[10px] text-muted-foreground mt-0.5">Total Earnings</p>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <Badge className="bg-[#0e9f6e]/10 text-[#0e9f6e] border-0 text-[10px] font-bold">Last 30 Days</Badge>
+                <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
+                  <Badge className="bg-[#0e9f6e]/10 text-[#0e9f6e] border-0 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">Last 30 Days</Badge>
                   {growthPercent > 0 ? (
-                    <span className="text-[10px] font-semibold text-emerald-500 flex items-center gap-0.5">
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-emerald-500 flex items-center gap-0.5 whitespace-nowrap">
                       <ArrowUpRight className="h-3 w-3" /> +{growthPercent.toFixed(2)}% growth
                     </span>
                   ) : (
-                    <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-0.5">
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground flex items-center gap-0.5 whitespace-nowrap">
                       Stable growth
                     </span>
                   )}

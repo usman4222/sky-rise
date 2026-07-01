@@ -20,6 +20,8 @@ import { financeApi } from "@/lib/api-finance";
 import { adminApi } from "@/lib/api-admin";
 import { useAuthStore } from "@/store/authStore";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
+import { playSound } from "@/lib/sounds";
+import { SkyRiseLogo } from "@/components/logo";
 
 export const Route = createFileRoute("/dashboard/withdrawals")({ component: WithdrawPage });
 
@@ -30,10 +32,11 @@ function WithdrawPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [walletType, setWalletType] = useState("withdrawal");
   const [accountId, setAccountId] = useState("");
-  
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+
   // State variables for adding a new payout account
   const [newAccName, setNewAccName] = useState("");
-  const [newAccChannel, setNewAccChannel] = useState("usdt_trc20");
+  const [newAccChannel, setNewAccChannel] = useState("usdt_bep20");
   const [newAccTitle, setNewAccTitle] = useState("");
   const [newAccNumber, setNewAccNumber] = useState("");
   const [newBankName, setNewBankName] = useState("");
@@ -71,7 +74,7 @@ function WithdrawPage() {
         accountTitle: newAccTitle,
         accountNumber: newAccNumber,
         bankDetails,
-        walletAddress: (newAccChannel === "usdt_trc20" || newAccChannel === "coinpayments") ? newAccNumber : undefined
+        walletAddress: (newAccChannel.startsWith("usdt") || newAccChannel === "coinpayments") ? newAccNumber : undefined
       });
     },
     onSuccess: () => {
@@ -86,7 +89,7 @@ function WithdrawPage() {
   });
 
   const selectedAccount = accounts.find((a: any) => a._id === accountId);
-  const isCryptoWithdraw = selectedAccount?.channel === "usdt_trc20" || selectedAccount?.channel === "coinpayments";
+  const isCryptoWithdraw = selectedAccount?.channel.startsWith("usdt") || selectedAccount?.channel === "coinpayments";
 
   const withdrawMutation = useMutation({
     mutationFn: () => {
@@ -118,7 +121,7 @@ function WithdrawPage() {
         <StatCard icon={Coins} label="Referral Wallet" value={`$${(walletsData?.referral || 0).toFixed(2)}`} accent="primary" />
         <StatCard icon={Clock} label="Pending Withdrawals" value="View History" accent="gold" />
       </div>
- 
+
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card className="border-soft shadow-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -136,10 +139,20 @@ function WithdrawPage() {
                   </div>
                   <div className="space-y-1.5">
                     <Label>Payout Method / Channel</Label>
-                    <Select value={newAccChannel} onValueChange={setNewAccChannel}>
+                    <Select
+                      value={newAccChannel}
+                      onValueChange={(val) => {
+                        if (!val.startsWith("usdt") && val !== "coinpayments") {
+                          playSound.playChime();
+                          setIsComingSoonOpen(true);
+                          return;
+                        }
+                        setNewAccChannel(val);
+                      }}
+                    >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="usdt_trc20">USDT (TRC20)</SelectItem>
+                        <SelectItem value="usdt_bep20">USDT (BEP20)</SelectItem>
                         <SelectItem value="bank">Bank Transfer</SelectItem>
                         <SelectItem value="raast">Raast ID</SelectItem>
                         <SelectItem value="jazzcash">JazzCash</SelectItem>
@@ -159,7 +172,7 @@ function WithdrawPage() {
                   )}
                   <div className="space-y-1.5">
                     <Label>
-                      {newAccChannel === "usdt_trc20" ? "USDT TRC20 Wallet Address" : "IBAN / Mobile Number / Account Number"}
+                      {newAccChannel.startsWith("usdt") ? "USDT BEP20 Wallet Address" : "IBAN / Mobile Number / Account Number"}
                     </Label>
                     <Input value={newAccNumber} onChange={(e) => setNewAccNumber(e.target.value)} placeholder="Enter payout address or number" />
                   </div>
@@ -187,7 +200,18 @@ function WithdrawPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Select Payout Account</Label>
-                <Select value={accountId} onValueChange={setAccountId}>
+                <Select
+                  value={accountId}
+                  onValueChange={(val) => {
+                    const acc = accounts.find((a: any) => a._id === val);
+                    if (acc && !acc.channel.startsWith("usdt") && acc.channel !== "coinpayments") {
+                      playSound.playChime();
+                      setIsComingSoonOpen(true);
+                      return;
+                    }
+                    setAccountId(val);
+                  }}
+                >
                   <SelectTrigger><SelectValue placeholder="Choose a saved account" /></SelectTrigger>
                   <SelectContent>
                     {accounts.map((acc: any) => (
@@ -221,9 +245,17 @@ function WithdrawPage() {
                 </div>
               </div>
 
-              <Button 
-                className="w-full bg-primary-gradient text-primary-foreground h-14 rounded-full text-base font-semibold" 
-                onClick={() => withdrawMutation.mutate()}
+              <Button
+                className="w-full bg-primary-gradient text-primary-foreground h-14 rounded-full text-base font-semibold"
+                onClick={() => {
+                  const acc = accounts.find((a: any) => a._id === accountId);
+                  if (acc && !acc.channel.startsWith("usdt") && acc.channel !== "coinpayments") {
+                    playSound.playChime();
+                    setIsComingSoonOpen(true);
+                    return;
+                  }
+                  withdrawMutation.mutate();
+                }}
                 disabled={withdrawMutation.isPending || !accountId || !withdrawAmount}
               >
                 {withdrawMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : "Submit Withdrawal Request"}
@@ -231,7 +263,7 @@ function WithdrawPage() {
             </div>
           </CardContent>
         </Card>
- 
+
         <Card className="border-soft shadow-card">
           <CardHeader><CardTitle>Capital Withdrawal</CardTitle></CardHeader>
           <CardContent className="space-y-4">
@@ -246,7 +278,7 @@ function WithdrawPage() {
           </CardContent>
         </Card>
       </div>
- 
+
       <Card className="mt-6 border-soft shadow-card">
         <CardHeader><CardTitle>Withdrawal Ledger History</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
@@ -270,6 +302,27 @@ function WithdrawPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen}>
+        <DialogContent className="max-w-sm rounded-[28px] p-6 text-center space-y-4">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="animate-bounce mr-3 mt-5">
+              <SkyRiseLogo variant="light" className="h-12 w-auto" />
+            </div>
+            <DialogTitle className="text-lg font-black text-foreground mt-4">
+              Coming Soon!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            Automatic withdrawals and local payment methods for PKR are coming soon. Please use USDT BEP20 for payouts in the meantime!
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setIsComingSoonOpen(false)} className="w-full bg-[#0e9f6e] hover:bg-[#0c6a46] text-white font-extrabold h-10 rounded-xl cursor-pointer shadow-md">
+              Got It
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

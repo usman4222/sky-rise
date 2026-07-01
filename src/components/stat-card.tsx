@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { LucideIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { SkyRiseLogo } from "@/components/logo";
 
 export function StatCard({
   icon: Icon,
@@ -15,6 +19,7 @@ export function StatCard({
   subtitle?: string;
   accent?: "primary" | "gold" | "profit" | "green" | "yellow" | "active";
 }) {
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
   // Image-matched accent system:
   // green: solid emerald (#00a86b) — matches stock chart bar color & wallet coins
   // gold: solid warm gold (#f3ba2f) — matches the charging bull, keys, zipper
@@ -70,6 +75,7 @@ export function StatCard({
 
   // Auto-generate PKR equivalent if the value is USD
   let displaySubtitle = subtitle;
+  /*
   if (!displaySubtitle && typeof value === "string" && value.startsWith("$")) {
     const numericVal = parseFloat(value.replace("$", "").replace(/,/g, ""));
     if (!isNaN(numericVal)) {
@@ -79,38 +85,64 @@ export function StatCard({
       })}`;
     }
   }
+  */
 
   return (
-    <div className="h-full w-full bg-[#f8fdf9]/98 dark:bg-[#081407]/95 border border-[#c2ddd2] dark:border-[#00e676]/10 rounded-[28px] shadow-[0_12px_24px_rgba(0,105,62,0.04)] dark:shadow-[0_12px_24px_rgba(0,0,0,0.35)] transition-all duration-300 hover:shadow-[0_16px_36px_rgba(0,105,62,0.08)] dark:hover:shadow-[0_16px_36px_rgba(0,0,0,0.5),0_0_20px_rgba(0,230,118,0.06)] hover:-translate-y-0.5 flex flex-col justify-between glass-card-hover">
-      <div className="p-4 sm:p-5 flex items-center justify-between gap-4 h-full">
-        {/* Left Side: Text Details */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <p className="text-[10px] sm:text-xs font-extrabold text-[#3d6652] dark:text-[#00e676]/70 uppercase tracking-widest leading-tight">
-            {label}
-          </p>
-          <p className="text-xl sm:text-2xl font-black tracking-tight text-[#051409] dark:text-[#e2f0ea] break-all leading-none mt-2 font-sans">
-            {value}
-          </p>
-          {displaySubtitle ? (
-            <p className="text-[10px] sm:text-xs font-semibold text-[#3d6652]/70 dark:text-[#7aab90] mt-2 leading-none flex items-center gap-1">
-              {displaySubtitle}
+    <>
+      <div className="h-full w-full bg-[#f8fdf9]/98 dark:bg-[#081407]/95 border border-[#c2ddd2] dark:border-[#00e676]/10 rounded-[28px] shadow-[0_12px_24px_rgba(0,105,62,0.04)] dark:shadow-[0_12px_24px_rgba(0,0,0,0.35)] transition-all duration-300 hover:shadow-[0_16px_36px_rgba(0,105,62,0.08)] dark:hover:shadow-[0_16px_36px_rgba(0,0,0,0.5),0_0_20px_rgba(0,230,118,0.06)] hover:-translate-y-0.5 flex flex-col justify-between glass-card-hover">
+        <div className="p-3 sm:p-5 flex items-center justify-between gap-2 sm:gap-4 h-full">
+          {/* Left Side: Text Details */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <p className="text-[10px] sm:text-xs font-extrabold text-[#3d6652] dark:text-[#00e676]/70 uppercase tracking-widest leading-tight">
+              {label}
             </p>
-          ) : (
-            // Spacer to keep layout alignment matching cards with subtitles
-            <div className="h-3 sm:h-3.5 mt-2" />
-          )}
-          {trend && (
-            <p className="mt-1.5 text-xs font-bold text-[#00a86b] dark:text-[#00e676]">
-              {trend}
+            <p className="text-[17px] sm:text-2xl font-black tracking-tight text-[#051409] dark:text-[#e2f0ea] leading-none mt-2 font-sans whitespace-nowrap">
+              {value}
             </p>
-          )}
-        </div>
+            {displaySubtitle && !displaySubtitle.includes("PKR") ? (
+              <p
+                className="text-[10px] sm:text-xs font-semibold mt-2 leading-none flex items-center gap-1 text-[#3d6652]/70 dark:text-[#7aab90]"
+              >
+                {displaySubtitle}
+              </p>
+            ) : (
+              // Spacer to keep layout alignment matching cards with subtitles
+              <div className="h-3 sm:h-3.5 mt-2" />
+            )}
+            {trend && (
+              <p className="mt-1.5 text-xs font-bold text-[#00a86b] dark:text-[#00e676]">
+                {trend}
+              </p>
+            )}
+          </div>
 
-        {/* Right Side: Circular Icon container */}
-        <div className={`h-11 w-11 sm:h-12 sm:w-12 flex items-center justify-center rounded-full flex-shrink-0 transition-transform duration-300 hover:scale-105 ${selectedAccent.bg} ${selectedAccent.shadow}`}>
-          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+          {/* Right Side: Circular Icon container */}
+          <div className={`h-8 w-8 sm:h-12 sm:w-12 flex items-center justify-center rounded-full flex-shrink-0 transition-transform duration-300 hover:scale-105 ${selectedAccent.bg} ${selectedAccent.shadow}`}>
+            <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+          </div>
         </div>
       </div>
-    </div>
+
+      <Dialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen}>
+        <DialogContent className="max-w-sm rounded-[28px] p-6 text-center space-y-4">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="animate-bounce mr-3 mt-5">
+              <SkyRiseLogo variant="light" className="h-12 w-auto" />
+            </div>
+            <DialogTitle className="text-lg font-black text-foreground mt-4">
+              Currency Coming Soon!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            We are working hard to integrate local payment gateways for this region. Automatic deposits and withdrawals in PKR will be available soon!
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setIsComingSoonOpen(false)} className="w-full bg-[#0e9f6e] hover:bg-[#0c6a46] text-white font-extrabold h-10 rounded-xl cursor-pointer shadow-md">
+              Got It
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
