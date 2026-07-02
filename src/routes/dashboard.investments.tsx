@@ -230,7 +230,7 @@ function Investments() {
                           </TableCell>
                           
                           <TableCell className="align-middle px-4 py-4 font-extrabold text-profit text-sm">
-                            {inv.currentRoi}%
+                            {Number(inv.currentRoi || 0).toFixed(2)}%
                           </TableCell>
                           
                           <TableCell className="align-middle px-4 py-4 font-extrabold text-foreground text-sm">
@@ -375,7 +375,7 @@ function Investments() {
                       <div className="grid grid-cols-2 gap-4 border-t border-b border-glass-border/30 py-3">
                         <div className="space-y-0.5">
                           <span className="text-[9px] text-muted-foreground uppercase font-bold">Daily Return</span>
-                          <span className="text-sm font-extrabold text-profit block">{inv.currentRoi}%</span>
+                          <span className="text-sm font-extrabold text-profit block">{Number(inv.currentRoi || 0).toFixed(2)}%</span>
                         </div>
                         <div className="space-y-0.5">
                           <span className="text-[9px] text-muted-foreground uppercase font-bold">Total Earned</span>
@@ -522,7 +522,7 @@ function Investments() {
                       <TableRow key={inv._id} className="hover:bg-muted/30 transition-colors">
                         <TableCell className="font-semibold text-xs pl-6 py-4">{inv.package?.name || "Completed Package"}</TableCell>
                         <TableCell className="text-xs px-4 py-4">${Number(inv.amount || 0).toFixed(2)}</TableCell>
-                        <TableCell className="text-xs px-4 py-4">{inv.currentRoi}%</TableCell>
+                        <TableCell className="text-xs px-4 py-4">{Number(inv.currentRoi || 0).toFixed(2)}%</TableCell>
                         <TableCell className="text-xs text-profit font-semibold px-4 py-4">${Number(inv.totalRoiEarned || 0).toFixed(2)}</TableCell>
                         <TableCell className="text-xs px-4 py-4">{inv.packageType || "Standard"}</TableCell>
                         <TableCell className="text-xs px-4 py-4">{inv.closeDate ? new Date(inv.closeDate).toLocaleDateString() : new Date(inv.updatedAt).toLocaleDateString()}</TableCell>
