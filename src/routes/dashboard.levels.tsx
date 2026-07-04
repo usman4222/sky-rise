@@ -48,24 +48,23 @@ function LevelsPage() {
 
   const displayLevels = [
     { level: 1, income: 8, requirement: "Automatically open" },
-    { level: 2, income: 4, requirement: "1 Direct Active Member + $5 activation fee" },
-    { level: 3, income: 4, requirement: "Another Direct Active Member (Total 2) + $5 activation fee" },
-    { level: 4, income: 3, requirement: "Another Direct Active Member (Total 3) + $5 activation fee" },
-    { level: 5, income: 2, requirement: "Another Direct Active Member (Total 4) + $5 activation fee" },
-    { level: 6, income: 2, requirement: "Another Direct Active Member (Total 5) + $5 activation fee" },
-    { level: 7, income: 2, requirement: "Another Direct Active Member (Total 6) + $5 activation fee" },
-    { level: 8, income: 2, requirement: "Another Direct Active Member (Total 7) + $5 activation fee" },
-    { level: 9, income: 2, requirement: "Another Direct Active Member (Total 8) + $5 activation fee" },
-    { level: 10, income: 2, requirement: "Another Direct Active Member (Total 9) + $5 activation fee" },
+    { level: 2, income: 4, requirement: "1 Direct Active Member" },
+    { level: 3, income: 4, requirement: "Another Direct Active Member (Total 2)" },
+    { level: 4, income: 3, requirement: "Another Direct Active Member (Total 3)" },
+    { level: 5, income: 2, requirement: "Another Direct Active Member (Total 4)" },
+    { level: 6, income: 2, requirement: "Another Direct Active Member (Total 5)" },
+    { level: 7, income: 2, requirement: "Another Direct Active Member (Total 6)" },
+    { level: 8, income: 2, requirement: "Another Direct Active Member (Total 7)" },
+    { level: 9, income: 2, requirement: "Another Direct Active Member (Total 8)" },
+    { level: 10, income: 2, requirement: "Another Direct Active Member (Total 9)" },
   ].map(l => {
     const isUnlocked = unlockedLevels.includes(l.level);
     const isPrevUnlocked = unlockedLevels.includes(l.level - 1);
     
-    // Split pay calculations: $5 fee. Up to 50% paid via bonusActivation wallet.
-    const standardFee = 5.0;
-    const maxBonusPaid = Math.min(bonusActivation, standardFee * 0.5);
-    const realPaid = standardFee - maxBonusPaid;
-    const hasEnoughCash = depositBalance >= realPaid;
+    const standardFee = 0;
+    const maxBonusPaid = 0;
+    const realPaid = 0;
+    const hasEnoughCash = true;
 
     const requiredActiveDirects = l.level - 1;
     const hasEnoughReferrals = activeDirectReferralsCount >= requiredActiveDirects;
@@ -114,20 +113,6 @@ function LevelsPage() {
           value={activeDirectReferralsCount} 
           subtitle="Counted for Level activations"
           accent="primary" 
-        />
-        <StatCard 
-          icon={Wallet} 
-          label="Team Reward Balance" 
-          value={`$${bonusActivation.toFixed(2)}`} 
-          subtitle="Used up to 50% for level activation"
-          accent="green" 
-        />
-        <StatCard 
-          icon={DollarSign} 
-          label="Deposit Wallet (Cash)" 
-          value={`$${depositBalance.toFixed(2)}`} 
-          subtitle="For the cash fee portion"
-          accent="gold" 
         />
       </div>
 
@@ -183,54 +168,29 @@ function LevelsPage() {
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader><DialogTitle>Unlock Level {l.level}</DialogTitle></DialogHeader>
+                    <DialogHeader>
+                      <DialogTitle>Unlock Level {l.level}</DialogTitle>
+                    </DialogHeader>
                     <div className="space-y-4 py-2 text-sm text-foreground">
+                      <p className="text-muted-foreground text-center">
+                        Are you sure you want to unlock Level {l.level}?
+                      </p>
                       <div className="rounded-2xl bg-secondary/65 border border-glass-border p-4.5 space-y-2.5 shadow-sm">
-                        <div className="flex justify-between items-start border-b border-glass-border pb-2.5 text-xs">
+                        <div className="flex justify-between items-start text-xs">
                           <span className="text-muted-foreground font-semibold uppercase tracking-wider">Unlock Condition</span>
                           <span className="font-bold text-right text-foreground max-w-[220px]">{l.requirement}</span>
                         </div>
-                        <div className="flex justify-between pt-1">
-                          <span className="text-muted-foreground">Standard Activation Fee</span>
-                          <span className="font-semibold">$5.00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Team Reward wallet split (50% max)</span>
-                          <span className="font-semibold text-profit">-${l.bonusPaid.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between border-t border-glass-border pt-2.5 items-center">
-                          <span className="font-bold text-foreground">Total Cash Payable</span>
-                          <span className="font-black text-primary text-base">${l.realPaid.toFixed(2)}</span>
+                        <div className="flex justify-between border-t border-glass-border pt-2.5 items-center text-xs">
+                          <span className="text-muted-foreground font-semibold uppercase tracking-wider">Cost to Unlock</span>
+                          <span className="font-extrabold text-profit uppercase tracking-wider">Free</span>
                         </div>
                       </div>
-                      
-                      <div className="rounded-xl bg-primary/5 border border-primary/10 p-3.5 space-y-2 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Your Team Reward Balance:</span>
-                          <span className="font-semibold text-foreground">${bonusActivation.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Your Deposit Wallet Balance:</span>
-                          <span className={`font-semibold ${l.hasEnoughCash ? "text-foreground" : "text-destructive font-bold animate-pulse"}`}>
-                            ${depositBalance.toFixed(2)}
-                          </span>
-                        </div>
-                        {!l.hasEnoughCash && (
-                          <p className="text-[10px] text-destructive font-bold text-center bg-destructive/10 py-1.5 rounded-xl mt-1.5 animate-pulse">
-                            ⚠️ Insufficient cash in Deposit Wallet to cover fee
-                          </p>
-                        )}
-                      </div>
-                      
-                      <p className="text-[10px] text-muted-foreground/80 px-1 leading-normal text-center">
-                        * Note: Only the Team Reward Balance can be used for up to 50% discount. The $5 Signup Registration Bonus cannot be used.
-                      </p>
                     </div>
                     
                     <DialogFooter>
                       <Button 
                         className="w-full bg-primary-gradient text-primary-foreground"
-                        disabled={unlockMutation.isPending || !l.hasEnoughCash}
+                        disabled={unlockMutation.isPending}
                         onClick={() => unlockMutation.mutate(l.level)}
                       >
                         {unlockMutation.isPending && unlockMutation.variables === l.level ? (

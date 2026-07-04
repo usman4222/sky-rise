@@ -44,7 +44,7 @@ export const faqs = [
   { q: "What is auto reinvest?", a: "Auto reinvest automatically routes your daily ROI back into your active investment, compounding your position." },
   { q: "What happens if I do not claim daily ROI within 12 hours?", a: "Manual ROI must be claimed within 12 hours or it may expire as per platform rules." },
   { q: "How does direct referral income work?", a: "You earn 8% from direct referral investments based on the real deposited amount." },
-  { q: "How do I unlock level income?", a: "Higher levels are unlocked by sponsoring active direct members and paying a small activation fee." },
+  { q: "How do I unlock level income?", a: "Higher levels are unlocked by sponsoring active direct members." },
   { q: "What are VIP salary rewards?", a: "VIP salary rewards are weekly payouts based on your VIP rank and 5-leg team business." },
   { q: "Can I withdraw my capital?", a: "Yes, but early capital withdrawal may deduct 15% and reset prior ROI profits depending on holding period." },
   { q: "Are bonuses withdrawable?", a: "Registration and team bonuses are not withdrawable but can be used for investments or level activation per platform rules." },
@@ -52,15 +52,15 @@ export const faqs = [
 
 export const levels = [
   { level: 1, income: 8, unlocked: true, requirement: "Automatically open" },
-  { level: 2, income: 4, unlocked: false, requirement: "1 Direct Active Member + $5 activation fee" },
-  { level: 3, income: 4, unlocked: false, requirement: "Another Direct Active Member (Total 2) + $5 activation fee" },
-  { level: 4, income: 3, unlocked: false, requirement: "Another Direct Active Member (Total 3) + $5 activation fee" },
-  { level: 5, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 4) + $5 activation fee" },
-  { level: 6, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 5) + $5 activation fee" },
-  { level: 7, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 6) + $5 activation fee" },
-  { level: 8, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 7) + $5 activation fee" },
-  { level: 9, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 8) + $5 activation fee" },
-  { level: 10, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 9) + $5 activation fee" },
+  { level: 2, income: 4, unlocked: false, requirement: "1 Direct Active Member" },
+  { level: 3, income: 4, unlocked: false, requirement: "Another Direct Active Member (Total 2)" },
+  { level: 4, income: 3, unlocked: false, requirement: "Another Direct Active Member (Total 3)" },
+  { level: 5, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 4)" },
+  { level: 6, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 5)" },
+  { level: 7, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 6)" },
+  { level: 8, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 7)" },
+  { level: 9, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 8)" },
+  { level: 10, income: 2, unlocked: false, requirement: "Another Direct Active Member (Total 9)" },
 ];
 
 export const user = {
