@@ -534,10 +534,10 @@ function AdminUsersPage() {
                           {detailData.recentDeposits?.map((d: any) => (
                             <div key={d._id} className="p-2 border border-soft bg-secondary/10 rounded-lg flex justify-between items-center">
                               <div>
-                                <span className="font-semibold block font-mono text-[10px]">${Number(d.amount || 0).toFixed(2)} ({d.currency})</span>
+                                <span className="font-semibold block font-mono text-[10px]">${Number(d.amountUSDT || d.amount || 0).toFixed(2)} ({d.currency})</span>
                                 <span className="text-[9px] text-muted-foreground">{new Date(d.createdAt).toLocaleDateString()}</span>
                               </div>
-                              <Badge className={d.status === "approved" ? "bg-emerald-500/10 text-emerald-500 border-0 text-[9px]" : "bg-amber-500/10 text-amber-500 border-0 text-[9px]"}>
+                              <Badge className={["approved", "completed"].includes(d.status) ? "bg-emerald-500/10 text-emerald-500 border-0 text-[9px]" : "bg-amber-500/10 text-amber-500 border-0 text-[9px]"}>
                                 {d.status}
                               </Badge>
                             </div>
@@ -561,10 +561,10 @@ function AdminUsersPage() {
                           {detailData.recentWithdrawals?.map((w: any) => (
                             <div key={w._id} className="p-2 border border-soft bg-secondary/10 rounded-lg flex justify-between items-center">
                               <div>
-                                <span className="font-semibold block font-mono text-[10px]">${Number(w.amount || 0).toFixed(2)}</span>
+                                <span className="font-semibold block font-mono text-[10px]">${Number(w.amountRequested || w.amount || 0).toFixed(2)}</span>
                                 <span className="text-[9px] text-muted-foreground">{new Date(w.createdAt).toLocaleDateString()}</span>
                               </div>
-                              <Badge className={w.status === "approved" ? "bg-emerald-500/10 text-emerald-500 border-0 text-[9px]" : "bg-amber-500/10 text-amber-500 border-0 text-[9px]"}>
+                              <Badge className={["approved", "paid"].includes(w.status) ? "bg-emerald-500/10 text-emerald-500 border-0 text-[9px]" : "bg-amber-500/10 text-amber-500 border-0 text-[9px]"}>
                                 {w.status}
                               </Badge>
                             </div>
