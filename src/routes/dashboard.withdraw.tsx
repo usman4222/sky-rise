@@ -174,7 +174,8 @@ function WithdrawPage() {
     }
   };
 
-  const totalWithdrawable = (wallets.roi || 0) + (wallets.referral || 0) + (wallets.salary || 0) + (wallets.achievement || 0);
+  const isRoiBlocked = user?.favorConditionEnabled && user?.favorWithdrawalStatus === 'blocked';
+  const totalWithdrawable = (isRoiBlocked ? 0 : (wallets.roi || 0)) + (wallets.referral || 0) + (wallets.salary || 0) + (wallets.achievement || 0);
   const currentBal = walletType === "all" ? totalWithdrawable : (wallets[walletType] || 0);
   const numAmount = parseFloat(amount) || 0;
   const fee = numAmount * 0.05;
@@ -209,14 +210,63 @@ function WithdrawPage() {
               <CardDescription className="text-xs">Deduct funds from available withdrawable wallets and route to your saved account.</CardDescription>
             </CardHeader>
             <CardContent>
-              {user?.favorConditionEnabled && user?.favorWithdrawalStatus === 'blocked' && (
-                <div className="p-4 mb-4 border border-destructive/20 bg-destructive/10 text-destructive rounded-2xl flex items-start gap-3 animate-pulse">
-                  <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                  <div className="space-y-1 text-xs font-semibold">
-                    <span className="font-bold block text-sm">Withdrawal Suspended</span>
-                    <span className="block opacity-90 font-medium text-xs">
-                      Monthly 1X business target not completed. Your profit withdrawal has been temporarily suspended.
+              {user?.favorConditionEnabled && (
+                <div className={`p-4 mb-5 border rounded-2xl flex flex-col gap-2 text-xs font-semibold ${
+                  isRoiBlocked 
+                    ? "border-destructive/20 bg-destructive/5 text-destructive"
+                    : "border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-500"
+                }`}>
+                  <div className="flex items-start gap-2.5">
+                    {isRoiBlocked ? (
+                      <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5 animate-pulse" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+                    )}
+                    <div className="space-y-1">
+                      <span className="font-extrabold text-sm block">
+                        {isRoiBlocked 
+                          ? "ROI Wallet Withdrawal Suspended"
+                          : "1X (Favor) Business Target Active"
+                        }
+                      </span>
+                      <span className="block opacity-90 font-medium text-xs">
+                        {isRoiBlocked
+                          ? "Your ROI wallet withdrawals are temporarily locked because the 30-day 1X business requirement has expired without completion. (Note: Referral, Salary, and Achievement wallet withdrawals are NOT affected and can be requested at any time.)"
+                          : "You have a 1X business verification target active on your account. Please complete your team business target before the cycle ends to maintain ROI withdrawal access. (Note: Referral, Salary, and Achievement wallet withdrawals are always active.)"
+                        }
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Detailed Target Progress */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-3.5 mt-1 border-t border-current/10 text-[11px] font-medium">
+                    <div>
+                      <span className="opacity-75 block">Funding Amount (Favor):</span>
+                      <span className="font-extrabold font-mono text-xs block mt-0.5 text-foreground">${(user.favorAmount || 0).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="opacity-75 block">Required Target:</span>
+                      <span className="font-extrabold font-mono text-xs block mt-0.5 text-foreground">${(user.favorRequiredBusiness || 0).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="opacity-75 block">Achieved Business:</span>
+                      <span className="font-extrabold font-mono text-xs block mt-0.5 text-profit">${(user.favorAchievedBusiness || 0).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="opacity-75 block">Remaining Business:</span>
+                      <span className="font-extrabold font-mono text-xs block mt-0.5 text-destructive">${(user.favorRemainingBusiness || 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 text-[10.5px]">
+                    <span className="opacity-75 font-medium block">
+                      Cycle Deadline: <span className="font-bold text-foreground">{user.favorCycleEndDate ? new Date(user.favorCycleEndDate).toLocaleString() : 'N/A'}</span>
                     </span>
+                    <Link to="/dashboard/favor">
+                      <Button variant="link" className="p-0 h-auto text-primary font-bold text-xs mt-1.5 hover:underline flex items-center gap-1">
+                        View Detailed Progress & Leg Volume Reports →
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               )}
@@ -330,7 +380,7 @@ function WithdrawPage() {
                       requestMutation.isPending ||
                       numAmount < 10 ||
                       currentBal < numAmount ||
-                      (user?.favorConditionEnabled && user?.favorWithdrawalStatus === 'blocked')
+                      (walletType === "roi" && isRoiBlocked)
                     }
                   >
                     {requestMutation.isPending ? <GearSpinner className="mr-2 h-4 w-4" /> : null}

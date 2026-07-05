@@ -33,12 +33,13 @@ function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [favorActive, setFavorActive] = useState(false);
 
-  // Fetch users with search & page
+  // Fetch users with search, page & favorActive
   const { data: usersData, isLoading: isListLoading } = useQuery({
-    queryKey: ["adminUsers", search, page],
+    queryKey: ["adminUsers", search, page, favorActive],
     queryFn: async () => {
-      const res = await adminApi.getUsers(search || undefined, page, 10);
+      const res = await adminApi.getUsers(search || undefined, page, 10, favorActive);
       return res;
     },
     refetchOnWindowFocus: false,
@@ -161,8 +162,8 @@ function AdminUsersPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
+          <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+            <div className="relative flex-1 sm:w-64 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
               <Input 
                 placeholder="Search name, email, ref code..." 
@@ -174,6 +175,23 @@ function AdminUsersPage() {
                 }}
               />
             </div>
+            
+            <Button
+              size="sm"
+              variant={favorActive ? "default" : "outline"}
+              className={`h-9 text-xs gap-1.5 rounded-xl shadow-sm transition-all duration-200 ${
+                favorActive 
+                  ? "bg-[#f3ba2f] hover:bg-[#d8a324] text-slate-900 border-[#f3ba2f] hover:text-slate-900" 
+                  : "border-primary/20 text-primary hover:bg-primary hover:text-white"
+              }`}
+              onClick={() => {
+                setFavorActive(!favorActive);
+                setPage(1); // Reset page on filter change
+              }}
+            >
+              <Shield size={13} className={favorActive ? "animate-pulse" : ""} />
+              {favorActive ? "Show All Members" : "Filter: 1X Condition Active"}
+            </Button>
           </div>
         </div>
 
@@ -358,6 +376,37 @@ function AdminUsersPage() {
                 )}
               </div>
 
+              {/* 1X Favor Condition Details */}
+              {detailData.user.favorConditionEnabled && (
+                <div className="p-4.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-extrabold text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                      <Shield size={14} className="animate-pulse" />
+                      1X (Favor) Condition Active
+                    </span>
+                    <Badge className={detailData.user.favorWithdrawalStatus === 'blocked' ? 'bg-destructive text-white border-0 text-[10px]' : 'bg-emerald-500 text-white border-0 text-[10px]'} className="font-bold">
+                      Withdrawals: {detailData.user.favorWithdrawalStatus?.toUpperCase()}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2 border-t border-amber-500/15 text-[11px]">
+                    <div>
+                      <span className="text-muted-foreground block font-medium">Funding Amount (Favor):</span>
+                      <span className="font-extrabold text-foreground font-mono">${(detailData.user.favorAmount || 0).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block font-medium">Required Business:</span>
+                      <span className="font-extrabold text-foreground font-mono">${(detailData.user.favorRequiredBusiness || 0).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block font-medium">Deadline / Cycle End:</span>
+                      <span className="font-extrabold text-foreground font-mono">
+                        {detailData.user.favorCycleEndDate ? new Date(detailData.user.favorCycleEndDate).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Tabs Content */}
               <Tabs defaultValue="wallets" className="w-full">
                 <TabsList className="grid grid-cols-3 bg-secondary">
@@ -371,14 +420,24 @@ function AdminUsersPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {[
                       { label: "Deposit Wallet", val: detailData.wallet?.deposit || 0, icon: Wallet, color: "text-primary" },
-                      { label: "Admin Allocated Balance", val: detailData.wallet?.adminAllocated || 0, icon: Wallet, color: "text-[#f3ba2f]" },
+                      { label: "Total Admin Funding Given", val: detailData.user?.favorAmount || 0, icon: Wallet, color: "text-[#f3ba2f]" },
+                      { 
+                        label: "Invested Admin Balance", 
+                        val: detailData.investments
+                          ?.filter((inv: any) => inv.packageType === "Admin Funded Package")
+                          .reduce((sum: number, inv: any) => sum + (inv.amount || 0), 0) || 0, 
+                        icon: Wallet, 
+                        color: "text-[#f3ba2f]" 
+                      },
+                      { label: "Unspent Admin Balance", val: detailData.wallet?.adminAllocated || 0, icon: Wallet, color: "text-[#f3ba2f]" },
                       { label: "ROI Earnings", val: detailData.wallet?.roi || 0, icon: Wallet, color: "text-profit" },
                       { label: "Referral Bonus", val: detailData.wallet?.referral || 0, icon: Users, color: "text-profit" },
                       { label: "Weekly VIP Salary", val: detailData.wallet?.salary || 0, icon: Wallet, color: "text-gold" },
                       { label: "Achievement rewards", val: detailData.wallet?.achievement || 0, icon: Trophy, color: "text-gold" },
                       { label: "Bonus Received", val: detailData.wallet?.bonusReceived || 0, icon: Wallet, color: "text-primary" },
                       { label: "Bonus Transferable", val: detailData.wallet?.bonusTransferable || 0, icon: Wallet, color: "text-muted-foreground" },
-                      { label: "Withdrawal hold/total", val: detailData.wallet?.withdrawal || 0, icon: ArrowDownToLine, color: "text-destructive" },
+                      { label: "Withdrawals On Hold", val: detailData.wallet?.withdrawalHold || 0, icon: ArrowDownToLine, color: "text-amber-500" },
+                      { label: "Total Paid Withdrawals", val: detailData.wallet?.withdrawalPaid || 0, icon: ArrowDownToLine, color: "text-destructive" },
                     ].map((w, i) => {
                       const Icon = w.icon;
                       return (

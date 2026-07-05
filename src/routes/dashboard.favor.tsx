@@ -121,8 +121,8 @@ function UserFavorPage() {
               </div>
               <p className="text-xs opacity-90 mt-1 max-w-2xl font-medium">
                 {isBlocked
-                  ? "Your withdrawal access is temporarily locked because the 30-day 1X business requirement has expired without completion. Complete the target volume to unlock automatically."
-                  : "Your profit withdrawals are unlocked and working normally. Complete the requirement before the cycle ends to maintain access."}
+                  ? "Your ROI profit withdrawals are temporarily locked because your 30-day 1X business requirement has expired. Complete the target volume to unlock ROI withdrawals automatically. (Note: Referral, Salary, and Achievement wallet withdrawals are NOT affected and remain active.)"
+                  : "Your profit withdrawals are unlocked and working normally. Complete the requirement before the cycle ends to maintain ROI withdrawal access. (Note: Referral, Salary, and Achievement wallets can be withdrawn at any time.)"}
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ function UserFavorPage() {
                 <li className="flex items-start gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                   <span>
-                    <strong>Suspension Hold:</strong> Failing to complete the target before the deadline automatically freezes profit withdrawals until the required target is achieved.
+                    <strong>Suspension Hold:</strong> Failing to complete the target before the deadline automatically freezes **ROI Wallet** withdrawals. Other wallets (Referral, Salary, and Achievement) are never locked and can always be withdrawn.
                   </span>
                 </li>
               </ul>

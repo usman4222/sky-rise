@@ -9,8 +9,8 @@ export const adminApi = {
     api.get(`/admin/withdrawals?page=${page || 1}&limit=${limit || 10}${status ? `&status=${status}` : ''}`),
   getKyc: (status?: string, page?: number, limit?: number) => 
     api.get(`/admin/kyc?page=${page || 1}&limit=${limit || 10}${status ? `&status=${status}` : ''}`),
-  getUsers: (search?: string, page?: number, limit?: number) => 
-    api.get(`/admin/users?page=${page || 1}&limit=${limit || 10}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+  getUsers: (search?: string, page?: number, limit?: number, favorActive?: boolean) => 
+    api.get(`/admin/users?page=${page || 1}&limit=${limit || 10}${search ? `&search=${encodeURIComponent(search)}` : ''}${favorActive ? '&favorActive=true' : ''}`),
   getUserDetail: (id: string) => 
     api.get(`/admin/users/${id}`),
   suspendUser: (id: string) => 
