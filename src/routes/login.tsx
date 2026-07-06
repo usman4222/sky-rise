@@ -110,7 +110,11 @@ function LoginPage() {
       router.invalidate();
       navigate({ to: "/dashboard", replace: true });
     } catch (error: any) {
-      toast.error(getFirebaseErrorMessage(error));
+      if (error.message === "EMAIL_NOT_VERIFIED") {
+        toast.error("Your email is not verified yet. We have resent a verification link to your email inbox. Please verify it, then log in.");
+      } else {
+        toast.error(getFirebaseErrorMessage(error));
+      }
     }
   };
 

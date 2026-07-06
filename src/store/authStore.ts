@@ -62,7 +62,7 @@ interface AuthState {
   setAuth: (token: string, user: UserProfile, roles?: string[]) => void;
   clearAuth: () => void;
   login: (credentials: LoginInput) => Promise<void>;
-  register: (data: RegisterInput, phoneVerificationToken: string) => Promise<void>;
+  register: (data: RegisterInput, phoneVerificationToken: string, captchaToken: string) => Promise<{ emailVerified: boolean; message?: string }>;
   logout: () => Promise<void>;
   fetchProfile: (forceRefresh?: boolean) => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
@@ -104,6 +104,18 @@ export const useAuthStore = create<AuthState>()(
         try {
           // 1. Authenticate with Firebase
           const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+          
+          if (!userCredential.user.emailVerified) {
+            try {
+              await sendEmailVerification(userCredential.user);
+            } catch (emailErr) {
+              console.error("Failed to resend verification email:", emailErr);
+            }
+            await signOut(auth);
+            get().clearAuth();
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
+
           const idToken = await userCredential.user.getIdToken();
           
           // 2. Fetch or Sync with MongoDB backend using Firebase token
@@ -122,11 +134,17 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (data, phoneVerificationToken) => {
+      register: async (data, phoneVerificationToken, captchaToken) => {
         set({ isLoading: true });
         try {
           const { confirmPassword, password, email, ...payload } = data;
           
+          // 0. Verify CAPTCHA and Sponsor Code with backend first to prevent incomplete registrations in Firebase
+          await api.post("/firebase-auth/verify-signup", {
+            "cf-turnstile-response": captchaToken,
+            sponsorCode: data.sponsorCode
+          });
+
           // 1. Create User in Firebase Auth
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const idToken = await userCredential.user.getIdToken();
@@ -139,15 +157,21 @@ export const useAuthStore = create<AuthState>()(
           }
           
           // 2. Sync profile details to MongoDB backend
-          const response = await api.post<{ user: UserProfile }>(
+          const response = await api.post<{ user: UserProfile; status?: string; message?: string }>(
             "/firebase-auth/sync",
-            { idToken, phoneVerificationToken, ...payload },
+            { idToken, phoneVerificationToken, "cf-turnstile-response": captchaToken, ...payload },
             { headers: { Authorization: `Bearer ${idToken}` } }
           );
           
           if (response && response.user) {
             get().setAuth(idToken, response.user, response.user.roles || []);
+            return { emailVerified: true };
           }
+          
+          return {
+            emailVerified: false,
+            message: response?.message || "Email verification is required to complete registration."
+          };
         } catch (error: any) {
           throw error;
         } finally {

@@ -11,11 +11,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Gift, CheckCircle, Eye, EyeOff, Smartphone, ShieldCheck, ArrowLeft, KeyRound } from "lucide-react";
 import { GearSpinner } from "@/components/gear-loader";
 import { SkyRiseLogo } from "@/components/logo";
+import { auth } from "@/lib/firebase";
+import { sendEmailVerification } from "firebase/auth";
 
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { api } from "@/lib/api";
+import { Turnstile } from "@/components/turnstile";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -39,9 +42,12 @@ function RegisterPage() {
   });
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState("");
   const [justRegistered, setJustRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   // OTP Verification states
   const [showOtpScreen, setShowOtpScreen] = useState(false);
@@ -49,6 +55,8 @@ function RegisterPage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [pendingData, setPendingData] = useState<RegisterInput | null>(null);
   const [resendCountdown, setResendCountdown] = useState(0);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [emailResendCooldown, setEmailResendCooldown] = useState(0);
 
 
 
@@ -61,6 +69,55 @@ function RegisterPage() {
     }
     return () => clearTimeout(timer);
   }, [resendCountdown]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (emailResendCooldown > 0) {
+      timer = setTimeout(() => setEmailResendCooldown(emailResendCooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [emailResendCooldown]);
+
+  const handleCheckVerification = async () => {
+    try {
+      setIsVerifying(true);
+      const user = auth.currentUser;
+      if (user) {
+        await user.reload();
+        if (user.emailVerified) {
+          toast.success("Email verified successfully! You can now log in.");
+          setShowVerifyModal(false);
+          navigate({ to: "/login", replace: true });
+        } else {
+          toast.error("Your email is still not verified. Please click the link we sent to your inbox.");
+        }
+      } else {
+        toast.error("Unable to check verification status. Please check your inbox and verify, then log in.");
+        setShowVerifyModal(false);
+        navigate({ to: "/login", replace: true });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to check email verification status.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (emailResendCooldown > 0) return;
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        await sendEmailVerification(user);
+        toast.success("Verification link has been resent! Check your inbox.");
+        setEmailResendCooldown(60);
+      } else {
+        toast.error("Unable to resend verification email. Please log in to trigger a new link.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to resend verification email.");
+    }
+  };
 
   useEffect(() => {
     if (showSuccessModal && confettiContainerRef.current) {
@@ -138,10 +195,21 @@ function RegisterPage() {
   };
 
   const onSubmit = async (data: RegisterInput) => {
+    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    if (siteKey && !captchaToken) {
+      toast.error("Please verify that you are not a robot.");
+      return;
+    }
+
     try {
       setJustRegistered(true);
-      await registerAction(data, "MOCK_TOKEN");
-      setShowSuccessModal(true);
+      const res = await registerAction(data, "MOCK_TOKEN", captchaToken);
+      if (res && res.emailVerified) {
+        setShowSuccessModal(true);
+      } else {
+        setVerifyMessage(res?.message || "A verification link has been sent to your email. Please verify your email, then login.");
+        setShowVerifyModal(true);
+      }
     } catch (error: any) {
       setJustRegistered(false);
       toast.error(getFirebaseErrorMessage(error));
@@ -166,9 +234,14 @@ function RegisterPage() {
 
       // 2. Perform register
       setJustRegistered(true);
-      await registerAction(pendingData, res.phoneVerificationToken);
+      const regRes = await registerAction(pendingData, res.phoneVerificationToken, captchaToken);
       setShowOtpScreen(false);
-      setShowSuccessModal(true);
+      if (regRes && regRes.emailVerified) {
+        setShowSuccessModal(true);
+      } else {
+        setVerifyMessage(regRes?.message || "A verification link has been sent to your email. Please verify your email, then login.");
+        setShowVerifyModal(true);
+      }
     } catch (err: any) {
       setJustRegistered(false);
       toast.error(getFirebaseErrorMessage(err));
@@ -204,6 +277,40 @@ function RegisterPage() {
             <Button onClick={handleGoToDashboard} className="w-full glass-button-primary h-12 text-base relative z-20">
               Go to Dashboard
             </Button>
+          </div>
+        </div>
+      )}
+
+      {showVerifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="relative z-10 bg-background border border-glass-border rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="flex justify-center mb-6">
+              <div className="h-16 w-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                <KeyRound size={32} />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mb-3 text-foreground">Verify Your Email</h2>
+            <p className="text-muted-foreground text-sm mb-6 leading-relaxed font-medium">
+              {verifyMessage}
+            </p>
+            <div className="space-y-3">
+              <Button 
+                onClick={handleCheckVerification} 
+                disabled={isVerifying}
+                className="w-full glass-button-primary h-12 text-base relative z-20"
+              >
+                {isVerifying ? <><GearSpinner className="mr-2 h-4 w-4" /> Checking...</> : "I have verified my email"}
+              </Button>
+              
+              <Button 
+                variant="outline"
+                onClick={handleResendVerification} 
+                disabled={emailResendCooldown > 0}
+                className="w-full h-11 text-sm text-muted-foreground hover:text-foreground relative z-20"
+              >
+                {emailResendCooldown > 0 ? `Resend email in ${emailResendCooldown}s` : "Resend Verification Link"}
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -370,6 +477,15 @@ function RegisterPage() {
                     {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
                   </div>
 
+                  {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+                    <div className="sm:col-span-2 flex justify-center my-2">
+                      <Turnstile
+                        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                        onVerify={(token) => setCaptchaToken(token)}
+                      />
+                    </div>
+                  )}
+
                   <label className="sm:col-span-2 flex items-start gap-2 text-sm text-muted-foreground mt-2">
                     <Checkbox className="mt-0.5" required /> I agree to the Terms, Privacy Policy, and platform rules.
                   </label>
@@ -377,7 +493,7 @@ function RegisterPage() {
                   <Button
                     type="submit"
                     className={`sm:col-span-2 w-full glass-button-primary mt-2 ${isLoading ? "fluid-loading-btn" : ""}`}
-                    disabled={isLoading}
+                    disabled={isLoading || (!!import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken)}
                   >
                     {isLoading ? <><GearSpinner className="mr-2 h-4 w-4" /> Registering...</> : "Register"}
                   </Button>
