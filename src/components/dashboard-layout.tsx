@@ -32,7 +32,7 @@ const nav = [
   { to: "/dashboard/payment-methods", label: "Saved Accounts", icon: CreditCard },
   { to: "/dashboard/transactions", label: "Transactions", icon: Receipt },
   { to: "/dashboard/profile", label: "Profile", icon: User },
-  { to: "/dashboard/support", label: "Support", icon: LifeBuoy },
+  { to: "/dashboard/support", label: "Support", icon: LifeBuoy, hasAdmin: true },
 ];
 
 function Sidebar({ onClose }: { onClose?: () => void }) {
