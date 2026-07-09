@@ -158,7 +158,7 @@ function DashboardHome() {
   };
 
   // Fetch admin dashboard stats if user is admin
-  const { data: adminStats } = useQuery({
+  const { data: adminStats, isLoading: isAdminStatsLoading } = useQuery({
     queryKey: ["adminDashboard"],
     enabled: !!isAdmin,
     queryFn: async () => {
@@ -168,7 +168,7 @@ function DashboardHome() {
   });
 
   // Regular user data
-  const { data: walletsData } = useQuery({
+  const { data: walletsData, isLoading: isWalletsLoading } = useQuery({
     queryKey: ["wallets"],
     queryFn: async () => {
       const res = await financeApi.getWallets();
@@ -176,7 +176,7 @@ function DashboardHome() {
     }
   });
 
-  const { data: investments = [] } = useQuery({
+  const { data: investments = [], isLoading: isInvestmentsLoading } = useQuery({
     queryKey: ["myInvestments"],
     queryFn: async () => {
       const res = await investmentsApi.getMyInvestments();
@@ -221,14 +221,14 @@ function DashboardHome() {
     enabled: !isAdmin,
   });
 
-  const { data: downlineData } = useQuery({
+  const { data: downlineData, isLoading: isDownlineLoading } = useQuery({
     queryKey: ["downline"],
     queryFn: () => networkApi.getDownline(),
     refetchOnWindowFocus: false,
     enabled: !isAdmin,
   });
 
-  const { data: roiHistoryData } = useQuery({
+  const { data: roiHistoryData, isLoading: isRoiHistoryLoading } = useQuery({
     queryKey: ["roiHistory", 1],
     queryFn: () => investmentsApi.getRoiHistory(1, 20),
     refetchOnWindowFocus: false,
@@ -410,23 +410,23 @@ function DashboardHome() {
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
               <Link to="/dashboard/admin/users" className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" />
+                <StatCard icon={Users} label="Total Users" value={adminStats?.usersCount || 0} accent="primary" loading={isAdminStatsLoading} />
               </Link>
-              <StatCard icon={DollarSign} label="Total Deposited" value={`$${Number(adminStats?.totalDeposited || 0).toFixed(2)}`} accent="profit" />
+              <StatCard icon={DollarSign} label="Total Deposited" value={`$${Number(adminStats?.totalDeposited || 0).toFixed(2)}`} accent="profit" loading={isAdminStatsLoading} />
               <Link to="/dashboard/admin/withdrawals" className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={Wallet} label="Total Withdrawn" value={`$${Number(adminStats?.totalWithdrawn || 0).toFixed(2)}`} accent="profit" />
+                <StatCard icon={Wallet} label="Total Withdrawn" value={`$${Number(adminStats?.totalWithdrawn || 0).toFixed(2)}`} accent="profit" loading={isAdminStatsLoading} />
+              </Link>
+              <Link to="/dashboard/admin/withdrawals" search={{ status: "paid" }} className="block transition-all hover:scale-[1.02] cursor-pointer">
+                <StatCard icon={CheckCircle2} label="Paid Amount" value={`$${Number(adminStats?.totalPaidWithdrawalAmount || 0).toFixed(2)}`} accent="profit" loading={isAdminStatsLoading} />
               </Link>
               <Link to="/dashboard/admin/withdrawals" className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={Timer} label="Pending Withdrawals" value={adminStats?.pendingWithdrawals || 0} accent="gold" />
+                <StatCard icon={Timer} label="Pending Withdrawals" value={adminStats?.pendingWithdrawals || 0} accent="gold" loading={isAdminStatsLoading} />
               </Link>
               <Link to="/dashboard/packages" className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={CheckCircle2} label="Active Packages" value={adminStats?.activePackagesCount || 0} accent="primary" />
+                <StatCard icon={CheckCircle2} label="Active Packages" value={adminStats?.activePackagesCount || 0} accent="primary" loading={isAdminStatsLoading} />
               </Link>
               <Link to="/dashboard/admin/balance-adjust" search={{ userId: undefined }} className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={DollarSign} label="Total Admin Deposit" value={`$${Number(adminStats?.totalAdminDeposit || 0).toFixed(2)}`} accent="profit" />
-              </Link>
-              <Link to="/dashboard/admin/balance-adjust" search={{ userId: undefined }} className="block transition-all hover:scale-[1.02] cursor-pointer">
-                <StatCard icon={Gift} label="Total Admin Allocated" value={`$${Number(adminStats?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" />
+                <StatCard icon={Gift} label="Total Admin Allocated" value={`$${Number(adminStats?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" loading={isAdminStatsLoading} />
               </Link>
             </div>
           </div>
@@ -749,15 +749,15 @@ function DashboardHome() {
 
           {/* Top Stat Cards Grid */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-            <StatCard icon={Wallet} label="Total Balance" value={`$${walletBalance.toFixed(2)}`} accent="green" />
-            <StatCard icon={TrendingUp} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="gold" />
-            <StatCard icon={Activity} label="Total Earnings" value={`$${totalEarnings.toFixed(2)}`} accent="green" />
-            <StatCard icon={DollarSign} label="Today's Profit" value={`$${todayProfit.toFixed(2)}`} accent="yellow" />
+            <StatCard icon={Wallet} label="Total Balance" value={`$${walletBalance.toFixed(2)}`} accent="green" loading={isWalletsLoading} />
+            <StatCard icon={TrendingUp} label="Total Investment" value={`$${totalInvestmentAmount.toFixed(2)}`} accent="gold" loading={isInvestmentsLoading} />
+            <StatCard icon={Activity} label="Total Earnings" value={`$${totalEarnings.toFixed(2)}`} accent="green" loading={isWalletsLoading} />
+            <StatCard icon={DollarSign} label="Today's Profit" value={`$${todayProfit.toFixed(2)}`} accent="yellow" loading={isRoiHistoryLoading} />
             {/* <StatCard icon={Wallet} label="Admin Deposit" value={`$${Number(w?.totalAdminDeposit || 0).toFixed(2)}`} accent="profit" /> */}
             {/* <StatCard icon={Gift} label="Admin Funded" value={`$${Number(w?.totalAdminAllocated || 0).toFixed(2)}`} accent="gold" /> */}
             {/* <StatCard icon={Percent} label="ROI (Daily)" value={latestInvestment ? `${latestInvestment.currentRoi}%` : "1.20%"} subtitle="Every 24 Hours" accent="green" /> */}
-            <StatCard icon={Users} label="Direct Team" value={downlineData?.directReferralsCount ?? 0} subtitle={`Invested: $${totalDirectsInvestment.toFixed(2)}`} accent="primary" />
-            <StatCard icon={Users} label="Total Team" value={downlineData?.totalTeamSize ?? 0} subtitle={`Invested: $${totalTeamInvestment.toFixed(2)}`} accent="gold" />
+            <StatCard icon={Users} label="Direct Team" value={downlineData?.directReferralsCount ?? 0} subtitle={`Invested: $${totalDirectsInvestment.toFixed(2)}`} accent="primary" loading={isDownlineLoading} />
+            <StatCard icon={Users} label="Total Team" value={downlineData?.totalTeamSize ?? 0} subtitle={`Invested: $${totalTeamInvestment.toFixed(2)}`} accent="gold" loading={isDownlineLoading} />
           </div>
           {/* Middle Charts & Promo Row */}
           <div className="mt-6 grid gap-6 lg:grid-cols-3">

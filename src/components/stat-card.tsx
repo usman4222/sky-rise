@@ -11,6 +11,7 @@ export function StatCard({
   trend,
   subtitle,
   accent = "primary",
+  loading = false,
 }: {
   icon: LucideIcon;
   label: string;
@@ -18,8 +19,24 @@ export function StatCard({
   trend?: string;
   subtitle?: string;
   accent?: "primary" | "gold" | "profit" | "green" | "yellow" | "active";
+  loading?: boolean;
 }) {
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="h-full w-full bg-[#f8fdf9]/98 dark:bg-[#081407]/95 border border-[#c2ddd2] dark:border-[#00e676]/10 rounded-[28px] shadow-[0_12px_24px_rgba(0,105,62,0.04)] dark:shadow-[0_12px_24px_rgba(0,0,0,0.35)] animate-pulse">
+        <div className="p-3 sm:p-5 flex items-center justify-between gap-2 sm:gap-4 h-full">
+          <div className="flex-1 min-w-0 flex flex-col justify-center space-y-2.5">
+            <div className="h-3.5 w-20 bg-slate-200 dark:bg-slate-800 rounded-full" />
+            <div className="h-6 w-28 bg-slate-200 dark:bg-slate-800 rounded-full" />
+            <div className="h-3 w-16 bg-slate-200 dark:bg-slate-800 rounded-full" />
+          </div>
+          <div className="h-8 w-8 sm:h-12 sm:w-12 bg-slate-200 dark:bg-slate-800 rounded-full flex-shrink-0" />
+        </div>
+      </div>
+    );
+  }
   // Image-matched accent system:
   // green: solid emerald (#00a86b) — matches stock chart bar color & wallet coins
   // gold: solid warm gold (#f3ba2f) — matches the charging bull, keys, zipper

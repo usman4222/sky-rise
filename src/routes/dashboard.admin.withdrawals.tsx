@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,14 +17,26 @@ import { GearSectionLoader } from "@/components/gear-loader";
 import { newFlowsApi } from "@/lib/api-new-flows";
 import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { SimplePagination } from "@/components/simple-pagination";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/admin/withdrawals")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      status: (search.status as string) || undefined,
+    };
+  },
   component: AdminWithdrawalsPage,
 });
 
 function AdminWithdrawalsPage() {
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const navigate = useNavigate();
+  const { status } = Route.useSearch();
+  const [statusFilter, setStatusFilter] = useState<string>(status || "pending");
+
+  useEffect(() => {
+    setStatusFilter(status || "pending");
+  }, [status]);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
   const [adminNote, setAdminNote] = useState<string>("");
   const [transactionId, setTransactionId] = useState<string>("");
@@ -116,7 +128,11 @@ function AdminWithdrawalsPage() {
           </div>
           <div className="flex items-center gap-2">
             <Label className="text-xs font-semibold">Status Filter:</Label>
-            <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setPage(1); }}>
+            <Select value={statusFilter} onValueChange={(val) => { 
+              setStatusFilter(val); 
+              setPage(1); 
+              navigate({ to: "/dashboard/admin/withdrawals", search: { status: val } });
+            }}>
               <SelectTrigger className="w-[140px] h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>

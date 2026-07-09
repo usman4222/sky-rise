@@ -36,7 +36,7 @@ const nav = [
 ];
 
 function Sidebar({ onClose }: { onClose?: () => void }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname, search } = useRouterState({ select: (s) => s.location });
   const { user, logout } = useAuthStore();
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("SUPER_ADMIN");
   const navigate = useNavigate();
@@ -91,19 +91,21 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
               Admin Center
             </div>
             {[
-              { to: "/dashboard/admin/users", label: "Users Management", icon: Users },
-              { to: "/dashboard/admin/balance-adjust", label: "Adjust User Balance", icon: Wallet },
-              { to: "/dashboard/admin/withdrawals", label: "Verify Withdrawals Queue", icon: ArrowDownToLine },
-              { to: "/dashboard/admin/weekly-salary", label: "Verify Salary Queue", icon: Crown },
-              { to: "/dashboard/admin/announcements", label: "Manage Announcements", icon: Megaphone },
-              { to: "/dashboard/admin/balance-history", label: "Admin Balance History", icon: Receipt },
+              { to: "/dashboard/admin/users" as any, label: "Users Management", icon: Users, search: undefined },
+              { to: "/dashboard/admin/balance-adjust" as any, label: "Adjust User Balance", icon: Wallet, search: undefined },
+              { to: "/dashboard/admin/withdrawals" as any, label: "Verify Withdrawals Queue", icon: ArrowDownToLine, search: { status: "pending" } },
+              { to: "/dashboard/admin/withdrawals" as any, label: "Withdrawals History", icon: Clock, search: { status: "all" } },
+              { to: "/dashboard/admin/weekly-salary" as any, label: "Verify Salary Queue", icon: Crown, search: undefined },
+              { to: "/dashboard/admin/announcements" as any, label: "Manage Announcements", icon: Megaphone, search: undefined },
+              { to: "/dashboard/admin/balance-history" as any, label: "Admin Balance History", icon: Receipt, search: undefined },
             ].map((n) => {
-              const active = pathname === n.to || pathname.startsWith(n.to + "/");
+              const active = pathname === n.to && (n.search ? ((search as any).status || "pending") === n.search.status : true);
               const Icon = n.icon;
               return (
                 <Link
-                  key={n.to}
+                  key={n.label}
                   to={n.to}
+                  search={n.search}
                   onClick={onClose}
                   className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${active
                     ? "bg-primary-gradient text-white shadow-soft"
